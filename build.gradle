@@ -10,11 +10,8 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group("user11681")
-version("0.1.0")
+version("0.2.0")
 
-static String name() {
-    return "reflect"
-}
 
 repositories {
     mavenCentral()
@@ -35,7 +32,7 @@ bintray {
     publish = true
 
     pkg {
-        name = name()
+        name = project.name
         repo = "maven"
         licenses = ["LGPL-3.0"]
         vcsUrl = "https://github.com/user11681/reflect"
@@ -62,8 +59,8 @@ artifacts {
 publishing {
     publications {
         bintray(MavenPublication) {
-            groupId("user11681")
-            artifactId(name())
+            groupId(project.group)
+            artifactId(project.name)
             version(version)
 
             artifact(jar)

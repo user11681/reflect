@@ -38,6 +38,14 @@ public class Reflect {
         }
     }
 
+    public static <T> Class<T> defineClass(final ClassLoader classLoader, final String name, final byte[] bytecode, final ProtectionDomain protectionDomain) {
+        try {
+            return (Class<T>) defineClass2.invokeExact(classLoader, name, bytecode, 0, bytecode.length, protectionDomain);
+        } catch (final Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
     public static <T> Class<T> defineClass(final ClassLoader classLoader, final String name, final byte[] bytecode, final int offset, final int length) {
         try {
             return (Class<T>) defineClass1.invokeExact(classLoader, name, bytecode, offset, length);
