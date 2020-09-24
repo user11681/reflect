@@ -166,6 +166,150 @@ public class Reflect {
         Unsafe.putDouble(object, Unsafe.objectFieldOffset(field), value);
     }
 
+    public static int getIntVolatile(final Field field) {
+        return Unsafe.getIntVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putIntVolatile(final Field field, final int value) {
+        Unsafe.putIntVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static int getIntVolatile(final Object object, final Field field) {
+        return Unsafe.getIntVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putIntVolatile(final Object object, final Field field, final int value) {
+        Unsafe.putIntVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static Object getObjectVolatile(final Field field) {
+        return Unsafe.getObjectVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putObjectVolatile(final Field field, final Object value) {
+        Unsafe.putObjectVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static Object getObjectVolatile(final Object object, final Field field) {
+        return Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putObjectVolatile(final Object object, final Field field, final Object value) {
+        Unsafe.putObjectVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static boolean getBooleanVolatile(final Field field) {
+        return Unsafe.getBooleanVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putBooleanVolatile(final Field field, final boolean value) {
+        Unsafe.putBooleanVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static boolean getBooleanVolatile(final Object object, final Field field) {
+        return Unsafe.getBooleanVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putBooleanVolatile(final Object object, final Field field, final boolean value) {
+        Unsafe.putBooleanVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static byte getByteVolatile(final Field field) {
+        return Unsafe.getByteVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putByteVolatile(final Field field, final byte value) {
+        Unsafe.putByteVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static byte getByteVolatile(final Object object, final Field field) {
+        return Unsafe.getByteVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putByteVolatile(final Object object, final Field field, final byte value) {
+        Unsafe.putByteVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static short getShortVolatile(final Field field) {
+        return Unsafe.getShortVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putShortVolatile(final Field field, final short value) {
+        Unsafe.putShortVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static short getShortVolatile(final Object object, final Field field) {
+        return Unsafe.getShortVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putShortVolatile(final Object object, final Field field, final short value) {
+        Unsafe.putShortVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static char getCharVolatile(final Field field) {
+        return Unsafe.getCharVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putCharVolatile(final Field field, final char value) {
+        Unsafe.putCharVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static char getCharVolatile(final Object object, final Field field) {
+        return Unsafe.getCharVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putCharVolatile(final Object object, final Field field, final char value) {
+        Unsafe.putCharVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static long getLongVolatile(final Field field) {
+        return Unsafe.getLongVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putLongVolatile(final Field field, final long value) {
+        Unsafe.putLongVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static long getLongVolatile(final Object object, final Field field) {
+        return Unsafe.getLongVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putLongVolatile(final Object object, final Field field, final long value) {
+        Unsafe.putLongVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static float getFloatVolatile(final Field field) {
+        return Unsafe.getFloatVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putFloatVolatile(final Field field, final float value) {
+        Unsafe.putFloatVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static float getFloatVolatile(final Object object, final Field field) {
+        return Unsafe.getFloatVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putFloatVolatile(final Object object, final Field field, final float value) {
+        Unsafe.putFloatVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static double getDoubleVolatile(final Field field) {
+        return Unsafe.getDoubleVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    }
+
+    public static void putDoubleVolatile(final Field field, final double value) {
+        Unsafe.putDoubleVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
+    }
+
+    public static double getDoubleVolatile(final Object object, final Field field) {
+        return Unsafe.getDoubleVolatile(object, Unsafe.objectFieldOffset(field));
+    }
+
+    public static void putDoubleVolatile(final Object object, final Field field, final double value) {
+        Unsafe.putDoubleVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
     public static <T> Class<T> defineClass(final ClassLoader classLoader, final byte[] bytecode, final int offset, final int length) {
         try {
             return (Class<T>) defineClass0.invokeExact(classLoader, bytecode, offset, length);

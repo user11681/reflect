@@ -21,14 +21,14 @@ class ReflectTest {
         final Class<T> klass = Reflect.defineClass((ClassLoader) Reflect.getObject(ReflectTest.class, Reflect.getField(Class.class, "classLoader")), "user11681.reflect.ReflectTest$T", bytecode);
         final Object t = Unsafe.allocateInstance(klass);
 
-        logger.info(() -> String.valueOf(Reflect.getInt(t, Reflect.getField(klass, "thing"))));
+        logger.info(() -> String.valueOf(Reflect.getIntVolatile(t, Reflect.getField(klass, "thing"))));
 
-        Reflect.putInt(t, Reflect.getField(klass, "thing"), 12222);
+        Reflect.putIntVolatile(t, Reflect.getField(klass, "thing"), 12222);
 
-        logger.info(() -> String.valueOf(Reflect.getInt(t, Reflect.getField(klass, "thing"))));
+        logger.info(() -> String.valueOf(Reflect.getIntVolatile(t, Reflect.getField(klass, "thing"))));
     }
 
     static class T {
-        private final int thing = 1;
+        private volatile int thing = 1;
     }
 }
