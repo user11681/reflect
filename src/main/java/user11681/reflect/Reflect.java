@@ -38,16 +38,16 @@ public class Reflect {
         Unsafe.putInt(object, Unsafe.objectFieldOffset(field), value);
     }
 
-    public static Object getObject(final Field field) {
-        return Unsafe.getObject(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    public static <T> T getObject(final Field field) {
+        return (T) Unsafe.getObject(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
 
     public static void putObject(final Field field, final Object value) {
         Unsafe.putObject(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
     }
 
-    public static Object getObject(final Object object, final Field field) {
-        return Unsafe.getObject(object, Unsafe.objectFieldOffset(field));
+    public static <T> T getObject(final Object object, final Field field) {
+        return (T) Unsafe.getObject(object, Unsafe.objectFieldOffset(field));
     }
 
     public static void putObject(final Object object, final Field field, final Object value) {
@@ -182,16 +182,16 @@ public class Reflect {
         Unsafe.putIntVolatile(object, Unsafe.objectFieldOffset(field), value);
     }
 
-    public static Object getObjectVolatile(final Field field) {
-        return Unsafe.getObjectVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+    public static <T> T getObjectVolatile(final Field field) {
+        return (T) Unsafe.getObjectVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
 
     public static void putObjectVolatile(final Field field, final Object value) {
         Unsafe.putObjectVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field), value);
     }
 
-    public static Object getObjectVolatile(final Object object, final Field field) {
-        return Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(field));
+    public static <T> T getObjectVolatile(final Object object, final Field field) {
+        return (T) Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(field));
     }
 
     public static void putObjectVolatile(final Object object, final Field field, final Object value) {

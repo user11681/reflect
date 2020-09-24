@@ -38,7 +38,7 @@ bintray {
         vcsUrl = "https://github.com/user11681/reflect"
 
         version {
-            name = version
+            name = project.version
             released = new Date()
             githubRepo = "user11681/reflect"
             issueTrackerUrl = "https://github.com/user11681/reflect/issues"
@@ -61,7 +61,7 @@ publishing {
         bintray(MavenPublication) {
             groupId(project.group)
             artifactId(project.name)
-            version(version)
+            version(project.version)
 
             artifact(jar)
             artifact(sourceJar)
