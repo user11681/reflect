@@ -5,6 +5,8 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.ByteBuffer;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
@@ -12,6 +14,8 @@ import net.gudenau.lib.unsafe.Unsafe;
 
 public class Reflect {
     public static final boolean JAVA_9;
+
+    public static final MethodHandle addURL;
 
     private static final MethodHandle defineClass0;
     private static final MethodHandle defineClass1;
@@ -310,6 +314,14 @@ public class Reflect {
         Unsafe.putDoubleVolatile(object, Unsafe.objectFieldOffset(field), value);
     }
 
+    public static void addURL(final URLClassLoader classLoader, final URL url) {
+        try {
+            addURL.invokeExact(classLoader, url);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
     public static <T> Class<T> defineClass(final ClassLoader classLoader, final byte[] bytecode, final int offset, final int length) {
         try {
             return (Class<T>) defineClass0.invokeExact(classLoader, bytecode, offset, length);
@@ -426,6 +438,8 @@ public class Reflect {
 
                 Unsafe.putObjectVolatile(IllegalAccessLogger, Unsafe.staticFieldOffset(logger), null);
             }
+
+            addURL = Unsafe.trustedLookup.findVirtual(URLClassLoader.class, "addURL", MethodType.methodType(void.class, URL.class));
 
             defineClass0 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
             defineClass1 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
