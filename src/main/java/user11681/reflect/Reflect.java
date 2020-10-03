@@ -1,5 +1,6 @@
 package user11681.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
@@ -312,6 +313,14 @@ public class Reflect {
 
     public static void putDoubleVolatile(final Object object, final Field field, final double value) {
         Unsafe.putDoubleVolatile(object, Unsafe.objectFieldOffset(field), value);
+    }
+
+    public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
+        try {
+            return (T) annotationType.getDeclaredMethod(elementName).getDefaultValue();
+        } catch (final NoSuchMethodException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     public static <T> Class<T> loadClass(final String name) {
