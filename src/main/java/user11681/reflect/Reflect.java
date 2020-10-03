@@ -314,6 +314,22 @@ public class Reflect {
         Unsafe.putDoubleVolatile(object, Unsafe.objectFieldOffset(field), value);
     }
 
+    public static <T> Class<T> loadClass(final String name) {
+        try {
+            return (Class<T>) Class.forName(name);
+        } catch (final ClassNotFoundException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    public static <T> Class<T> loadClass(final String name, final boolean initialize, final ClassLoader loader) {
+        try {
+            return (Class<T>) Class.forName(name, initialize, loader);
+        } catch (final ClassNotFoundException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
     public static void addURL(final URLClassLoader classLoader, final URL url) {
         try {
             addURL.invokeExact(classLoader, url);
