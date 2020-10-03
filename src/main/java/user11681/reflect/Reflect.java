@@ -1,5 +1,6 @@
 package user11681.reflect;
 
+import it.unimi.dsi.fastutil.objects.Object2ReferenceLinkedOpenHashMap;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -26,6 +27,9 @@ public class Reflect {
 
     private static final boolean DEFINE_CLASS_HAS_BOOLEAN;
     private static final int MODIFIERS_OFFSET;
+    private static final long PARENT_FIELD_OFFSET;
+
+    private static final Object2ReferenceLinkedOpenHashMap<Class<?>, Field[]> fieldCache = new Object2ReferenceLinkedOpenHashMap<>();
 
     public static int getInt(final Field field) {
         return Unsafe.getInt(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
@@ -445,9 +449,19 @@ public class Reflect {
 
     public static Field[] getFields(final Class<?> klass) {
         try {
-            return DEFINE_CLASS_HAS_BOOLEAN
+            Field[] fields = fieldCache.get(klass);
+
+            if (fields != null) {
+                return fields;
+            }
+
+            fields = DEFINE_CLASS_HAS_BOOLEAN
                 ? (Field[]) getDeclaredFields0.invokeExact(klass, false)
                 : (Field[]) getDeclaredFields0.invokeExact(klass);
+
+            fieldCache.put(klass, fields);
+
+            return fields;
         } catch (final Throwable throwable) {
             throw new RuntimeException(throwable);
         }
@@ -490,6 +504,7 @@ public class Reflect {
 
             DEFINE_CLASS_HAS_BOOLEAN = found.getParameterCount() > 0;
             MODIFIERS_OFFSET = (int) Unsafe.objectFieldOffset(getField(Field.class, "modifiers"));
+            PARENT_FIELD_OFFSET = Unsafe.objectFieldOffset(getField(ClassLoader.class, "parent"));
 
             final Class<?> Reflection = Class.forName(JAVA_9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
 
