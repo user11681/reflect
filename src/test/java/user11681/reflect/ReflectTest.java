@@ -16,11 +16,11 @@ class ReflectTest {
         final Object classPath = Reflect.getClassPath(ReflectTest.class.getClassLoader());
         final File file = new File("test");
 
-        logger.info(Arrays.toString(Reflect.getURLs(classPath)));
+        logger.warn(Arrays.toString(Reflect.getURLs(classPath)));
 
         Reflect.addURL(classPath, file.toURL());
 
-        logger.info(Arrays.toString(Reflect.getURLs(classPath)));
+        logger.warn(Arrays.toString(Reflect.getURLs(classPath)));
     }
 
     static class T {

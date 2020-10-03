@@ -24,11 +24,10 @@ public class Reflect extends Accessor {
     private static final MethodHandle defineClass1;
     private static final MethodHandle defineClass2;
     private static final MethodHandle defineClass3;
-    private static final MethodHandle getDeclaredFields0;
+    private static final MethodHandle getDeclaredFields;
 
     private static final boolean DEFINE_CLASS_HAS_BOOLEAN;
     private static final int MODIFIERS_OFFSET;
-    private static final long PARENT_FIELD_OFFSET;
 
     private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Object2ReferenceOpenHashMap<>();
 
@@ -205,8 +204,8 @@ public class Reflect extends Accessor {
             }
 
             fields = DEFINE_CLASS_HAS_BOOLEAN
-                ? (Field[]) getDeclaredFields0.invokeExact(klass, false)
-                : (Field[]) getDeclaredFields0.invokeExact(klass);
+                     ? (Field[]) getDeclaredFields.invokeExact(klass, false)
+                     : (Field[]) getDeclaredFields.invokeExact(klass);
 
             fieldCache.put(klass, fields);
 
@@ -217,55 +216,50 @@ public class Reflect extends Accessor {
     }
 
     static {
-        try {
-            final String version = System.getProperty("java.version");
+        final String version = System.getProperty("java.version");
+        final Class<?> Reflection;
 
-            if (JAVA_9 = version.indexOf('.') != 1 || version.indexOf(2) == '9') {
-                final Class<?> IllegalAccessLogger = Class.forName("jdk.internal.module.IllegalAccessLogger");
-                final Field logger = IllegalAccessLogger.getDeclaredField("logger");
+        if (JAVA_9 = version.indexOf('.') != 1 || version.indexOf(2) == '9') {
+            final Class<?> IllegalAccessLogger = loadClass("jdk.internal.module.IllegalAccessLogger");
 
-                Unsafe.putObjectVolatile(IllegalAccessLogger, Unsafe.staticFieldOffset(logger), null);
-
-                URLClassPath = loadClass("jdk.internal.loader.URLClassPath");
-            } else {
-                URLClassPath = loadClass("sun.misc.URLClassPath");
+            try {
+                putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);
+            } catch (final NoSuchFieldException throwable) {
+                throw new RuntimeException(throwable);
             }
 
-            addURL = Unsafe.trustedLookup.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
-            getURLs = Unsafe.trustedLookup.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
-
-            defineClass0 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
-            defineClass1 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
-            defineClass2 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class));
-            defineClass3 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
-
-            final Method[] methods = Class.class.getDeclaredMethods();
-            Method found = null;
-
-            for (final Method method : methods) {
-                if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
-                    found = method;
-
-                    break;
-                }
-            }
-
-            if (found == null) {
-                throw new Throwable();
-            } else {
-                getDeclaredFields0 = Unsafe.trustedLookup.unreflectSpecial(found, Class.class);
-            }
-
-            DEFINE_CLASS_HAS_BOOLEAN = found.getParameterCount() > 0;
-            MODIFIERS_OFFSET = (int) Unsafe.objectFieldOffset(getField(Field.class, "modifiers"));
-            PARENT_FIELD_OFFSET = Unsafe.objectFieldOffset(getField(ClassLoader.class, "parent"));
-
-            final Class<?> Reflection = Class.forName(JAVA_9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
-
-            Unsafe.putObjectVolatile(Reflection, Unsafe.staticFieldOffset(getField(Reflection, "fieldFilterMap")), new HashMap<>());
-            Unsafe.putObjectVolatile(Reflection, Unsafe.staticFieldOffset(getField(Reflection, "methodFilterMap")), new HashMap<>());
-        } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            URLClassPath = loadClass("jdk.internal.loader.URLClassPath");
+            Reflection = loadClass("jdk.internal.reflect.Reflection");
+        } else {
+            URLClassPath = loadClass("sun.misc.URLClassPath");
+            Reflection = loadClass("sun.reflect.Reflection");
         }
+
+        addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
+        getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
+
+        defineClass0 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
+        defineClass1 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
+        defineClass2 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class));
+        defineClass3 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
+
+        final Method[] methods = Class.class.getDeclaredMethods();
+        Method found = null;
+
+        for (final Method method : methods) {
+            if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
+                found = method;
+
+                break;
+            }
+        }
+
+        getDeclaredFields = Invoker.unreflectSpecial(found, Class.class);
+
+        DEFINE_CLASS_HAS_BOOLEAN = found.getParameterCount() > 0;
+        MODIFIERS_OFFSET = (int) Unsafe.objectFieldOffset(getField(Field.class, "modifiers"));
+
+        putObjectVolatile(Reflection, getField(Reflection, "fieldFilterMap"), new HashMap<>());
+        putObjectVolatile(Reflection, getField(Reflection, "methodFilterMap"), new HashMap<>());
     }
 }
