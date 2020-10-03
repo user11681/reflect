@@ -1,31 +1,26 @@
 package user11681.reflect;
 
-import java.io.InputStream;
-import net.gudenau.lib.unsafe.Unsafe;
+import java.io.File;
+import java.util.Arrays;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
 
 @Testable
 class ReflectTest {
-    static final Logger logger = LoggerFactory.getLogger(ReflectTest.class);
+    static final Logger logger = LogManager.getLogger("test");
 
     @Test
     void test() throws Throwable {
-        final InputStream stream = ReflectTest.class.getResourceAsStream("/user11681/reflect/ReflectTest$T.class");
-        final byte[] bytecode = new byte[stream.available()];
+        final Object classPath = Reflect.getClassPath(ReflectTest.class.getClassLoader());
+        final File file = new File("test");
 
-        while (stream.read(bytecode) != -1) {}
+        logger.info(Arrays.toString(Reflect.getURLs(classPath)));
 
-        final Class<T> klass = Reflect.defineClass((ClassLoader) Reflect.getObject(ReflectTest.class, Reflect.getField(Class.class, "classLoader")), "user11681.reflect.ReflectTest$T", bytecode);
-        final Object t = Unsafe.allocateInstance(klass);
+        Reflect.addURL(classPath, file.toURL());
 
-        logger.info(() -> String.valueOf(Reflect.getIntVolatile(t, Reflect.getField(klass, "thing"))));
-
-        Reflect.putIntVolatile(t, Reflect.getField(klass, "thing"), 12222);
-
-        logger.info(() -> String.valueOf(Reflect.getIntVolatile(t, Reflect.getField(klass, "thing"))));
+        logger.info(Arrays.toString(Reflect.getURLs(classPath)));
     }
 
     static class T {

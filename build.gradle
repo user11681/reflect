@@ -10,7 +10,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group("user11681")
-version("0.4.1")
+version("0.5.0")
 
 repositories {
     mavenCentral()
@@ -23,6 +23,7 @@ dependencies {
     api("it.unimi.dsi:fastutil:+")
 
     testImplementation("org.junit.jupiter:junit-jupiter:+")
+    testImplementation("org.apache.logging.log4j:log4j-core:+")
 }
 
 bintray {
