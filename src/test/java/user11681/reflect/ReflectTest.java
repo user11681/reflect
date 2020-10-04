@@ -2,6 +2,7 @@ package user11681.reflect;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import org.apache.logging.log4j.LogManager;
@@ -13,14 +14,49 @@ import org.junit.platform.commons.annotation.Testable;
 class ReflectTest {
     static final Logger logger = LogManager.getLogger("test");
 
-    int test;
-    int bruh;
-    boolean hurb;
+    @Test
+    void testCopy() {
+        final Field[] fields = Fields.getInstanceFields(ReflectTest.class);
+        final TestObject one = new TestObject();
+        final TestObject two = new TestObject();
+
+        logFields(one);
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+        logFields(two);
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+        for (final Method method : Accessor.class.getDeclaredMethods()) {
+            final String name = method.getName();
+
+            if (name.startsWith("copy")) {
+                final String typeName = name.substring(name.indexOf('y') + 1).toLowerCase();
+
+                for (final Field field : fields) {
+                    final String fieldTypeName = field.getType().getSimpleName().toLowerCase();
+
+                    if (fieldTypeName.equals(typeName)) {
+                        Accessor.copyObject(one, two, field);
+                    } else if (fieldTypeName.replace("Volatile", "").equals(typeName)) {
+                        Accessor.copyObjectVolatile(one, two, field);
+                    }
+                }
+            }
+        }
+
+        logFields(one);
+    }
 
     @Test
     void normalFieldTime() {
         final ThrowingRunnable test = () -> {
-            final Field field = ReflectTest.class.getDeclaredField("test");
+            final Field field = ReflectTest.class.getDeclaredField("integer");
 
             field.setAccessible(true);
 
@@ -65,6 +101,12 @@ class ReflectTest {
 
         for (final URL url : Classes.getURLs(classPath)) {
             logger.warn(url);
+        }
+    }
+
+    static void logFields(final Object object) {
+        for (final Field field : Fields.getInstanceFields(object.getClass())) {
+            logger.info("{}: {}", field, Accessor.getObject(object, field));
         }
     }
 

@@ -1,5 +1,6 @@
 package user11681.reflect;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.AccessibleObject;
@@ -19,6 +20,8 @@ public class Fields {
     private static final long OVERRIDE_OFFSET;
 
     private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Object2ReferenceOpenHashMap<>();
+    private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> staticFieldCache = new Object2ReferenceOpenHashMap<>();
+    private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> instanceFieldCache = new Object2ReferenceOpenHashMap<>();
     private static final Object2ReferenceOpenHashMap<String, Field> nameToField = new Object2ReferenceOpenHashMap<>();
 
     public static Field getField(final Object object, final String name) {
@@ -52,6 +55,70 @@ public class Fields {
         getFields(klass);
 
         return nameToField.get(klass.getName() + '.' + name);
+    }
+
+    public static Field[] getInstanceFields(final Class<?> klass) {
+        Field[] fields = instanceFieldCache.get(klass);
+
+        if (fields != null) {
+            return fields;
+        }
+
+        fields = getFields(klass);
+
+        final IntArrayList instanceIndexes = new IntArrayList();
+
+        for (int i = 0, length = fields.length; i < length; i++) {
+            if ((fields[i].getModifiers() & Modifier.STATIC) == 0) {
+                instanceIndexes.add(i);
+            }
+        }
+
+        final int instanceFieldCount = instanceIndexes.size();
+        final Field[] instanceFields = new Field[instanceFieldCount];
+        int size = 0;
+
+        final int[] indexArray = instanceIndexes.elements();
+
+        for (int i = 0; i < instanceFieldCount; i++) {
+            instanceFields[size++] = fields[indexArray[i]];
+        }
+
+        instanceFieldCache.put(klass, instanceFields);
+
+        return instanceFields;
+    }
+
+    public static Field[] getStaticFields(final Class<?> klass) {
+        Field[] fields = staticFieldCache.get(klass);
+
+        if (fields != null) {
+            return fields;
+        }
+
+        fields = getFields(klass);
+
+        final IntArrayList staticIndexes = new IntArrayList();
+
+        for (int i = 0, length = fields.length; i < length; i++) {
+            if ((fields[i].getModifiers() & Modifier.STATIC) != 0) {
+                staticIndexes.add(i);
+            }
+        }
+
+        final int staticFieldCount = staticIndexes.size();
+        final Field[] staticFields = new Field[staticFieldCount];
+        int size = 0;
+
+        final int[] indexArray = staticIndexes.elements();
+
+        for (int i = 0; i < staticFieldCount; i++) {
+            staticFields[size++] = fields[indexArray[i]];
+        }
+
+        staticFieldCache.put(klass, staticFields);
+
+        return staticFields;
     }
 
     public static Field[] getFields(final Class<?> klass) {
