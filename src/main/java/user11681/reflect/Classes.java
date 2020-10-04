@@ -6,7 +6,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.security.SecureClassLoader;
 
 public class Classes {
     public static final Class<?> URLClassPath;
@@ -18,6 +20,8 @@ public class Classes {
     private static final MethodHandle defineClass1;
     private static final MethodHandle defineClass2;
     private static final MethodHandle defineClass3;
+    private static final MethodHandle defineClass4;
+    private static final MethodHandle defineClass5;
 
     public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
         try {
@@ -135,6 +139,22 @@ public class Classes {
         }
     }
 
+    public static <T> Class<T> defineClass(final SecureClassLoader classLoader, final String name, final byte[] bytecode, final int offset, final int length, final CodeSource codeSource) {
+        try {
+            return (Class<T>) defineClass4.invokeExact(classLoader, name, bytecode, offset, length, codeSource);
+        } catch (final Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
+    public static <T> Class<T> defineClass(final SecureClassLoader classLoader, final String name, final ByteBuffer bytecode, final CodeSource codeSource) {
+        try {
+            return (Class<T>) defineClass5.invokeExact(classLoader, name, bytecode, codeSource);
+        } catch (final Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
     static {
         URLClassPath = Fields.JAVA_9
                        ? Classes.loadClass("jdk.internal.loader.URLClassPath")
@@ -144,6 +164,8 @@ public class Classes {
         defineClass1 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
         defineClass2 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class));
         defineClass3 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
+        defineClass4 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class));
+        defineClass5 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, CodeSource.class));
 
         addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
         getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
