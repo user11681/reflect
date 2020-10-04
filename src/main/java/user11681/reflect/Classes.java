@@ -1,35 +1,31 @@
 package user11681.reflect;
 
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.security.ProtectionDomain;
-import java.util.HashMap;
-import net.gudenau.lib.unsafe.Unsafe;
 
-public class Reflect extends Accessor {
-    public static final boolean JAVA_9;
-
+public class Classes {
     public static final Class<?> URLClassPath;
 
     private static final MethodHandle addURL;
     private static final MethodHandle getURLs;
+
     private static final MethodHandle defineClass0;
     private static final MethodHandle defineClass1;
     private static final MethodHandle defineClass2;
     private static final MethodHandle defineClass3;
-    private static final MethodHandle getDeclaredFields;
 
-    private static final boolean DEFINE_CLASS_HAS_BOOLEAN;
-    private static final int MODIFIERS_OFFSET;
-
-    private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Object2ReferenceOpenHashMap<>();
+    public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
+        try {
+            return (T) annotationType.getDeclaredMethod(elementName).getDefaultValue();
+        } catch (final NoSuchMethodException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
 
     public static URL[] getURLs(final ClassLoader classLoader) {
         return getURLs(getClassPath(classLoader));
@@ -63,7 +59,7 @@ public class Reflect extends Accessor {
         Class<?> klass = loaderClass;
 
         while (klass != Object.class) {
-            for (final Field field : getFields(klass)) {
+            for (final Field field : Fields.getFields(klass)) {
                 if (URLClassPath.isAssignableFrom(field.getType())) {
                     return field;
                 }
@@ -73,14 +69,6 @@ public class Reflect extends Accessor {
         }
 
         throw new IllegalArgumentException(String.format("%s does not have a URLClassPath", loaderClass));
-    }
-
-    public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
-        try {
-            return (T) annotationType.getDeclaredMethod(elementName).getDefaultValue();
-        } catch (final NoSuchMethodException exception) {
-            throw new RuntimeException(exception);
-        }
     }
 
     public static <T> Class<T> loadClass(final String name) {
@@ -147,119 +135,17 @@ public class Reflect extends Accessor {
         }
     }
 
-    public static Field getAccessibleField(final Class<?> klass, final String name) {
-        try {
-            for (final Field field : getFields(klass)) {
-                if (name.equals(field.getName())) {
-                    field.setAccessible(true);
-
-                    Unsafe.putInt(field, MODIFIERS_OFFSET, Unsafe.getInt(field, MODIFIERS_OFFSET) & ~Modifier.FINAL);
-
-                    return field;
-                }
-            }
-
-            throw new IllegalArgumentException(String.format("field %s does not exist in %s.", name, klass));
-        } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
-        }
-    }
-
-    public static Field getField(final Class<?> klass, final String name) {
-        try {
-            for (final Field field : getFields(klass)) {
-                if (name.equals(field.getName())) {
-                    return field;
-                }
-            }
-
-            throw new IllegalArgumentException(String.format("field %s does not exist in %s.", name, klass));
-        } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
-        }
-    }
-
-    public static Field[] getAccessibleFields(final Class<?> klass) {
-        try {
-            final Field[] fields = getFields(klass);
-
-            for (final Field field : fields) {
-                field.setAccessible(true);
-
-                Unsafe.putInt(field, MODIFIERS_OFFSET, Unsafe.getInt(field, MODIFIERS_OFFSET) & ~Modifier.FINAL);
-            }
-
-            return fields;
-        } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
-        }
-    }
-
-    public static Field[] getFields(final Class<?> klass) {
-        try {
-            Field[] fields = fieldCache.get(klass);
-
-            if (fields != null) {
-                return fields;
-            }
-
-            fields = DEFINE_CLASS_HAS_BOOLEAN
-                     ? (Field[]) getDeclaredFields.invokeExact(klass, false)
-                     : (Field[]) getDeclaredFields.invokeExact(klass);
-
-            fieldCache.put(klass, fields);
-
-            return fields;
-        } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
-        }
-    }
-
     static {
-        final String version = System.getProperty("java.version");
-        final Class<?> Reflection;
-
-        if (JAVA_9 = version.indexOf('.') != 1 || version.indexOf(2) == '9') {
-            final Class<?> IllegalAccessLogger = loadClass("jdk.internal.module.IllegalAccessLogger");
-
-            try {
-                putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);
-            } catch (final NoSuchFieldException throwable) {
-                throw new RuntimeException(throwable);
-            }
-
-            URLClassPath = loadClass("jdk.internal.loader.URLClassPath");
-            Reflection = loadClass("jdk.internal.reflect.Reflection");
-        } else {
-            URLClassPath = loadClass("sun.misc.URLClassPath");
-            Reflection = loadClass("sun.reflect.Reflection");
-        }
-
-        addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
-        getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
+        URLClassPath = Fields.JAVA_9
+                       ? Classes.loadClass("jdk.internal.loader.URLClassPath")
+                       : Classes.loadClass("sun.misc.URLClassPath");
 
         defineClass0 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
         defineClass1 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
         defineClass2 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class));
         defineClass3 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
 
-        final Method[] methods = Class.class.getDeclaredMethods();
-        Method found = null;
-
-        for (final Method method : methods) {
-            if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
-                found = method;
-
-                break;
-            }
-        }
-
-        getDeclaredFields = Invoker.unreflectSpecial(found, Class.class);
-
-        DEFINE_CLASS_HAS_BOOLEAN = found.getParameterCount() > 0;
-        MODIFIERS_OFFSET = (int) Unsafe.objectFieldOffset(getField(Field.class, "modifiers"));
-
-        putObjectVolatile(Reflection, getField(Reflection, "fieldFilterMap"), new HashMap<>());
-        putObjectVolatile(Reflection, getField(Reflection, "methodFilterMap"), new HashMap<>());
+        addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
+        getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
     }
 }
