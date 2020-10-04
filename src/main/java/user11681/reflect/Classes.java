@@ -75,7 +75,27 @@ public class Classes {
         throw new IllegalArgumentException(String.format("%s does not have a URLClassPath", loaderClass));
     }
 
-    public static <T> Class<T> loadClass(final String name) {
+    public static void load(final String... classes) {
+        for (final String klass : classes) {
+            try {
+                Class.forName(klass);
+            } catch (final ClassNotFoundException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+    }
+
+    public static void load(final boolean initialize, final ClassLoader loader, final String... classes) {
+        for (final String klass : classes) {
+            try {
+                Class.forName(klass, initialize, loader);
+            } catch (final ClassNotFoundException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+    }
+
+    public static <T> Class<T> load(final String name) {
         try {
             return (Class<T>) Class.forName(name);
         } catch (final ClassNotFoundException exception) {
@@ -83,7 +103,7 @@ public class Classes {
         }
     }
 
-    public static <T> Class<T> loadClass(final String name, final boolean initialize, final ClassLoader loader) {
+    public static <T> Class<T> load(final String name, final boolean initialize, final ClassLoader loader) {
         try {
             return (Class<T>) Class.forName(name, initialize, loader);
         } catch (final ClassNotFoundException exception) {
@@ -157,8 +177,8 @@ public class Classes {
 
     static {
         URLClassPath = Fields.JAVA_9
-                       ? Classes.loadClass("jdk.internal.loader.URLClassPath")
-                       : Classes.loadClass("sun.misc.URLClassPath");
+                       ? Classes.load("jdk.internal.loader.URLClassPath")
+                       : Classes.load("sun.misc.URLClassPath");
 
         defineClass0 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
         defineClass1 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));

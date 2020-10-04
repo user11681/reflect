@@ -42,7 +42,7 @@ public class Fields {
     }
 
     public static Field getField(final String klass, final String name) {
-        return getField(Classes.loadClass(klass), name);
+        return getField(Classes.load(klass), name);
     }
 
     public static Field getField(final Class<?> klass, final String name) {
@@ -153,7 +153,7 @@ public class Fields {
         final Class<?> Reflection;
 
         if (JAVA_9 = version.indexOf('.') != 1 || version.indexOf(2) == '9') {
-            final Class<?> IllegalAccessLogger = Classes.loadClass("jdk.internal.module.IllegalAccessLogger");
+            final Class<?> IllegalAccessLogger = Classes.load("jdk.internal.module.IllegalAccessLogger");
 
             try {
                 Accessor.putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);
@@ -161,9 +161,9 @@ public class Fields {
                 throw new RuntimeException(throwable);
             }
 
-            Reflection = Classes.loadClass("jdk.internal.reflect.Reflection");
+            Reflection = Classes.load("jdk.internal.reflect.Reflection");
         } else {
-            Reflection = Classes.loadClass("sun.reflect.Reflection");
+            Reflection = Classes.load("sun.reflect.Reflection");
         }
 
         final Method[] methods = Class.class.getDeclaredMethods();
