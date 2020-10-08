@@ -1,8 +1,5 @@
 package user11681.reflect;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 public class Reflect {
     public static final boolean java9;
 
@@ -20,14 +17,6 @@ public class Reflect {
                 } catch (final NoSuchFieldException throwable) {
                     throw new RuntimeException(throwable);
                 }
-            }
-
-            final Field security = Fields.getField(System.class, "security");
-
-            if (Modifier.isVolatile(security.getModifiers())) {
-                Accessor.putObject(security, null);
-            } else {
-                Accessor.putObjectVolatile(security, null);
             }
         }
     }

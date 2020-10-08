@@ -201,6 +201,14 @@ public class Fields {
 
             Accessor.putObjectVolatile(Reflection, "fieldFilterMap", new HashMap<>());
             Accessor.putObjectVolatile(Reflection, "methodFilterMap", new HashMap<>());
+
+            final Field security = Fields.getField(System.class, "security");
+
+            if (Modifier.isVolatile(security.getModifiers())) {
+                Accessor.putObject(security, null);
+            } else {
+                Accessor.putObjectVolatile(security, null);
+            }
         } catch (final Throwable throwable) {
             throw new RuntimeException(throwable);
         }
