@@ -19,6 +19,8 @@ public class Classes {
 
     public static final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
+    private static final MethodHandle findLoadedClass;
+
     private static final MethodHandle addURL;
     private static final MethodHandle getURLs;
 
@@ -34,6 +36,14 @@ public class Classes {
             return (T) annotationType.getDeclaredMethod(elementName).getDefaultValue();
         } catch (final NoSuchMethodException exception) {
             throw new RuntimeException(exception);
+        }
+    }
+
+    public static <T> Class<T> findLoadedClass(final ClassLoader loader, final String klass) {
+        try {
+            return (Class<T>) findLoadedClass.invokeExact(loader, klass);
+        } catch (final Throwable throwable) {
+            throw new RuntimeException(throwable);
         }
     }
 
@@ -233,6 +243,8 @@ public class Classes {
         Reflect.disableSecurity();
 
         URLClassPath = load(Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
+
+        findLoadedClass = Invoker.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
 
         addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
         getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
