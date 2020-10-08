@@ -16,13 +16,6 @@ class ReflectTest {
 
     @Test
     void bootstrapClassLoaderTest() throws Throwable {
-        URL klass = (URL) Invoker.bind(Accessor.getObject(Classes.load("sun.misc.Launcher$BootClassPathHolder"), "bcp"), "findResource", MethodType.methodType(URL.class, String.class, boolean.class)).invokeExact("user11681.reflect.Reflect", false);
-
-        Classes.addBootstrapURL(Classes.class.getProtectionDomain().getCodeSource().getLocation());
-
-        klass = (URL) Invoker.bind(Accessor.getObject(Classes.load("sun.misc.Launcher$BootClassPathHolder"), "bcp"), "findResource", MethodType.methodType(URL.class, String.class, boolean.class)).invokeExact("user11681.reflect.Reflect", false);
-
-        Class.forName("user11681.reflect.Reflect", true, null);
     }
 
     @Test
