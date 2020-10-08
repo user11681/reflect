@@ -122,27 +122,31 @@ public class Fields {
     }
 
     public static Field[] getFields(final Class<?> klass) {
-        try {
-            Field[] fields = fieldCache.get(klass);
+        Field[] fields = fieldCache.get(klass);
 
-            if (fields != null) {
-                return fields;
-            }
-
-            fields = getDeclaredFieldsHasBoolean
-                     ? (Field[]) getDeclaredFields.invokeExact(klass, false)
-                     : (Field[]) getDeclaredFields.invokeExact(klass);
-
-            fieldCache.put(klass, fields);
-
-            for (final Field field : fields) {
-                Unsafe.putBoolean(field, overrideOffset, true);
-                Unsafe.putInt(field, modifiersOffset, field.getModifiers() & ~Modifier.FINAL);
-
-                nameToField.put(klass.getName() + '.' + field.getName(), field);
-            }
-
+        if (fields != null) {
             return fields;
+        }
+
+        fields = getRawFields(klass);
+
+        fieldCache.put(klass, fields);
+
+        for (final Field field : fields) {
+            Unsafe.putBoolean(field, overrideOffset, true);
+            Unsafe.putInt(field, modifiersOffset, field.getModifiers() & ~Modifier.FINAL);
+
+            nameToField.put(klass.getName() + '.' + field.getName(), field);
+        }
+
+        return fields;
+    }
+
+    public static Field[] getRawFields(final Class<?> klass) {
+        try {
+            return getDeclaredFieldsHasBoolean
+                ? (Field[]) getDeclaredFields.invokeExact(klass, false)
+                : (Field[]) getDeclaredFields.invokeExact(klass);
         } catch (final Throwable throwable) {
             throw new RuntimeException(throwable);
         }
@@ -168,8 +172,8 @@ public class Fields {
 
         try {
             Field[] fields = getDeclaredFieldsHasBoolean
-                                   ? (Field[]) getDeclaredFields.invokeExact(Field.class, false)
-                                   : (Field[]) getDeclaredFields.invokeExact(Field.class);
+                ? (Field[]) getDeclaredFields.invokeExact(Field.class, false)
+                : (Field[]) getDeclaredFields.invokeExact(Field.class);
 
             long offset = -1;
 
@@ -184,8 +188,8 @@ public class Fields {
             modifiersOffset = offset;
 
             fields = getDeclaredFieldsHasBoolean
-                             ? (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class, false)
-                             : (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class);
+                ? (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class, false)
+                : (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class);
 
             for (final Field field : fields) {
                 if (field.getName().equals("override")) {
