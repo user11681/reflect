@@ -15,7 +15,8 @@ class ReflectTest {
     static final TestObject test = new TestObject();
 
     @Test
-    void bootstrapClassLoaderTest() throws Throwable {
+    void tes() throws Throwable {
+        Unsafe.putBoolean(Unsafe.allocateInstance(Field.class), Fields.overrideOffset, true);
     }
 
     @Test

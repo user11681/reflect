@@ -2,7 +2,6 @@ package user11681.reflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
 
 public class Reflect {
     public static final boolean java9;
@@ -23,14 +22,9 @@ public class Reflect {
                 }
             }
 
-            final Class<?> Reflection = Classes.load(java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
-
-            Accessor.putObjectVolatile(Reflection, "fieldFilterMap", new HashMap<>());
-            Accessor.putObjectVolatile(Reflection, "methodFilterMap", new HashMap<>());
-
             final Field security = Fields.getField(System.class, "security");
 
-            if ((security.getModifiers() & Modifier.VOLATILE) == 0) {
+            if (Modifier.isVolatile(security.getModifiers())) {
                 Accessor.putObject(security, null);
             } else {
                 Accessor.putObjectVolatile(security, null);

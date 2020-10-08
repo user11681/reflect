@@ -7,6 +7,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 
 @SuppressWarnings("ConstantConditions")
@@ -195,6 +196,11 @@ public class Fields {
             }
 
             overrideOffset = offset;
+
+            final Class<?> Reflection = Classes.load(Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
+
+            Accessor.putObjectVolatile(Reflection, "fieldFilterMap", new HashMap<>());
+            Accessor.putObjectVolatile(Reflection, "methodFilterMap", new HashMap<>());
         } catch (final Throwable throwable) {
             throw new RuntimeException(throwable);
         }
