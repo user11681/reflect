@@ -44,6 +44,14 @@ public class Accessor {
         Unsafe.putInt(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static int getInt(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getInt(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putInt(final Object object, final Class<?> klass, final String field, final int value) {
+        Unsafe.putInt(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static <T> T getObject(final Field field) {
         return (T) Unsafe.getObject(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -82,6 +90,14 @@ public class Accessor {
 
     public static void putObject(final Class<?> klass, final String name, final Object value) {
         Unsafe.putObject(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static <T> T getObject(final Object object, final Class<?> klass, final String field) {
+        return (T) Unsafe.getObject(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putObject(final Object object, final Class<?> klass, final String field, final Object value) {
+        Unsafe.putObject(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static boolean getBoolean(final Field field) {
@@ -124,6 +140,14 @@ public class Accessor {
         Unsafe.putBoolean(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static boolean getBoolean(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getBoolean(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putBoolean(final Object object, final Class<?> klass, final String field, final boolean value) {
+        Unsafe.putBoolean(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static byte getByte(final Field field) {
         return Unsafe.getByte(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -162,6 +186,14 @@ public class Accessor {
 
     public static void putByte(final Class<?> klass, final String name, final byte value) {
         Unsafe.putByte(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static byte getByte(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getByte(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putByte(final Object object, final Class<?> klass, final String field, final byte value) {
+        Unsafe.putByte(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static short getShort(final Field field) {
@@ -204,6 +236,14 @@ public class Accessor {
         Unsafe.putShort(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static short getShort(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getShort(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putShort(final Object object, final Class<?> klass, final String field, final short value) {
+        Unsafe.putShort(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static char getChar(final Object object, final Field field) {
         return Unsafe.getChar(object, Unsafe.objectFieldOffset(field));
     }
@@ -242,6 +282,14 @@ public class Accessor {
 
     public static void putChar(final Class<?> klass, final String name, final char value) {
         Unsafe.putChar(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static char getChar(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getChar(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putChar(final Object object, final Class<?> klass, final String field, final char value) {
+        Unsafe.putChar(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static long getLong(final Field field) {
@@ -284,6 +332,14 @@ public class Accessor {
         Unsafe.putLong(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static long getLong(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getLong(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putLong(final Object object, final Class<?> klass, final String field, final long value) {
+        Unsafe.putLong(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static float getFloat(final Field field) {
         return Unsafe.getFloat(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -322,6 +378,14 @@ public class Accessor {
 
     public static void putFloat(final Class<?> klass, final String name, final float value) {
         Unsafe.putFloat(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static float getFloat(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getFloat(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putFloat(final Object object, final Class<?> klass, final String field, final float value) {
+        Unsafe.putFloat(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static double getDouble(final Field field) {
@@ -364,6 +428,14 @@ public class Accessor {
         Unsafe.putDouble(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static double getDouble(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getDouble(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putDouble(final Object object, final Class<?> klass, final String field, final double value) {
+        Unsafe.putDouble(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static int getIntVolatile(final Field field) {
         return Unsafe.getIntVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -402,6 +474,14 @@ public class Accessor {
 
     public static void putIntVolatile(final Class<?> klass, final String name, final int value) {
         Unsafe.putIntVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static int getIntVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getIntVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putIntVolatile(final Object object, final Class<?> klass, final String field, final int value) {
+        Unsafe.putIntVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static <T> T getObjectVolatile(final Field field) {
@@ -444,6 +524,14 @@ public class Accessor {
         Unsafe.putObjectVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static <T> T getObjectVolatile(final Object object, final Class<?> klass, final String field) {
+        return (T) Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putObjectVolatile(final Object object, final Class<?> klass, final String field, final Object value) {
+        Unsafe.putObjectVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static boolean getBooleanVolatile(final Field field) {
         return Unsafe.getBooleanVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -482,6 +570,14 @@ public class Accessor {
 
     public static void putBooleanVolatile(final Class<?> klass, final String name, final boolean value) {
         Unsafe.putBooleanVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static boolean getBooleanVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getBooleanVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putBooleanVolatile(final Object object, final Class<?> klass, final String field, final boolean value) {
+        Unsafe.putBooleanVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static byte getByteVolatile(final Field field) {
@@ -524,6 +620,14 @@ public class Accessor {
         Unsafe.putByteVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static byte getByteVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getByteVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putByteVolatile(final Object object, final Class<?> klass, final String field, final byte value) {
+        Unsafe.putByteVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static short getShortVolatile(final Field field) {
         return Unsafe.getShortVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -562,6 +666,14 @@ public class Accessor {
 
     public static void putShortVolatile(final Class<?> klass, final String name, final short value) {
         Unsafe.putShortVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static short getShortVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getShortVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putShortVolatile(final Object object, final Class<?> klass, final String field, final short value) {
+        Unsafe.putShortVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static char getCharVolatile(final Field field) {
@@ -604,6 +716,14 @@ public class Accessor {
         Unsafe.putCharVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static char getCharVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getCharVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putCharVolatile(final Object object, final Class<?> klass, final String field, final char value) {
+        Unsafe.putCharVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static long getLongVolatile(final Field field) {
         return Unsafe.getLongVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -642,6 +762,14 @@ public class Accessor {
 
     public static void putLongVolatile(final Class<?> klass, final String name, final long value) {
         Unsafe.putLongVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static long getLongVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getLongVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putLongVolatile(final Object object, final Class<?> klass, final String field, final long value) {
+        Unsafe.putLongVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static float getFloatVolatile(final Field field) {
@@ -684,6 +812,14 @@ public class Accessor {
         Unsafe.putFloatVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
     }
 
+    public static float getFloatVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getFloatVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putFloatVolatile(final Object object, final Class<?> klass, final String field, final float value) {
+        Unsafe.putFloatVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
+    }
+
     public static double getDoubleVolatile(final Field field) {
         return Unsafe.getDoubleVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
@@ -722,6 +858,14 @@ public class Accessor {
 
     public static void putDoubleVolatile(final Class<?> klass, final String name, final double value) {
         Unsafe.putDoubleVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)), value);
+    }
+
+    public static double getDoubleVolatile(final Object object, final Class<?> klass, final String field) {
+        return Unsafe.getDoubleVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+    }
+
+    public static void putDoubleVolatile(final Object object, final Class<?> klass, final String field, final double value) {
+        Unsafe.putDoubleVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);
     }
 
     public static long objectFieldOffset(final Class<?> klass, final String field) {
