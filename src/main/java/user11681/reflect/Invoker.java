@@ -119,4 +119,8 @@ public class Invoker {
             throw new RuntimeException(exception);
         }
     }
+
+    static {
+        Reflect.disableSecurity();
+    }
 }

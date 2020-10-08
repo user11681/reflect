@@ -1,17 +1,23 @@
 package user11681.reflect;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
+import net.gudenau.lib.unsafe.Unsafe;
 
 public class Classes {
     public static final Class<?> URLClassPath;
+
+    public static final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
     private static final MethodHandle addURL;
     private static final MethodHandle getURLs;
@@ -111,6 +117,54 @@ public class Classes {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
+    public static <T> Class<T> defineBootstrapClass(final ClassLoader resourceLoader, final String name) {
+        try {
+            final URL url = resourceLoader.getResource("/" + name.replace('.', '/') + ".class");
+            final InputStream stream = url.openStream();
+            final byte[] bytecode = new byte[stream.available()];
+
+            while (stream.read(bytecode) != -1) {}
+
+            return Unsafe.defineClass(name, bytecode, 0, bytecode.length, null, new ProtectionDomain(new CodeSource(url, (CodeSigner[]) null), null, null, null));
+        } catch (final IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static <T> Class<T> defineSystemClass(final ClassLoader resourceLoader, final String name) {
+        try {
+            final URL url = resourceLoader.getResource("/" + name.replace('.', '/') + ".class");
+            final InputStream stream = url.openStream();
+            final byte[] bytecode = new byte[stream.available()];
+
+            while (stream.read(bytecode) != -1) {}
+
+            return defineClass((SecureClassLoader) systemClassLoader, name, bytecode, 0, bytecode.length, new CodeSource(url, (CodeSigner[]) null));
+        } catch (final IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    public static <T> Class<T> defineClass(final ClassLoader resourceLoader, final ClassLoader classLoader, final String name) {
+        return defineClass(resourceLoader, classLoader, name, null);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static <T> Class<T> defineClass(final ClassLoader resourceLoader, final ClassLoader classLoader, final String name, final ProtectionDomain protectionDomain) {
+        try {
+            final InputStream stream = resourceLoader.getResourceAsStream("/" + name.replace('.', '/') + ".class");
+            final byte[] bytecode = new byte[stream.available()];
+
+            while (stream.read(bytecode) != -1) {}
+
+            return defineClass(classLoader, name, bytecode, 0, bytecode.length, protectionDomain);
+        } catch (final IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
     public static <T> Class<T> defineClass(final ClassLoader classLoader, final byte[] bytecode, final int offset, final int length) {
         try {
             return (Class<T>) defineClass0.invokeExact(classLoader, bytecode, offset, length);
@@ -176,9 +230,12 @@ public class Classes {
     }
 
     static {
-        URLClassPath = Fields.JAVA_9
-                       ? Classes.load("jdk.internal.loader.URLClassPath")
-                       : Classes.load("sun.misc.URLClassPath");
+        Reflect.disableSecurity();
+
+        URLClassPath = load(Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
+
+        addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
+        getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
 
         defineClass0 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
         defineClass1 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
@@ -186,8 +243,5 @@ public class Classes {
         defineClass3 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
         defineClass4 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class));
         defineClass5 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, CodeSource.class));
-
-        addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
-        getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
     }
 }

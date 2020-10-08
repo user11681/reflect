@@ -1,18 +1,60 @@
 package user11681.reflect;
 
 import java.io.File;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
 
 @Testable
 class ReflectTest {
-    static final Logger logger = LogManager.getLogger("test");
+    static final TestObject test = new TestObject();
+
+    @Test
+    void bootstrapClassLoaderTest() throws Throwable {
+        URL klass = (URL) Invoker.bind(Accessor.getObject(Classes.load("sun.misc.Launcher$BootClassPathHolder"), "bcp"), "findResource", MethodType.methodType(URL.class, String.class, boolean.class)).invokeExact("user11681.reflect.Reflect", false);
+
+        Classes.addBootstrapURL(Classes.class.getProtectionDomain().getCodeSource().getLocation());
+
+        klass = (URL) Invoker.bind(Accessor.getObject(Classes.load("sun.misc.Launcher$BootClassPathHolder"), "bcp"), "findResource", MethodType.methodType(URL.class, String.class, boolean.class)).invokeExact("user11681.reflect.Reflect", false);
+
+        Class.forName("user11681.reflect.Reflect", true, null);
+    }
+
+    @Test
+    void normalFieldTime() {
+        final ThrowingRunnable test = () -> {
+            final Field field = TestObject.class.getDeclaredField("integer");
+
+            field.setAccessible(true);
+
+            final Field modifiers = Field.class.getDeclaredField("modifiers");
+
+            modifiers.setAccessible(true);
+            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        };
+
+        time(test);
+        time(test);
+        time(test);
+        time(test);
+        time(test);
+    }
+
+    @Test
+    void reflectFieldTime() {
+        final ThrowingRunnable test = () -> Fields.getField(TestObject.class, "integer");
+
+        time(test);
+        time(test);
+        time(test);
+        time(test);
+        time(test);
+    }
 
     @Test
     void testCopy() {
@@ -54,43 +96,12 @@ class ReflectTest {
     }
 
     @Test
-    void normalFieldTime() {
-        final ThrowingRunnable test = () -> {
-            final Field field = ReflectTest.class.getDeclaredField("integer");
-
-            field.setAccessible(true);
-
-            final Field modifiers = Field.class.getDeclaredField("modifiers");
-
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-        };
-
-        time(test);
-        time(test);
-        time(test);
-        time(test);
-        time(test);
-    }
-
-    @Test
-    void reflectFieldTime() {
-        final ThrowingRunnable test = () -> Fields.getField(ReflectTest.class, "test");
-
-        time(test);
-        time(test);
-        time(test);
-        time(test);
-        time(test);
-    }
-
-    @Test
     void test() throws Throwable {
         final Object classPath = Classes.getClassPath(ReflectTest.class.getClassLoader());
         final File file = new File("test");
 
         for (final URL url : Classes.getURLs(classPath)) {
-            logger.warn(url);
+            Logger.log(url);
         }
 
         System.out.println();
@@ -100,13 +111,17 @@ class ReflectTest {
         Classes.addURL(classPath, file.toURL());
 
         for (final URL url : Classes.getURLs(classPath)) {
-            logger.warn(url);
+            Logger.log(url);
         }
+    }
+
+    public static <T> T invokeStatic(final Class<?> klass, final String name, final MethodType methodType, final Object... arguments) throws Throwable {
+        return (T) Unsafe.trustedLookup.findStatic(klass, name, methodType).invokeWithArguments(arguments);
     }
 
     static void logFields(final Object object) {
         for (final Field field : Fields.getInstanceFields(object.getClass())) {
-            logger.info("{}: {}", field, Accessor.getObject(object, field));
+            System.out.printf("%s: %s\n", field, Accessor.getObject(object, field));
         }
     }
 
@@ -123,6 +138,6 @@ class ReflectTest {
     }
 
     static {
-        Accessor.putInt((Object) Accessor.getObjectVolatile(logger, "privateConfig"), "intLevel", 600);
+        Classes.load("user11681.reflect.Reflect");
     }
 }

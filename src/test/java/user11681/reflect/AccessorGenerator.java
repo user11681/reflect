@@ -79,7 +79,7 @@ class AccessorGenerator {
                         }
 
                         for (final String line : lines) {
-                            log(line);
+                            Logger.log(line);
                         }
                     }
                 }
@@ -105,18 +105,10 @@ class AccessorGenerator {
                     };
 
                     for (final String line : lines) {
-                        log(line);
+                        Logger.log(line);
                     }
                 }
             }
         }
-    }
-
-    static void log(final Object format, final Object... arguments) {
-        log(String.valueOf(format), arguments);
-    }
-
-    static void log(final String format, final Object... arguments) {
-        System.out.printf(format + "\n", arguments);
     }
 }

@@ -7,17 +7,16 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 
+@SuppressWarnings("ConstantConditions")
 public class Fields {
-    public static final boolean JAVA_9;
+    public static final long modifiersOffset;
+    public static final long overrideOffset;
 
     private static final MethodHandle getDeclaredFields;
 
-    private static final boolean DEFINE_CLASS_HAS_BOOLEAN;
-    private static final long MODIFIERS_OFFSET;
-    private static final long OVERRIDE_OFFSET;
+    private static final boolean getDeclaredFieldsHasBoolean;
 
     private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Object2ReferenceOpenHashMap<>();
     private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> staticFieldCache = new Object2ReferenceOpenHashMap<>();
@@ -129,15 +128,15 @@ public class Fields {
                 return fields;
             }
 
-            fields = DEFINE_CLASS_HAS_BOOLEAN
+            fields = getDeclaredFieldsHasBoolean
                      ? (Field[]) getDeclaredFields.invokeExact(klass, false)
                      : (Field[]) getDeclaredFields.invokeExact(klass);
 
             fieldCache.put(klass, fields);
 
             for (final Field field : fields) {
-                Unsafe.putBoolean(field, OVERRIDE_OFFSET, true);
-                Unsafe.putInt(field, MODIFIERS_OFFSET, field.getModifiers() & ~Modifier.FINAL);
+                Unsafe.putBoolean(field, overrideOffset, true);
+                Unsafe.putInt(field, modifiersOffset, field.getModifiers() & ~Modifier.FINAL);
 
                 nameToField.put(klass.getName() + '.' + field.getName(), field);
             }
@@ -149,22 +148,7 @@ public class Fields {
     }
 
     static {
-        final String version = System.getProperty("java.version");
-        final Class<?> Reflection;
-
-        if (JAVA_9 = version.indexOf('.') != 1 || version.indexOf(2) == '9') {
-            final Class<?> IllegalAccessLogger = Classes.load("jdk.internal.module.IllegalAccessLogger");
-
-            try {
-                Accessor.putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);
-            } catch (final NoSuchFieldException throwable) {
-                throw new RuntimeException(throwable);
-            }
-
-            Reflection = Classes.load("jdk.internal.reflect.Reflection");
-        } else {
-            Reflection = Classes.load("sun.reflect.Reflection");
-        }
+        Reflect.disableSecurity();
 
         final Method[] methods = Class.class.getDeclaredMethods();
         Method found = null;
@@ -179,12 +163,40 @@ public class Fields {
 
         getDeclaredFields = Invoker.unreflectSpecial(found, Class.class);
 
-        //noinspection ConstantConditions
-        DEFINE_CLASS_HAS_BOOLEAN = found.getParameterCount() > 0;
-        MODIFIERS_OFFSET = Unsafe.objectFieldOffset(getField(Field.class, "modifiers"));
-        OVERRIDE_OFFSET = Unsafe.objectFieldOffset(getField(AccessibleObject.class, "override"));
+        getDeclaredFieldsHasBoolean = found.getParameterCount() > 0;
 
-        Accessor.putObjectVolatile(Reflection, "fieldFilterMap", new HashMap<>());
-        Accessor.putObjectVolatile(Reflection, "methodFilterMap", new HashMap<>());
+        try {
+            Field[] fields = getDeclaredFieldsHasBoolean
+                                   ? (Field[]) getDeclaredFields.invokeExact(Field.class, false)
+                                   : (Field[]) getDeclaredFields.invokeExact(Field.class);
+
+            long offset = -1;
+
+            for (final Field field : fields) {
+                if (field.getName().equals("modifiers")) {
+                    offset = Unsafe.objectFieldOffset(field);
+
+                    break;
+                }
+            }
+
+            modifiersOffset = offset;
+
+            fields = getDeclaredFieldsHasBoolean
+                             ? (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class, false)
+                             : (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class);
+
+            for (final Field field : fields) {
+                if (field.getName().equals("override")) {
+                    offset = Unsafe.objectFieldOffset(field);
+
+                    break;
+                }
+            }
+
+            overrideOffset = offset;
+        } catch (final Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
     }
 }
