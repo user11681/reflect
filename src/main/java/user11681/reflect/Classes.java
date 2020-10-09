@@ -130,7 +130,7 @@ public class Classes {
     @SuppressWarnings("ConstantConditions")
     public static <T> Class<T> defineBootstrapClass(final ClassLoader resourceLoader, final String name) {
         try {
-            final URL url = resourceLoader.getResource("/" + name.replace('.', '/') + ".class");
+            final URL url = resourceLoader.getResource(name.replace('.', '/') + ".class");
             final InputStream stream = url.openStream();
             final byte[] bytecode = new byte[stream.available()];
 
@@ -145,7 +145,7 @@ public class Classes {
     @SuppressWarnings("ConstantConditions")
     public static <T> Class<T> defineSystemClass(final ClassLoader resourceLoader, final String name) {
         try {
-            final URL url = resourceLoader.getResource("/" + name.replace('.', '/') + ".class");
+            final URL url = resourceLoader.getResource(name.replace('.', '/') + ".class");
             final InputStream stream = url.openStream();
             final byte[] bytecode = new byte[stream.available()];
 
@@ -164,7 +164,7 @@ public class Classes {
     @SuppressWarnings("ConstantConditions")
     public static <T> Class<T> defineClass(final ClassLoader resourceLoader, final ClassLoader classLoader, final String name, final ProtectionDomain protectionDomain) {
         try {
-            final InputStream stream = resourceLoader.getResourceAsStream("/" + name.replace('.', '/') + ".class");
+            final InputStream stream = resourceLoader.getResourceAsStream(name.replace('.', '/') + ".class");
             final byte[] bytecode = new byte[stream.available()];
 
             while (stream.read(bytecode) != -1) {}
