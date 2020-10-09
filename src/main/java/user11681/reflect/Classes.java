@@ -60,13 +60,39 @@ public class Classes {
     }
 
     public static void addURL(final ClassLoader classLoader, final URL url) {
-        addURL(getClassPath(classLoader), url);
+        try {
+            addURL.invoke(getClassPath(classLoader), url);
+        } catch (final Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
+    public static void addURL(final ClassLoader classLoader, final URL... urls) {
+        final Object classPath = getClassPath(classLoader);
+
+        for (final URL url : urls) {
+            try {
+                addURL.invoke(classPath, url);
+            } catch (final Throwable throwable) {
+                throw new RuntimeException(throwable);
+            }
+        }
     }
 
     public static void addURL(final Object classPath, final URL url) {
         try {
             addURL.invoke(classPath, url);
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+    }
+
+    public static void addURL(final Object classPath, final URL... urls) {
+        try {
+            for (final URL url : urls) {
+                addURL.invoke(classPath, url);
+            }
+        } catch (final Throwable throwable) {
             throw new RuntimeException(throwable);
         }
     }
