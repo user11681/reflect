@@ -101,7 +101,17 @@ public class Classes {
         }
     }
 
-    public static void load(final boolean initialize, final ClassLoader loader, final String... classes) {
+    public static void load(final ClassLoader loader, final String... classes) {
+        for (final String klass : classes) {
+            try {
+                Class.forName(klass, true, loader);
+            } catch (final ClassNotFoundException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+    }
+
+    public static void load(final ClassLoader loader, final boolean initialize, final String... classes) {
         for (final String klass : classes) {
             try {
                 Class.forName(klass, initialize, loader);
@@ -119,7 +129,15 @@ public class Classes {
         }
     }
 
-    public static <T> Class<T> load(final String name, final boolean initialize, final ClassLoader loader) {
+    public static <T> Class<T> load(final ClassLoader loader, final String name) {
+        try {
+            return (Class<T>) Class.forName(name, true, loader);
+        } catch (final ClassNotFoundException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    public static <T> Class<T> load(final ClassLoader loader, final boolean initialize, final String name) {
         try {
             return (Class<T>) Class.forName(name, initialize, loader);
         } catch (final ClassNotFoundException exception) {
