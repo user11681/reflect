@@ -17,7 +17,7 @@ import net.gudenau.lib.unsafe.Unsafe;
 public class Classes {
     public static final Class<?> URLClassPath;
 
-    public static final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+    public static final SecureClassLoader systemClassLoader = (SecureClassLoader) ClassLoader.getSystemClassLoader();
 
     private static final MethodHandle findLoadedClass;
 
@@ -151,7 +151,7 @@ public class Classes {
 
             while (stream.read(bytecode) != -1) {}
 
-            return defineClass((SecureClassLoader) systemClassLoader, name, bytecode, 0, bytecode.length, new CodeSource(url, (CodeSigner[]) null));
+            return defineClass(systemClassLoader, name, bytecode, 0, bytecode.length, new CodeSource(url, (CodeSigner[]) null));
         } catch (final IOException exception) {
             throw new RuntimeException(exception);
         }
