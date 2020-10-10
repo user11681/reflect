@@ -22,7 +22,7 @@ public class Classes {
     public static final int addressFactor;
     public static final long classOffset;
     public static final long fieldOffset;
-    public static final boolean eightByteClass;
+    public static final boolean longClassPointer;
     public static final boolean x64;
 
     private static final MethodHandle findLoadedClass;
@@ -42,7 +42,11 @@ public class Classes {
     }
 
     public static <T> T copyClass(final Object to, final T from) {
-        Unsafe.putInt(to, classOffset, Unsafe.getInt(from, classOffset));
+        if (longClassPointer) {
+            Unsafe.putLong(to, classOffset, Unsafe.getLong(from, classOffset));
+        } else {
+            Unsafe.putInt(to, classOffset, Unsafe.getInt(from, classOffset));
+        }
 
         return (T) to;
     }
@@ -330,15 +334,15 @@ public class Classes {
 
         if (fieldOffset == 8) { // 32bit jvm
             x64 = false;
-            eightByteClass = false;
+            longClassPointer = false;
         } else if (fieldOffset == 12) { // 64bit jvm with compressed OOPs
             x64 = true;
-            eightByteClass = false;
+            longClassPointer = false;
         } else if (fieldOffset == 16) { // 64bit jvm
             x64 = true;
-            eightByteClass = true;
+            longClassPointer = true;
         } else {
-            throw new IllegalStateException("unsupported field offset. Report this to https://github.com/user11681/reflect/issues.");
+            throw new IllegalStateException("unsupported field offset. Report this exception to https://github.com/user11681/reflect/issues.");
         }
 
         addressFactor = x64 ? 8 : 1;

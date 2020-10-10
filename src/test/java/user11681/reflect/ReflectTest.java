@@ -1,6 +1,7 @@
 package user11681.reflect;
 
 import java.io.File;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -13,6 +14,32 @@ import org.junit.platform.commons.annotation.Testable;
 @Testable
 class ReflectTest {
     static final TestObject test = new TestObject();
+    static final int iterations = 1;
+
+    @Test
+    void invokerPerformance() throws Throwable {
+        final Object object = new Object();
+
+        long start = System.nanoTime();
+
+        final MethodHandle handle = Invoker.findVirtual(Object.class, "hashCode", MethodType.methodType(int.class));
+
+        for (int i = 0; i < iterations; i++) {
+            int code = (int) handle.invokeExact(object);
+        }
+
+        System.out.println(System.nanoTime() - start);
+
+        start = System.nanoTime();
+
+        final Method method = Object.class.getMethod("hashCode");
+
+        for (int i = 0; i < iterations; i++) {
+            int code = (int) method.invoke(object);
+        }
+
+        System.out.println(System.nanoTime() - start);
+    }
 
     @Test
     void classPointerTest() {
