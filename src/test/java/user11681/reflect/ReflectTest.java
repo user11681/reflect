@@ -15,6 +15,15 @@ class ReflectTest {
     static final TestObject test = new TestObject();
 
     @Test
+    void classPointerTest() {
+        final Object object = Unsafe.allocateInstance(Object.class);
+
+        System.out.println(object);
+        Classes.copyClass(object, new ReflectTest());
+        System.out.println(object);
+    }
+
+    @Test
     void tes() throws Throwable {
         Unsafe.putBoolean(Unsafe.allocateInstance(Field.class), Fields.overrideOffset, true);
     }

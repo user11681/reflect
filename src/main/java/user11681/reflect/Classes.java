@@ -19,6 +19,12 @@ public class Classes {
 
     public static final SecureClassLoader systemClassLoader = (SecureClassLoader) ClassLoader.getSystemClassLoader();
 
+    public static final int addressFactor;
+    public static final long classOffset;
+    public static final long fieldOffset;
+    public static final boolean eightByteClass;
+    public static final boolean x64;
+
     private static final MethodHandle findLoadedClass;
 
     private static final MethodHandle addURL;
@@ -30,6 +36,16 @@ public class Classes {
     private static final MethodHandle defineClass3;
     private static final MethodHandle defineClass4;
     private static final MethodHandle defineClass5;
+
+    public static <T> T setClass(final Object object, final Class<T> klass) {
+        return copyClass(object, Unsafe.allocateInstance(klass));
+    }
+
+    public static <T> T copyClass(final Object to, final T from) {
+        Unsafe.putInt(to, classOffset, Unsafe.getInt(from, classOffset));
+
+        return (T) to;
+    }
 
     public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
         try {
@@ -299,5 +315,32 @@ public class Classes {
         defineClass3 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
         defineClass4 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class));
         defineClass5 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, CodeSource.class));
+
+        final byte[] byteArray = new byte[0];
+        final short[] shortArray = new short[0];
+
+        long offset = 0;
+
+        while (Unsafe.getInt(byteArray, offset) == Unsafe.getInt(shortArray, offset)) {
+            offset += 4;
+        }
+
+        classOffset = offset;
+        fieldOffset = Unsafe.objectFieldOffset(Fields.getField(Integer.class, "value"));
+
+        if (fieldOffset == 8) { // 32bit jvm
+            x64 = false;
+            eightByteClass = false;
+        } else if (fieldOffset == 12) { // 64bit jvm with compressed OOPs
+            x64 = true;
+            eightByteClass = false;
+        } else if (fieldOffset == 16) { // 64bit jvm
+            x64 = true;
+            eightByteClass = true;
+        } else {
+            throw new IllegalStateException("unsupported field offset. Report this to https://github.com/user11681/reflect/issues.");
+        }
+
+        addressFactor = x64 ? 8 : 1;
     }
 }
