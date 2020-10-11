@@ -38,8 +38,16 @@ public class Classes {
 
     private static final ClassLoader classLoader = Classes.class.getClassLoader();
 
-    public static <T> T setClass(final Object object, final String string) {
-        return setClass(object, load(classLoader, false, string));
+    /**
+     * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass().getName() == klass}.
+     *
+     * @param object the object whose class pointer to change.
+     * @param klass the name of class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
+     * @param <T> the desired new type.
+     * @return <a color = "#DDDDDD">{@code object}</a>.
+     */
+    public static <T> T setClass(final Object object, final String klass) {
+        return setClass(object, load(classLoader, false, klass));
     }
 
     /**
