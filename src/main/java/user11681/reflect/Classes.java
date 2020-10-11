@@ -15,9 +15,10 @@ import java.security.SecureClassLoader;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Classes {
-    public static final Class<?> URLClassPath;
-
     public static final SecureClassLoader systemClassLoader = (SecureClassLoader) ClassLoader.getSystemClassLoader();
+
+    public static final Class<?> URLClassPath;
+    public static final Class<?> Reflection;
 
     public static final int addressFactor;
     public static final long classOffset;
@@ -26,10 +27,8 @@ public class Classes {
     public static final boolean x64;
 
     private static final MethodHandle findLoadedClass;
-
     private static final MethodHandle addURL;
     private static final MethodHandle getURLs;
-
     private static final MethodHandle defineClass0;
     private static final MethodHandle defineClass1;
     private static final MethodHandle defineClass2;
@@ -37,10 +36,32 @@ public class Classes {
     private static final MethodHandle defineClass4;
     private static final MethodHandle defineClass5;
 
+    private static final ClassLoader classLoader = Classes.class.getClassLoader();
+
+    public static <T> T setClass(final Object object, final String string) {
+        return setClass(object, load(classLoader, false, string));
+    }
+
+    /**
+     * Change the class of <a color = "#DDDDDD">{@code object}</a> to <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass() == klass}.
+     *
+     * @param object the object whose class pointer to change.
+     * @param klass the class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
+     * @param <T> the desired new type.
+     * @return <a color = "#DDDDDD">{@code object}</a>.
+     */
     public static <T> T setClass(final Object object, final Class<T> klass) {
         return copyClass(object, Unsafe.allocateInstance(klass));
     }
 
+    /**
+     * Change the class of <a color = "#DDDDDD">{@code to}</a> to that of <a color = "#DDDDDD">{@code from}</a> such that {@code to.getClass() == from.getClass()}.
+     *
+     * @param to the object whose class pointer to change.
+     * @param from the object from which to get the class pointer.
+     * @param <T> the desired new type.
+     * @return <a color = "#DDDDDD">{@code to}</a>.
+     */
     public static <T> T copyClass(final Object to, final T from) {
         if (longClassPointer) {
             Unsafe.putLong(to, classOffset, Unsafe.getLong(from, classOffset));
@@ -140,9 +161,9 @@ public class Classes {
     public static void load(final String... classes) {
         for (final String klass : classes) {
             try {
-                Class.forName(klass);
+                Class.forName(klass, true, classLoader);
             } catch (final ClassNotFoundException exception) {
-                throw new RuntimeException(exception);
+                throw Unsafe.throwException(exception);
             }
         }
     }
@@ -152,7 +173,7 @@ public class Classes {
             try {
                 Class.forName(klass, true, loader);
             } catch (final ClassNotFoundException exception) {
-                throw new RuntimeException(exception);
+                throw Unsafe.throwException(exception);
             }
         }
     }
@@ -162,16 +183,16 @@ public class Classes {
             try {
                 Class.forName(klass, initialize, loader);
             } catch (final ClassNotFoundException exception) {
-                throw new RuntimeException(exception);
+                throw Unsafe.throwException(exception);
             }
         }
     }
 
     public static <T> Class<T> load(final String name) {
         try {
-            return (Class<T>) Class.forName(name);
+            return (Class<T>) Class.forName(name, true, classLoader);
         } catch (final ClassNotFoundException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -179,7 +200,7 @@ public class Classes {
         try {
             return (Class<T>) Class.forName(name, true, loader);
         } catch (final ClassNotFoundException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -306,7 +327,8 @@ public class Classes {
     static {
         Reflect.disableSecurity();
 
-        URLClassPath = load(Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
+        Reflection = load(classLoader, Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
+        URLClassPath = load(classLoader, Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
 
         findLoadedClass = Invoker.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
 

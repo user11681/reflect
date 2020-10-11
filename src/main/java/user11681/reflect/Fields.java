@@ -201,7 +201,7 @@ public class Fields {
 
             overrideOffset = offset;
 
-            final Class<?> Reflection = Classes.load(Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
+            final Class<?> Reflection = Classes.Reflection;
 
             Accessor.putObjectVolatile(Reflection, "fieldFilterMap", new HashMap<>());
             Accessor.putObjectVolatile(Reflection, "methodFilterMap", new HashMap<>());

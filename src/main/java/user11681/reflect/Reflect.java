@@ -10,7 +10,7 @@ public class Reflect {
             initiated = true;
 
             if (java9) {
-                final Class<?> IllegalAccessLogger = Classes.load("jdk.internal.module.IllegalAccessLogger");
+                final Class<?> IllegalAccessLogger = Classes.load(Reflect.class.getClassLoader(), "jdk.internal.module.IllegalAccessLogger");
 
                 try {
                     Accessor.putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);

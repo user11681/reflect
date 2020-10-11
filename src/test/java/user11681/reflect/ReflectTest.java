@@ -17,6 +17,27 @@ class ReflectTest {
     static final int iterations = 1;
 
     @Test
+    void classPointerTest() {
+        Object object = Unsafe.allocateInstance(Object.class);
+
+        System.out.println(object);
+        Classes.copyClass(object, new ReflectTest());
+        System.out.println(object);
+
+        object = Unsafe.allocateInstance(Object.class);
+
+        System.out.println(object);
+        Classes.copyClass(object, new ReflectTest());
+        System.out.println(object);
+
+        object = Unsafe.allocateInstance(Object.class);
+
+        System.out.println(object);
+        Classes.copyClass(object, new ReflectTest());
+        System.out.println(object);
+    }
+
+    @Test
     void invokerPerformance() throws Throwable {
         final Object object = new Object();
 
@@ -39,15 +60,6 @@ class ReflectTest {
         }
 
         System.out.println(System.nanoTime() - start);
-    }
-
-    @Test
-    void classPointerTest() {
-        final Object object = Unsafe.allocateInstance(Object.class);
-
-        System.out.println(object);
-        Classes.copyClass(object, new ReflectTest());
-        System.out.println(object);
     }
 
     @Test
