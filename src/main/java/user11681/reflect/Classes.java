@@ -80,6 +80,10 @@ public class Classes {
         return (T) to;
     }
 
+    public static <T> T cast(final Object object) {
+        return (T) object;
+    }
+
     public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
         try {
             return (T) annotationType.getDeclaredMethod(elementName).getDefaultValue();
