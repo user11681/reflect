@@ -19,6 +19,8 @@ public class Classes {
     public static final Class<?> URLClassPath;
     public static final Class<?> Reflection;
 
+    public static final Object systemClassPath;
+
     public static final int addressFactor;
     public static final long classOffset;
     public static final long fieldOffset;
@@ -101,12 +103,12 @@ public class Classes {
         }
     }
 
-    public static void addURL(final ClassLoader classLoader, final URL url) {
-        try {
-            addURL.invoke(getClassPath(classLoader), url);
-        } catch (final Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
+    public static void addSystemURL(final URL... url) {
+        addURL(systemClassPath, url);
+    }
+
+    public static void addSystemURL(final URL url) {
+        addURL(systemClassPath, url);
     }
 
     public static void addURL(final ClassLoader classLoader, final URL... urls) {
@@ -121,9 +123,9 @@ public class Classes {
         }
     }
 
-    public static void addURL(final Object classPath, final URL url) {
+    public static void addURL(final ClassLoader classLoader, final URL url) {
         try {
-            addURL.invoke(classPath, url);
+            addURL.invoke(getClassPath(classLoader), url);
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
@@ -134,6 +136,14 @@ public class Classes {
             for (final URL url : urls) {
                 addURL.invoke(classPath, url);
             }
+        } catch (final Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
+    }
+
+    public static void addURL(final Object classPath, final URL url) {
+        try {
+            addURL.invoke(classPath, url);
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
@@ -387,5 +397,7 @@ public class Classes {
         }
 
         addressFactor = x64 ? 8 : 1;
+
+        systemClassPath = getClassPath(systemClassLoader);
     }
 }
