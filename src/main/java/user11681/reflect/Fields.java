@@ -2,6 +2,7 @@ package user11681.reflect;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
@@ -19,26 +20,26 @@ public class Fields {
 
     private static final boolean getDeclaredFieldsHasBoolean;
 
-    private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Object2ReferenceOpenHashMap<>();
-    private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> staticFieldCache = new Object2ReferenceOpenHashMap<>();
-    private static final Object2ReferenceOpenHashMap<Class<?>, Field[]> instanceFieldCache = new Object2ReferenceOpenHashMap<>();
+    private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Reference2ReferenceOpenHashMap<>();
+    private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> staticFieldCache = new Reference2ReferenceOpenHashMap<>();
+    private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> instanceFieldCache = new Reference2ReferenceOpenHashMap<>();
     private static final Object2ReferenceOpenHashMap<String, Field> nameToField = new Object2ReferenceOpenHashMap<>();
+
+    private static final Field NOT_FOUND = null;
 
     public static Field getField(final Object object, final String name) {
         Class<?> klass = object.getClass();
-        Field field = null;
+        Field field;
 
         while (klass != Object.class) {
-            field = getField(klass, name);
-
-            if (field != null) {
-                break;
+            if ((field = getField(klass, name)) != null) {
+                return field;
             }
 
             klass = klass.getSuperclass();
         }
 
-        return field;
+        return NOT_FOUND;
     }
 
     public static Field getField(final String klass, final String name) {
@@ -124,19 +125,17 @@ public class Fields {
     public static Field[] getFields(final Class<?> klass) {
         Field[] fields = fieldCache.get(klass);
 
-        if (fields != null) {
-            return fields;
-        }
+        if (fields == null) {
+            fields = getRawFields(klass);
 
-        fields = getRawFields(klass);
+            fieldCache.put(klass, fields);
 
-        fieldCache.put(klass, fields);
+            for (final Field field : fields) {
+                Unsafe.putBoolean(field, overrideOffset, true);
+                Unsafe.putInt(field, modifiersOffset, field.getModifiers() & ~Modifier.FINAL);
 
-        for (final Field field : fields) {
-            Unsafe.putBoolean(field, overrideOffset, true);
-            Unsafe.putInt(field, modifiersOffset, field.getModifiers() & ~Modifier.FINAL);
-
-            nameToField.put(klass.getName() + '.' + field.getName(), field);
+                nameToField.put(klass.getName() + '.' + field.getName(), field);
+            }
         }
 
         return fields;
@@ -148,7 +147,7 @@ public class Fields {
                 ? (Field[]) getDeclaredFields.invokeExact(klass, false)
                 : (Field[]) getDeclaredFields.invokeExact(klass);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -214,7 +213,7 @@ public class Fields {
                 Accessor.putObjectVolatile(security, null);
             }
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 }

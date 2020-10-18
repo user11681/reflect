@@ -1,9 +1,16 @@
 package user11681.reflect;
 
+import net.gudenau.lib.unsafe.Unsafe;
+
 public class Reflect {
     public static final boolean java9;
 
     public static boolean initiated;
+
+    /**
+     * the default class loader for some operations like loading classes
+     */
+    public static ClassLoader defaultClassLoader = Classes.class.getClassLoader();
 
     public static void disableSecurity() {
         if (!initiated) {
@@ -15,7 +22,7 @@ public class Reflect {
                 try {
                     Accessor.putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);
                 } catch (final NoSuchFieldException throwable) {
-                    throw new RuntimeException(throwable);
+                    throw Unsafe.throwException(throwable);
                 }
             }
         }

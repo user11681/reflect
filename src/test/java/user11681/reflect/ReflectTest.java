@@ -8,16 +8,27 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import net.gudenau.lib.unsafe.Unsafe;
-import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.annotation.Testable;
 
-@Testable
-class ReflectTest {
-    static final TestObject test = new TestObject();
-    static final int iterations = 1;
+public class ReflectTest {
+    static final int iterations = 10;
 
-    @Test
-    void classPointerTest() {
+    public static void main(final String[] arguments) throws Throwable {
+        unreflectTest();
+    }
+
+    public static void unreflectTest() throws Throwable {
+        final Method method = Class.class.getDeclaredMethod("getName");
+
+        timeN(() -> Logger.log((String) method.invoke(Class.class)));
+        timeN(() -> Logger.log((String) Unsafe.trustedLookup.unreflect(method).invokeExact(Class.class)));
+    }
+
+    public static void methodTest() {
+        timeN(() -> Methods.getMethods(TestObject.class));
+        timeN(ReflectTest.class::getDeclaredMethods);
+    }
+
+    public static void classPointerTest() {
         Object object = Unsafe.allocateInstance(Object.class);
 
         System.out.println(object);
@@ -37,8 +48,7 @@ class ReflectTest {
         System.out.println(object);
     }
 
-    @Test
-    void invokerPerformance() throws Throwable {
+    public static void invokerPerformance() throws Throwable {
         final Object object = new Object();
 
         long start = System.nanoTime();
@@ -62,13 +72,11 @@ class ReflectTest {
         System.out.println(System.nanoTime() - start);
     }
 
-    @Test
-    void tes() throws Throwable {
+    public static void tes() throws Throwable {
         Unsafe.putBoolean(Unsafe.allocateInstance(Field.class), Fields.overrideOffset, true);
     }
 
-    @Test
-    void normalFieldTime() {
+    public static void normalFieldTime() {
         final ThrowingRunnable test = () -> {
             final Field field = TestObject.class.getDeclaredField("integer");
 
@@ -87,8 +95,7 @@ class ReflectTest {
         time(test);
     }
 
-    @Test
-    void reflectFieldTime() {
+    public static void reflectFieldTime() {
         final ThrowingRunnable test = () -> Fields.getField(TestObject.class, "integer");
 
         time(test);
@@ -98,8 +105,7 @@ class ReflectTest {
         time(test);
     }
 
-    @Test
-    void testCopy() {
+    public static void testCopy() {
         final Field[] fields = Fields.getInstanceFields(ReflectTest.class);
         final TestObject one = new TestObject();
         final TestObject two = new TestObject();
@@ -137,8 +143,7 @@ class ReflectTest {
         logFields(one);
     }
 
-    @Test
-    void test() throws Throwable {
+    public static void test() throws Throwable {
         final Object classPath = Classes.getClassPath(ReflectTest.class.getClassLoader());
         final File file = new File("test");
 
@@ -161,13 +166,27 @@ class ReflectTest {
         return (T) Unsafe.trustedLookup.findStatic(klass, name, methodType).invokeWithArguments(arguments);
     }
 
-    static void logFields(final Object object) {
+    public static void logFields(final Object object) {
         for (final Field field : Fields.getInstanceFields(object.getClass())) {
             System.out.printf("%s: %s\n", field, Accessor.getObject(object, field));
         }
     }
 
-    static void time(final ThrowingRunnable test) {
+    public static void timeN(final ThrowingRunnable test) {
+        try {
+            final long start = System.nanoTime();
+
+            for (int i = 0; i < iterations; i++) {
+                test.run();
+            }
+
+            System.out.println((System.nanoTime() - start) / (double) iterations);
+        } catch (final Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
+    }
+
+    public static void time(final ThrowingRunnable test) {
         try {
             final long start = System.nanoTime();
 
@@ -175,11 +194,17 @@ class ReflectTest {
 
             System.out.println(System.nanoTime() - start);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
     static {
-        Classes.load("user11681.reflect.Reflect");
+        Classes.load(true,
+            "user11681.reflect.Reflect",
+            "user11681.reflect.Invoker",
+            "user11681.reflect.Fields",
+            "user11681.reflect.Accessor",
+            "user11681.reflect.Methods"
+        );
     }
 }

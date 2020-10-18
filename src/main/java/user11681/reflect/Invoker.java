@@ -12,7 +12,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.bind(receiver, name, type);
         } catch (final NoSuchMethodException | IllegalAccessException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -20,7 +20,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findConstructor(refc, type);
         } catch (final NoSuchMethodException | IllegalAccessException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -28,7 +28,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findGetter(refc, name, type);
         } catch (final IllegalAccessException | NoSuchFieldException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -36,7 +36,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findSetter(refc, name, type);
         } catch (final IllegalAccessException | NoSuchFieldException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -44,7 +44,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findSpecial(refc, name, type, specialCaller);
         } catch (final IllegalAccessException | NoSuchMethodException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -52,7 +52,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findStatic(refc, name, type);
         } catch (final IllegalAccessException | NoSuchMethodException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -60,7 +60,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findStaticGetter(refc, name, type);
         } catch (final IllegalAccessException | NoSuchFieldException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -68,7 +68,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findStaticSetter(refc, name, type);
         } catch (final IllegalAccessException | NoSuchFieldException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -76,7 +76,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.findVirtual(refc, name, type);
         } catch (final IllegalAccessException | NoSuchMethodException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -84,7 +84,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.unreflect(m);
         } catch (final IllegalAccessException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -92,7 +92,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.unreflectConstructor(c);
         } catch (final IllegalAccessException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -100,7 +100,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.unreflectGetter(f);
         } catch (final IllegalAccessException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -108,7 +108,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.unreflectSetter(f);
         } catch (final IllegalAccessException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -116,7 +116,7 @@ public class Invoker {
         try {
             return Unsafe.trustedLookup.unreflectSpecial(m, specialCaller);
         } catch (final IllegalAccessException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 

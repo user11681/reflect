@@ -10,7 +10,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 project.group = "user11681"
-project.version = "0.11.4"
+project.version = "0.11.5"
 
 repositories {
     mavenCentral()
@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    api("net.gudenau.lib:unsafe:1.2.16")
+    api("net.gudenau.lib:unsafe:+")
     api("it.unimi.dsi:fastutil:+")
 
     testImplementation("org.junit.jupiter:junit-jupiter:+")

@@ -2,7 +2,6 @@ package user11681.reflect;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
@@ -36,8 +35,6 @@ public class Classes {
     private static final MethodHandle defineClass4;
     private static final MethodHandle defineClass5;
 
-    private static final ClassLoader classLoader = Classes.class.getClassLoader();
-
     /**
      * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass().getName() == klass}.
      *
@@ -47,7 +44,7 @@ public class Classes {
      * @return <a color = "#DDDDDD">{@code object}</a>.
      */
     public static <T> T setClass(final Object object, final String klass) {
-        return setClass(object, load(classLoader, false, klass));
+        return setClass(object, load(Reflect.defaultClassLoader, false, klass));
     }
 
     /**
@@ -84,19 +81,11 @@ public class Classes {
         return (T) object;
     }
 
-    public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
-        try {
-            return (T) annotationType.getDeclaredMethod(elementName).getDefaultValue();
-        } catch (final NoSuchMethodException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
     public static <T> Class<T> findLoadedClass(final ClassLoader loader, final String klass) {
         try {
             return (Class<T>) findLoadedClass.invokeExact(loader, klass);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -108,7 +97,7 @@ public class Classes {
         try {
             return (URL[]) getURLs.invoke(classPath);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -116,7 +105,7 @@ public class Classes {
         try {
             addURL.invoke(getClassPath(classLoader), url);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -127,7 +116,7 @@ public class Classes {
             try {
                 addURL.invoke(classPath, url);
             } catch (final Throwable throwable) {
-                throw new RuntimeException(throwable);
+                throw Unsafe.throwException(throwable);
             }
         }
     }
@@ -136,7 +125,7 @@ public class Classes {
         try {
             addURL.invoke(classPath, url);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -146,7 +135,7 @@ public class Classes {
                 addURL.invoke(classPath, url);
             }
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -173,7 +162,17 @@ public class Classes {
     public static void load(final String... classes) {
         for (final String klass : classes) {
             try {
-                Class.forName(klass, true, classLoader);
+                Class.forName(klass, true, Reflect.defaultClassLoader);
+            } catch (final ClassNotFoundException exception) {
+                throw Unsafe.throwException(exception);
+            }
+        }
+    }
+
+    public static void load(final boolean initialize, final String... classes) {
+        for (final String klass : classes) {
+            try {
+                Class.forName(klass, initialize, Reflect.defaultClassLoader);
             } catch (final ClassNotFoundException exception) {
                 throw Unsafe.throwException(exception);
             }
@@ -202,7 +201,15 @@ public class Classes {
 
     public static <T> Class<T> load(final String name) {
         try {
-            return (Class<T>) Class.forName(name, true, classLoader);
+            return (Class<T>) Class.forName(name, true, Reflect.defaultClassLoader);
+        } catch (final ClassNotFoundException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static <T> Class<T> load(final boolean initialize, final String name) {
+        try {
+            return (Class<T>) Class.forName(name, initialize, Reflect.defaultClassLoader);
         } catch (final ClassNotFoundException exception) {
             throw Unsafe.throwException(exception);
         }
@@ -220,7 +227,7 @@ public class Classes {
         try {
             return (Class<T>) Class.forName(name, initialize, loader);
         } catch (final ClassNotFoundException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -235,7 +242,7 @@ public class Classes {
 
             return Unsafe.defineClass(name, bytecode, 0, bytecode.length, null, new ProtectionDomain(new CodeSource(url, (CodeSigner[]) null), null, null, null));
         } catch (final IOException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -250,7 +257,7 @@ public class Classes {
 
             return defineClass(systemClassLoader, name, bytecode, 0, bytecode.length, new CodeSource(url, (CodeSigner[]) null));
         } catch (final IOException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -268,7 +275,7 @@ public class Classes {
 
             return defineClass(classLoader, name, bytecode, 0, bytecode.length, protectionDomain);
         } catch (final IOException exception) {
-            throw new RuntimeException(exception);
+            throw Unsafe.throwException(exception);
         }
     }
 
@@ -276,7 +283,7 @@ public class Classes {
         try {
             return (Class<T>) defineClass0.invokeExact(classLoader, bytecode, offset, length);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -284,7 +291,7 @@ public class Classes {
         try {
             return (Class<T>) defineClass1.invokeExact(classLoader, name, bytecode, 0, bytecode.length);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -292,7 +299,7 @@ public class Classes {
         try {
             return (Class<T>) defineClass2.invokeExact(classLoader, name, bytecode, 0, bytecode.length, protectionDomain);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -300,7 +307,7 @@ public class Classes {
         try {
             return (Class<T>) defineClass1.invokeExact(classLoader, name, bytecode, offset, length);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -308,7 +315,7 @@ public class Classes {
         try {
             return (Class<T>) defineClass2.invokeExact(classLoader, name, bytecode, offset, length, protectionDomain);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -316,7 +323,7 @@ public class Classes {
         try {
             return (Class<T>) defineClass3.invokeExact(classLoader, name, bytecode, protectionDomain);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -324,7 +331,7 @@ public class Classes {
         try {
             return (Class<T>) defineClass4.invokeExact(classLoader, name, bytecode, offset, length, codeSource);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
@@ -332,15 +339,15 @@ public class Classes {
         try {
             return (Class<T>) defineClass5.invokeExact(classLoader, name, bytecode, codeSource);
         } catch (final Throwable throwable) {
-            throw new RuntimeException(throwable);
+            throw Unsafe.throwException(throwable);
         }
     }
 
     static {
         Reflect.disableSecurity();
 
-        Reflection = load(classLoader, Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
-        URLClassPath = load(classLoader, Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
+        Reflection = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
+        URLClassPath = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
 
         findLoadedClass = Invoker.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
 
