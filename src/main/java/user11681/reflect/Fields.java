@@ -3,6 +3,7 @@ package user11681.reflect;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
@@ -31,7 +32,7 @@ public class Fields {
         Class<?> klass = object.getClass();
         Field field;
 
-        while (klass != Object.class) {
+        while (klass != null) {
             if ((field = getField(klass, name)) != null) {
                 return field;
             }
@@ -120,6 +121,20 @@ public class Fields {
         staticFieldCache.put(klass, staticFields);
 
         return staticFields;
+    }
+
+    public static ReferenceArrayList<Field> getAllFields(Class<?> klass) {
+        final ReferenceArrayList<Field> fields = ReferenceArrayList.wrap(getFields(klass));
+
+        klass = klass.getSuperclass();
+
+        while (klass != null) {
+            fields.addElements(fields.size(), getFields(klass));
+
+            klass = klass.getSuperclass();
+        }
+
+        return fields;
     }
 
     public static Field[] getFields(final Class<?> klass) {

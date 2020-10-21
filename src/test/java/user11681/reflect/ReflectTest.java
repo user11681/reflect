@@ -13,7 +13,13 @@ public class ReflectTest {
     static final int iterations = 10;
 
     public static void main(final String[] arguments) throws Throwable {
-        unreflectTest();
+        allFields();
+    }
+
+    public static void allFields() {
+        for (final Field field : Fields.getAllFields(C.class)) {
+            Logger.log(field);
+        }
     }
 
     public static void unreflectTest() throws Throwable {
