@@ -9,7 +9,8 @@ repositories {
 }
 
 dependencies {
-    // Use "+" for the latest version or pick one from https://dl.bintray.com/user11681/maven/user11681/reflect
+    // Use "+" for the latest version
+    // or pick one from https://dl.bintray.com/user11681/maven/user11681/reflect
     api("user11681:reflect:+")
 }
 ```
