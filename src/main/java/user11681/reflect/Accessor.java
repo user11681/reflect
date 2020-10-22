@@ -1460,6 +1460,10 @@ public class Accessor {
     }
 */
 
+    public static long addressOf(final long pointer) {
+        return pointer & 0xFFFFFFFFL;
+    }
+
     static {
         Reflect.disableSecurity();
     }

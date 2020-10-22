@@ -59,6 +59,41 @@ public class Fields {
         return nameToField.get(klass.getName() + '.' + name);
     }
 
+    public static Field getRawField(final Object object, final String name) {
+        Class<?> klass = object.getClass();
+        Field field;
+
+        while (klass != null) {
+            if ((field = getRawField(klass, name)) != null) {
+                return field;
+            }
+
+            klass = klass.getSuperclass();
+        }
+
+        return NOT_FOUND;
+    }
+
+    public static Field getRawField(final String klass, final String name) {
+        for (final Field field : getRawFields(Classes.load(klass))) {
+            if (field.getName().equals(name)) {
+                return field;
+            }
+        }
+
+        return NOT_FOUND;
+    }
+
+    public static Field getRawField(final Class<?> klass, final String name) {
+        for (final Field field : getRawFields(klass)) {
+            if (field.getName().equals(name)) {
+                return field;
+            }
+        }
+
+        return NOT_FOUND;
+    }
+
     public static Field[] getInstanceFields(final Class<?> klass) {
         Field[] fields = instanceFieldCache.get(klass);
 

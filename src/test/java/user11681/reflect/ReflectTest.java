@@ -8,12 +8,25 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import net.gudenau.lib.unsafe.Unsafe;
+import user11681.reflect.experimental.Classes2;
 
 public class ReflectTest {
     static final int iterations = 10;
 
     public static void main(final String[] arguments) throws Throwable {
-        allFields();
+        invokerOverload();
+    }
+
+    public static void invokerOverload() throws Throwable {
+        Logger.log(Invoker.unreflect(Boolean.class, "getBoolean", String.class).invoke("123"));
+        Logger.log(Invoker.unreflectConstructor(Boolean.class, boolean.class).invoke(true));
+    }
+
+    public static void addClass() {
+        Classes2.addClass(String.class, Integer.class);
+
+        final String integer = (String) (Object) 0;
+        final Integer string = (Integer) (Object) "";
     }
 
     public static void allFields() {

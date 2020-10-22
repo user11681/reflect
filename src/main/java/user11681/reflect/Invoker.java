@@ -16,9 +16,41 @@ public class Invoker {
         }
     }
 
+    public static MethodHandle bind(final Object receiver, final String name, final Class<?> returnType) {
+        try {
+            return Unsafe.trustedLookup.bind(receiver, name, MethodType.methodType(returnType));
+        } catch (final NoSuchMethodException | IllegalAccessException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle bind(final Object receiver, final String name, final Class<?> returnType, final Class<?>... parameterTypes) {
+        try {
+            return Unsafe.trustedLookup.bind(receiver, name, MethodType.methodType(returnType, parameterTypes));
+        } catch (final NoSuchMethodException | IllegalAccessException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
     public static MethodHandle findConstructor(final Class<?> refc, final MethodType type) {
         try {
             return Unsafe.trustedLookup.findConstructor(refc, type);
+        } catch (final NoSuchMethodException | IllegalAccessException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle findConstructor(final Class<?> refc) {
+        try {
+            return Unsafe.trustedLookup.findConstructor(refc, MethodType.methodType(void.class));
+        } catch (final NoSuchMethodException | IllegalAccessException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle findConstructor(final Class<?> refc, final Class<?>... parameterTypes) {
+        try {
+            return Unsafe.trustedLookup.findConstructor(refc, MethodType.methodType(void.class, parameterTypes));
         } catch (final NoSuchMethodException | IllegalAccessException exception) {
             throw Unsafe.throwException(exception);
         }
@@ -48,9 +80,41 @@ public class Invoker {
         }
     }
 
+    public static MethodHandle findSpecial(final Class<?> specialCaller, final Class<?> refc, final String name, final Class<?> returnType) {
+        try {
+            return Unsafe.trustedLookup.findSpecial(refc, name, MethodType.methodType(returnType), specialCaller);
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle findSpecial(final Class<?> specialCaller, final Class<?> refc, final String name, final Class<?> returnType, final Class<?>... parameterTypes) {
+        try {
+            return Unsafe.trustedLookup.findSpecial(refc, name, MethodType.methodType(returnType, parameterTypes), specialCaller);
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
     public static MethodHandle findStatic(final Class<?> refc, final String name, final MethodType type)  {
         try {
             return Unsafe.trustedLookup.findStatic(refc, name, type);
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle findStatic(final Class<?> refc, final String name, final Class<?> returnType)  {
+        try {
+            return Unsafe.trustedLookup.findStatic(refc, name, MethodType.methodType(returnType));
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle findStatic(final Class<?> refc, final String name, final Class<?> returnType, final Class<?>... parameterTypes)  {
+        try {
+            return Unsafe.trustedLookup.findStatic(refc, name, MethodType.methodType(returnType, parameterTypes));
         } catch (final IllegalAccessException | NoSuchMethodException exception) {
             throw Unsafe.throwException(exception);
         }
@@ -80,42 +144,106 @@ public class Invoker {
         }
     }
 
-    public static MethodHandle unreflect(final Method m) {
+    public static MethodHandle findVirtual(final Class<?> refc, final String name, final Class<?> returnType) {
         try {
-            return Unsafe.trustedLookup.unreflect(m);
+            return Unsafe.trustedLookup.findVirtual(refc, name, MethodType.methodType(returnType));
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle findVirtual(final Class<?> refc, final String name, final Class<?> returnType, final Class<?>... parameterTypes) {
+        try {
+            return Unsafe.trustedLookup.findVirtual(refc, name, MethodType.methodType(returnType, parameterTypes));
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle unreflect(final Method method) {
+        try {
+            return Unsafe.trustedLookup.unreflect(method);
         } catch (final IllegalAccessException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static MethodHandle unreflectConstructor(final Constructor<?> c) {
+    public static MethodHandle unreflect(final Class<?> klass, final String name, final Class<?>... parameterTypes) {
         try {
-            return Unsafe.trustedLookup.unreflectConstructor(c);
+            return Unsafe.trustedLookup.unreflect(klass.getDeclaredMethod(name, parameterTypes));
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle unreflectConstructor(final Constructor<?> constructor) {
+        try {
+            return Unsafe.trustedLookup.unreflectConstructor(constructor);
         } catch (final IllegalAccessException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static MethodHandle unreflectGetter(final Field f) {
+    public static MethodHandle unreflectConstructor(final Class<?> klass, final Class<?>... parameterTypes) {
         try {
-            return Unsafe.trustedLookup.unreflectGetter(f);
+            return Unsafe.trustedLookup.unreflectConstructor(klass.getDeclaredConstructor(parameterTypes));
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle unreflectGetter(final Field field) {
+        try {
+            return Unsafe.trustedLookup.unreflectGetter(field);
         } catch (final IllegalAccessException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static MethodHandle unreflectSetter(final Field f) {
+    public static MethodHandle unreflectGetter(final Class<?> klass, final String name) {
         try {
-            return Unsafe.trustedLookup.unreflectSetter(f);
+            return Unsafe.trustedLookup.unreflectGetter(Fields.getField(klass, name));
         } catch (final IllegalAccessException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static MethodHandle unreflectSpecial(final Method m, final Class<?> specialCaller) {
+    public static MethodHandle unreflectSetter(final Field field) {
         try {
-            return Unsafe.trustedLookup.unreflectSpecial(m, specialCaller);
+            return Unsafe.trustedLookup.unreflectSetter(field);
         } catch (final IllegalAccessException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle unreflectSetter(final Class<?> klass, final String name) {
+        try {
+            return Unsafe.trustedLookup.unreflectSetter(Fields.getField(klass, name));
+        } catch (final IllegalAccessException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle unreflectSpecial(final Method method, final Class<?> specialCaller) {
+        try {
+            return Unsafe.trustedLookup.unreflectSpecial(method, specialCaller);
+        } catch (final IllegalAccessException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle unreflectSpecial(final Class<?> klass, final String name, final Class<?>... parameterTypes) {
+        try {
+            return Unsafe.trustedLookup.unreflectSpecial(klass.getDeclaredMethod(name, parameterTypes), klass);
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle unreflectSpecial(final Class<?> specialCaller, final Class<?> klass, final String name, final Class<?>... parameterTypes) {
+        try {
+            return Unsafe.trustedLookup.unreflectSpecial(klass.getDeclaredMethod(name, parameterTypes), specialCaller);
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
             throw Unsafe.throwException(exception);
         }
     }

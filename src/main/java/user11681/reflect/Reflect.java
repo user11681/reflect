@@ -10,18 +10,18 @@ public class Reflect {
     /**
      * the default class loader for some operations like loading classes
      */
-    public static ClassLoader defaultClassLoader = Classes.class.getClassLoader();
+    public static ClassLoader defaultClassLoader = Reflect.class.getClassLoader();
 
     public static void disableSecurity() {
         if (!initiated) {
             initiated = true;
 
             if (java9) {
-                final Class<?> IllegalAccessLogger = Classes.load(Reflect.class.getClassLoader(), "jdk.internal.module.IllegalAccessLogger");
-
                 try {
+                    final Class<?> IllegalAccessLogger = Class.forName("jdk.internal.module.IllegalAccessLogger", false, defaultClassLoader);
+
                     Accessor.putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);
-                } catch (final NoSuchFieldException throwable) {
+                } catch (final Throwable throwable) {
                     throw Unsafe.throwException(throwable);
                 }
             }

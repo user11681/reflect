@@ -71,12 +71,20 @@ public class Classes {
      */
     public static <T> T copyClass(final Object to, final T from) {
         if (longClassPointer) {
-            Unsafe.putLong(to, classOffset, Unsafe.getLong(from, classOffset));
+            Accessor.copyLong(to, from, classOffset);
         } else {
-            Unsafe.putInt(to, classOffset, Unsafe.getInt(from, classOffset));
+            Accessor.copyInt(to, from, classOffset);
         }
 
         return (T) to;
+    }
+
+    public static long getClassPointer(final Class<?> klass) {
+        return getClassPointer(Unsafe.allocateInstance(klass));
+    }
+
+    public static long getClassPointer(final Object object) {
+        return longClassPointer ? Unsafe.getLong(object, classOffset) : Unsafe.getInt(object, classOffset);
     }
 
     public static <T> T cast(final Object object) {
