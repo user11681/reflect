@@ -1465,6 +1465,6 @@ public class Accessor {
     }
 
     static {
-        Reflect.disableSecurity();
+        Reflect.disableIllegalAccessLogger();
     }
 }

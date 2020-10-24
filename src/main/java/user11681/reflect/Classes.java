@@ -362,7 +362,7 @@ public class Classes {
     }
 
     static {
-        Reflect.disableSecurity();
+        Reflect.disableIllegalAccessLogger();
 
         Reflection = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
         URLClassPath = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");

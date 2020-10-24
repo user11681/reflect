@@ -120,7 +120,7 @@ public class Methods {
     }
 
     static {
-        Reflect.disableSecurity();
+        Reflect.disableIllegalAccessLogger();
 
         try {
             MethodHandle tempGetDeclaredMethods = null;

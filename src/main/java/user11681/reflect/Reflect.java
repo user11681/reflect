@@ -12,7 +12,7 @@ public class Reflect {
      */
     public static ClassLoader defaultClassLoader = Reflect.class.getClassLoader();
 
-    public static void disableSecurity() {
+    public static void disableIllegalAccessLogger() {
         if (!initiated) {
             initiated = true;
 
@@ -20,7 +20,7 @@ public class Reflect {
                 try {
                     final Class<?> IllegalAccessLogger = Class.forName("jdk.internal.module.IllegalAccessLogger", false, defaultClassLoader);
 
-                    Accessor.putObjectVolatile(IllegalAccessLogger, IllegalAccessLogger.getDeclaredField("logger"), null);
+                    Unsafe.putObjectVolatile(IllegalAccessLogger, Unsafe.staticFieldOffset(IllegalAccessLogger.getDeclaredField("logger")), null);
                 } catch (final Throwable throwable) {
                     throw Unsafe.throwException(throwable);
                 }

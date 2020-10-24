@@ -249,6 +249,6 @@ public class Invoker {
     }
 
     static {
-        Reflect.disableSecurity();
+        Reflect.disableIllegalAccessLogger();
     }
 }

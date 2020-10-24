@@ -202,7 +202,7 @@ public class Fields {
     }
 
     static {
-        Reflect.disableSecurity();
+        Reflect.disableIllegalAccessLogger();
 
         final Method[] methods = Class.class.getDeclaredMethods();
         Method found = null;
