@@ -11,10 +11,14 @@ import net.gudenau.lib.unsafe.Unsafe;
 import user11681.reflect.experimental.Classes2;
 
 public class ReflectTest {
-    static final int iterations = 10;
+    private static final int iterations = 100;
+    private static final int tests = 10;
 
     public static void main(final String[] arguments) throws Throwable {
-        invokerOverload();
+        for (int i = 0; i < tests; i++) {
+//            classPointerTest();
+            unreflectTest();
+        }
     }
 
     public static void invokerOverload() throws Throwable {
@@ -36,10 +40,32 @@ public class ReflectTest {
     }
 
     public static void unreflectTest() throws Throwable {
-        final Method method = Class.class.getDeclaredMethod("getName");
+        final Method method = Methods.getMethod(A.class, "privateMethod");
+        final Method declaredMethod = A.class.getDeclaredMethod("privateMethod");
+        final MethodHandle methodHandle = Invoker.findStatic(A.class, "privateMethod", String.class);
+        final MethodHandle unreflected = Invoker.unreflect(method);
 
-        timeN(() -> Logger.log((String) method.invoke(Class.class)));
-        timeN(() -> Logger.log((String) Unsafe.trustedLookup.unreflect(method).invokeExact(Class.class)));
+        timeN("Method 0", () -> {
+            Methods.getMethod(A.class, "privateMethod2", int.class);
+        });
+
+        timeN("Method 1", () -> {
+            Methods.getMethod(A.class, "privateMethod");
+        });
+
+        timeN("Method 2", () -> {
+            final Method method1 = A.class.getDeclaredMethod("privateMethod");
+
+            method.setAccessible(true);
+        });
+
+        timeN("MethodHandle unreflection", () -> {
+            Invoker.unreflect(declaredMethod);
+        });
+
+        timeN("MethodHandle", () -> {
+            Invoker.findStatic(A.class, "privateMethod", String.class);
+        });
     }
 
     public static void methodTest() {
@@ -51,13 +77,13 @@ public class ReflectTest {
         Object object = Unsafe.allocateInstance(Object.class);
 
         System.out.println(object);
-        Classes.copyClass(object, new ReflectTest());
+        Classes.setClass(object, ReflectTest.class);
         System.out.println(object);
 
-        object = Unsafe.allocateInstance(Object.class);
+        object = Unsafe.allocateInstance(ReflectTest.class);
 
         System.out.println(object);
-        Classes.copyClass(object, new ReflectTest());
+        Classes.setClass(object, ReflectTest.class);
         System.out.println(object);
 
         object = Unsafe.allocateInstance(Object.class);
@@ -199,7 +225,21 @@ public class ReflectTest {
                 test.run();
             }
 
-            System.out.println((System.nanoTime() - start) / (double) iterations);
+            Logger.log((System.nanoTime() - start) / (double) iterations);
+        } catch (final Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
+    }
+
+    public static void timeN(final String label, final ThrowingRunnable test) {
+        try {
+            final long start = System.nanoTime();
+
+            for (int i = 0; i < iterations; i++) {
+                test.run();
+            }
+
+            Logger.log("%s: %s", label, (System.nanoTime() - start) / (double) iterations);
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
@@ -211,7 +251,19 @@ public class ReflectTest {
 
             test.run();
 
-            System.out.println(System.nanoTime() - start);
+            Logger.log(System.nanoTime() - start);
+        } catch (final Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
+    }
+
+    public static void time(final String label, final ThrowingRunnable test) {
+        try {
+            final long start = System.nanoTime();
+
+            test.run();
+
+            Logger.log("%s: %s", label, System.nanoTime() - start);
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }

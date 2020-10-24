@@ -10,7 +10,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 project.group = "user11681"
-project.version = "0.12.0"
+project.version = "0.13.0"
 
 repositories {
     mavenCentral()
