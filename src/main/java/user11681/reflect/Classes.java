@@ -41,8 +41,8 @@ public class Classes {
      * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass().getName() == klass}.
      *
      * @param object the object whose class pointer to change.
-     * @param klass the name of class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
-     * @param <T> the desired new type.
+     * @param klass  the name of class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
+     * @param <T>    the desired new type.
      * @return <a color = "#DDDDDD">{@code object}</a>.
      */
     public static <T> T setClass(final Object object, final String klass) {
@@ -53,8 +53,8 @@ public class Classes {
      * Change the class of <a color = "#DDDDDD">{@code object}</a> to <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass() == klass}.
      *
      * @param object the object whose class pointer to change.
-     * @param klass the class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
-     * @param <T> the desired new type.
+     * @param klass  the class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
+     * @param <T>    the desired new type.
      * @return <a color = "#DDDDDD">{@code object}</a>.
      */
     public static <T> T setClass(final Object object, final Class<T> klass) {
@@ -64,9 +64,9 @@ public class Classes {
     /**
      * Change the class of <a color = "#DDDDDD">{@code to}</a> to that of <a color = "#DDDDDD">{@code from}</a> such that {@code to.getClass() == from.getClass()}.
      *
-     * @param to the object whose class pointer to change.
+     * @param to   the object whose class pointer to change.
      * @param from the object from which to get the class pointer.
-     * @param <T> the desired new type.
+     * @param <T>  the desired new type.
      * @return <a color = "#DDDDDD">{@code to}</a>.
      */
     public static <T> T copyClass(final Object to, final T from) {
@@ -379,29 +379,29 @@ public class Classes {
             defineClass3 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
             defineClass4 = Unsafe.trustedLookup.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class));
             defineClass5 = Unsafe.trustedLookup.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, CodeSource.class));
+
+            final byte[] byteArray = new byte[0];
+            final short[] shortArray = new short[0];
+
+            long offset = 0;
+
+            while (Unsafe.getInt(byteArray, offset) == Unsafe.getInt(shortArray, offset)) {
+                offset += 4;
+            }
+
+            classOffset = offset;
+            fieldOffset = Unsafe.objectFieldOffset(Integer.class.getDeclaredField("value"));
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
 
-        final byte[] byteArray = new byte[0];
-        final short[] shortArray = new short[0];
-
-        long offset = 0;
-
-        while (Unsafe.getInt(byteArray, offset) == Unsafe.getInt(shortArray, offset)) {
-            offset += 4;
-        }
-
-        classOffset = offset;
-        fieldOffset = Unsafe.objectFieldOffset(Fields.getField(Integer.class, "value"));
-
-        if (fieldOffset == 8) { // 32bit jvm
+        if (fieldOffset == 8) { // 32bit JVM
             x64 = false;
             longClassPointer = false;
-        } else if (fieldOffset == 12) { // 64bit jvm with compressed OOPs
+        } else if (fieldOffset == 12) { // 64bit JVM with compressed OOPs
             x64 = true;
             longClassPointer = false;
-        } else if (fieldOffset == 16) { // 64bit jvm
+        } else if (fieldOffset == 16) { // 64bit JVM
             x64 = true;
             longClassPointer = true;
         } else {
