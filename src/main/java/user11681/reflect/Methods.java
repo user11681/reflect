@@ -39,6 +39,18 @@ public class Methods {
         return NOT_FOUND;
     }
 
+    public static Method getMethod(final Class<?> klass, final String name) {
+        final Method[] methods = getMethods(klass);
+
+        for (int i = 0, length = methods.length; i < length; i++) {
+            if (methods[i].getName().equals(name)) {
+                return methods[i];
+            }
+        }
+
+        return NOT_FOUND;
+    }
+
     public static Method getMethod(final Object object, final String name, final Class<?>... parameterTypes) {
         Class<?> klass = object.getClass();
         Method method;
@@ -81,12 +93,69 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getMethod(final Class<?> klass, final String name) {
-        final Method[] methods = getMethods(klass);
+    public static Method getRawMethod(final Object object, final String name) {
+        Class<?> klass = object.getClass();
+        Method method;
+
+        while (klass != null) {
+            if ((method = getRawMethod(klass, name)) != null) {
+                return method;
+            }
+
+            klass = klass.getSuperclass();
+        }
+
+        return NOT_FOUND;
+    }
+
+    public static Method getRawMethod(final Class<?> klass, final String name) {
+        final Method[] methods = getRawMethods(klass);
 
         for (int i = 0, length = methods.length; i < length; i++) {
             if (methods[i].getName().equals(name)) {
                 return methods[i];
+            }
+        }
+
+        return NOT_FOUND;
+    }
+
+    public static Method getRawMethod(final Object object, final String name, final Class<?>... parameterTypes) {
+        Class<?> klass = object.getClass();
+        Method method;
+
+        while (klass != null) {
+            if ((method = getRawMethod(klass, name, parameterTypes)) != null) {
+                return method;
+            }
+
+            klass = klass.getSuperclass();
+        }
+
+        return NOT_FOUND;
+    }
+
+    public static Method getRawMethod(final Class<?> klass, final String name, final Class<?>... parameterTypes) {
+        final Method[] methods = getRawMethods(klass);
+        Class<?>[] parameterTypes1;
+        Method method;
+        int parameterCount;
+        int j;
+
+        method:
+        for (int i = 0, length = methods.length; i < length; i++) {
+            if (methods[i].getName().equals(name)) {
+                method = methods[i];
+
+                if ((parameterCount = (parameterTypes1 = method.getParameterTypes()).length) == parameterTypes.length) {
+                    for (j = 0; j < parameterCount; j++) {
+                        if (parameterTypes1[j] != parameterTypes[j]) {
+                            continue method;
+                        }
+                    }
+
+                    return methods[i];
+                }
             }
         }
 

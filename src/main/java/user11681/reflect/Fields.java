@@ -215,18 +215,13 @@ public class Fields {
             }
         }
 
-        getDeclaredFields = Invoker.unreflectSpecial(found, Class.class);
-
-        getDeclaredFieldsHasBoolean = found.getParameterCount() > 0;
-
         try {
-            Field[] fields = getDeclaredFieldsHasBoolean
-                ? (Field[]) getDeclaredFields.invokeExact(Field.class, false)
-                : (Field[]) getDeclaredFields.invokeExact(Field.class);
+            getDeclaredFields = Unsafe.trustedLookup.unreflectSpecial(found, Class.class);
+            getDeclaredFieldsHasBoolean = found.getParameterCount() > 0;
 
             long offset = -1;
 
-            for (final Field field : fields) {
+            for (final Field field : getRawFields(Field.class)) {
                 if (field.getName().equals("modifiers")) {
                     offset = Unsafe.objectFieldOffset(field);
 
@@ -236,11 +231,7 @@ public class Fields {
 
             modifiersOffset = offset;
 
-            fields = getDeclaredFieldsHasBoolean
-                ? (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class, false)
-                : (Field[]) getDeclaredFields.invokeExact(AccessibleObject.class);
-
-            for (final Field field : fields) {
+            for (final Field field : getRawFields(AccessibleObject.class)) {
                 if (field.getName().equals("override")) {
                     offset = Unsafe.objectFieldOffset(field);
 
@@ -250,17 +241,15 @@ public class Fields {
 
             overrideOffset = offset;
 
-            final Class<?> Reflection = Classes.Reflection;
+            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "fieldFilterMap")), new HashMap<>());
+            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "methodFilterMap")), new HashMap<>());
 
-            Accessor.putObjectVolatile(Reflection, "fieldFilterMap", new HashMap<>());
-            Accessor.putObjectVolatile(Reflection, "methodFilterMap", new HashMap<>());
-
-            final Field security = Fields.getField(System.class, "security");
+            final Field security = getRawField(System.class, "security");
 
             if (Modifier.isVolatile(security.getModifiers())) {
-                Accessor.putObject(security, null);
+                Unsafe.putObject(security.getDeclaringClass(), Unsafe.staticFieldOffset(security), null);
             } else {
-                Accessor.putObjectVolatile(security, null);
+                Unsafe.putObjectVolatile(security.getDeclaringClass(), Unsafe.staticFieldOffset(security), null);
             }
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);

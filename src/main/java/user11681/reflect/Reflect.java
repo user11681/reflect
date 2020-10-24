@@ -5,7 +5,7 @@ import net.gudenau.lib.unsafe.Unsafe;
 public class Reflect {
     public static final boolean java9;
 
-    public static boolean initiated;
+    public static boolean loggerInactive;
 
     /**
      * the default class loader for some operations like loading classes
@@ -13,9 +13,7 @@ public class Reflect {
     public static ClassLoader defaultClassLoader = Reflect.class.getClassLoader();
 
     public static void disableIllegalAccessLogger() {
-        if (!initiated) {
-            initiated = true;
-
+        if (!loggerInactive) {
             if (java9) {
                 try {
                     final Class<?> IllegalAccessLogger = Class.forName("jdk.internal.module.IllegalAccessLogger", false, defaultClassLoader);
@@ -25,6 +23,8 @@ public class Reflect {
                     throw Unsafe.throwException(throwable);
                 }
             }
+
+            loggerInactive = true;
         }
     }
 

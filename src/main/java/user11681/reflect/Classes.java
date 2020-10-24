@@ -367,17 +367,21 @@ public class Classes {
         Reflection = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
         URLClassPath = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
 
-        findLoadedClass = Invoker.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
+        try {
+            findLoadedClass = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
 
-        addURL = Invoker.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
-        getURLs = Invoker.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
+            addURL = Unsafe.trustedLookup.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
+            getURLs = Unsafe.trustedLookup.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
 
-        defineClass0 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
-        defineClass1 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
-        defineClass2 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class));
-        defineClass3 = Invoker.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
-        defineClass4 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class));
-        defineClass5 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, CodeSource.class));
+            defineClass0 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
+            defineClass1 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
+            defineClass2 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class));
+            defineClass3 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
+            defineClass4 = Unsafe.trustedLookup.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class));
+            defineClass5 = Unsafe.trustedLookup.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, CodeSource.class));
+        } catch (final Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
 
         final byte[] byteArray = new byte[0];
         final short[] shortArray = new short[0];

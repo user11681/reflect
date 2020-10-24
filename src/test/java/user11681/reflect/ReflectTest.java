@@ -11,14 +11,19 @@ import net.gudenau.lib.unsafe.Unsafe;
 import user11681.reflect.experimental.Classes2;
 
 public class ReflectTest {
-    private static final int iterations = 100;
+    private static final int iterations = 1;
     private static final int tests = 10;
 
     public static void main(final String[] arguments) throws Throwable {
         for (int i = 0; i < tests; i++) {
-//            classPointerTest();
-            unreflectTest();
+            newInvokerUnreflectTest();
         }
+    }
+
+    public static void newInvokerUnreflectTest() {
+//        timeN("new", () -> Invoker.unreflect2(A.class, "privateMethod"));
+
+        timeN("old", () -> Invoker.unreflect(A.class, "privateMethod"));
     }
 
     public static void invokerOverload() throws Throwable {
