@@ -15,9 +15,13 @@ public class ReflectTest {
     private static final int tests = 10;
 
     public static void main(final String[] arguments) throws Throwable {
-        for (int i = 0; i < tests; i++) {
-            newInvokerUnreflectTest();
-        }
+        staticCast();
+    }
+
+    public static void staticCast() {
+        final Integer a = Classes.staticCast(A.class, Integer.class);
+
+        System.out.println(A.class.getClassLoader());
     }
 
     public static void newInvokerUnreflectTest() {
