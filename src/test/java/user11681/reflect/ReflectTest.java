@@ -21,21 +21,27 @@ public class ReflectTest {
     private static int dummyIndex;
 
     public static void main(final String[] arguments) throws Throwable {
-        enumTest();
+        Logger.log(time(ReflectTest::enumTest) / Math.pow(10, 6));
     }
 
     public static void enumTest() throws Throwable {
         final Constructor<?> retentionPolicyConstructor = EnumConstructor.findConstructor(false, RetentionPolicy.class);
         final Constructor<?> enumerationConstructor = EnumConstructor.findConstructor(true, Enumeration.class, 0D);
+        EnumConstructor.newInstance(Enumeration.class, "TEST", 1D);
+        EnumConstructor.newInstance(Enumeration.class, 0, "TEST", 3D);
+        EnumConstructor.newInstance(false, Enumeration.class, "TEST", 4D);
+        EnumConstructor.newInstance(false, Enumeration.class, 1, "TEST", 5D);
 
-        timeN(() -> EnumConstructor.add(Enumeration.class, "TEST", 0D));
+        final Enumeration enumeration = EnumConstructor.newInstance(Enumeration.class, 2, "TEST", 2D);
+        assert enumeration != null;
 
-        final long time = System.nanoTime();
+        EnumConstructor.add(Enumeration.class, "TEST", 1D);
+        EnumConstructor.add(Enumeration.class, 0, "TEST", 3D);
+        EnumConstructor.add(false, Enumeration.class, "TEST", 4D);
+        EnumConstructor.add(false, Enumeration.class, 1, "TEST", 5D);
+        EnumConstructor.add(Enumeration.class, enumeration);
+
         final EnumConstructor<RetentionPolicy> constructor = new EnumConstructor<>(RetentionPolicy.class);
-
-        repeat(() -> constructor.add("TEST", 0D));
-
-        Logger.log((System.nanoTime() - time) / (double) iterations);
     }
 
     public static void staticCast() {
@@ -255,53 +261,69 @@ public class ReflectTest {
         }
     }
 
-    public static void timeN(final ThrowingRunnable test) {
+    public static double timeN(final ThrowingRunnable test) {
         try {
-            final long start = System.nanoTime();
+            final long time = System.nanoTime();
 
             for (int i = 0; i < iterations; i++) {
                 test.run();
             }
 
-            Logger.log((System.nanoTime() - start) / (double) iterations);
+            final double duration = (double) (System.nanoTime() - time) / iterations;
+
+            Logger.log(duration);
+
+            return duration;
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static void timeN(final String label, final ThrowingRunnable test) {
+    public static double timeN(final String label, final ThrowingRunnable test) {
         try {
-            final long start = System.nanoTime();
+            final long time = System.nanoTime();
 
             for (int i = 0; i < iterations; i++) {
                 test.run();
             }
 
-            Logger.log("%s: %s", label, (System.nanoTime() - start) / (double) iterations);
+            final double duration = (double) (System.nanoTime() - time) / iterations;
+
+            Logger.log("%s: %s", label, duration);
+
+            return duration;
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static void time(final ThrowingRunnable test) {
+    public static long time(final ThrowingRunnable test) {
         try {
-            final long start = System.nanoTime();
+            long time = System.nanoTime();
 
             test.run();
 
-            Logger.log(System.nanoTime() - start);
+            time = System.nanoTime() - time;
+
+            Logger.log(time);
+
+            return time;
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static void time(final String label, final ThrowingRunnable test) {
+    public static long time(final String label, final ThrowingRunnable test) {
         try {
-            final long start = System.nanoTime();
+            long time = System.nanoTime();
 
             test.run();
 
-            Logger.log("%s: %s", label, System.nanoTime() - start);
+            time = System.nanoTime() - time;
+
+            Logger.log("%s: %s", label, time);
+
+            return time;
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
