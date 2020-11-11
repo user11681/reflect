@@ -44,6 +44,8 @@ public class ReflectTest {
         final EnumConstructor<RetentionPolicy> constructor = new EnumConstructor<>(RetentionPolicy.class);
 
         repeat(() -> constructor.add("TEST", 0D));
+
+        Enumeration.valueOf("TEST");
     }
 
     public static void staticCast() {
