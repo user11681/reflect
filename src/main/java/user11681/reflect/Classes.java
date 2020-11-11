@@ -16,8 +16,10 @@ import net.gudenau.lib.unsafe.Unsafe;
 public class Classes {
     public static final SecureClassLoader systemClassLoader = (SecureClassLoader) ClassLoader.getSystemClassLoader();
 
-    public static final Class<?> URLClassPath;
+    public static final Class<?> ConstructorAccessor;
+    public static final Class<?> NativeConstructorAccessorImpl;
     public static final Class<?> Reflection;
+    public static final Class<?> URLClassPath;
 
     public static final Object systemClassPath;
 
@@ -412,8 +414,10 @@ public class Classes {
     static {
         Reflect.disableIllegalAccessLogger();
 
-        Reflection = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
-        URLClassPath = load(Reflect.defaultClassLoader, Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
+        ConstructorAccessor = load(Reflect.java9 ? "jdk.internal.reflect.ConstructorAccessor" : "sun.reflect.ConstructorAccessor");
+        NativeConstructorAccessorImpl = load(Reflect.java9 ? "jdk.internal.reflect.NativeConstructorAccessorImpl" : "sun.reflect.NativeConstructorAccessorImpl");
+        Reflection = load(Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
+        URLClassPath = load(Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
 
         try {
             findLoadedClass = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));

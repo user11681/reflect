@@ -181,9 +181,6 @@ public class Fields {
             fieldCache.put(klass, fields);
 
             for (final Field field : fields) {
-                Unsafe.putBoolean(field, overrideOffset, true);
-                Unsafe.putInt(field, modifiersOffset, field.getModifiers() & ~Modifier.FINAL);
-
                 nameToField.put(klass.getName() + '.' + field.getName(), field);
             }
         }

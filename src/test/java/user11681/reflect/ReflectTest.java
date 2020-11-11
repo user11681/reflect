@@ -1,8 +1,11 @@
 package user11681.reflect;
 
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.io.File;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -11,17 +14,43 @@ import net.gudenau.lib.unsafe.Unsafe;
 import user11681.reflect.experimental.Classes2;
 
 public class ReflectTest {
-    private static final int iterations = 1;
+    private static final int iterations = 1000;
     private static final int tests = 10;
 
+    private static final ReferenceArrayList<Object> dummy = ReferenceArrayList.wrap(new Object[]{0});
+    private static int dummyIndex;
+
     public static void main(final String[] arguments) throws Throwable {
-        staticCast();
+        enumTest();
+    }
+
+    public static void enumTest() throws Throwable {
+        final Constructor<?> retentionPolicyConstructor = EnumConstructor.findConstructor(false, RetentionPolicy.class);
+        final Constructor<?> enumerationConstructor = EnumConstructor.findConstructor(true, Enumeration.class, 0D);
+
+        timeN(() -> EnumConstructor.add(Enumeration.class, "TEST", 0D));
+
+        final long time = System.nanoTime();
+        final EnumConstructor<RetentionPolicy> constructor = new EnumConstructor<>(RetentionPolicy.class);
+
+        repeat(() -> constructor.add("TEST", 0D));
+
+        Logger.log((System.nanoTime() - time) / (double) iterations);
     }
 
     public static void staticCast() {
         final Integer a = Classes.staticCast(A.class, Integer.class);
 
+        System.out.println(a);
         System.out.println(A.class.getClassLoader());
+
+        final Double dubble = 0D;
+        final Long longg = Classes.staticCast(dubble, Long.class);
+
+        System.out.println(dubble);
+        Accessor.putLong(longg, "value", 0xFFFFFFFFFFL);
+        System.out.println(longg);
+        System.out.println(Classes.staticCast(longg, Double.class));
     }
 
     public static void newInvokerUnreflectTest() {
@@ -275,6 +304,16 @@ public class ReflectTest {
             Logger.log("%s: %s", label, System.nanoTime() - start);
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
+        }
+    }
+
+    public static void repeat(final ThrowingRunnable test) {
+        for (int i = 0; i < iterations; i++) {
+            try {
+                test.run();
+            } catch (final Throwable throwable) {
+                throw Unsafe.throwException(throwable);
+            }
         }
     }
 
