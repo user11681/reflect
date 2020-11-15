@@ -2,6 +2,8 @@ reflect is a Java reflection library that uses Unsafe in order to circumvent sec
 It should be compatible with Java versions 8 and above. When run with Java 9 or newer, it also disables the illegal access logger.<br>
 It reduces the usual verbosity of reflection by providing concise methods for most reflective operations.
 
+reflect requires [unsafe](https://github.com/user11681/unsafe).
+
 This library is hosted on Bintray.
 ```groovy
 repositories {
@@ -9,8 +11,10 @@ repositories {
 }
 
 dependencies {
-    // Use "+" for the latest version
-    // or pick one from https://dl.bintray.com/user11681/maven/user11681/reflect
+    // Use "+" for the latest version or see
+    // https://dl.bintray.com/user11681/maven/net/gudenau/lib/unsafe and
+    // https://dl.bintray.com/user11681/maven/user11681/reflect
+    api("net.gudenau.lib:unsafe:+")
     api("user11681:reflect:+")
 }
 ```
