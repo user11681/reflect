@@ -247,8 +247,4 @@ public class Invoker {
             throw Unsafe.throwException(exception);
         }
     }
-
-    static {
-        Reflect.disableIllegalAccessLogger();
-    }
 }

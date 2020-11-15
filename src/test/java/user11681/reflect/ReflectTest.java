@@ -22,6 +22,14 @@ public class ReflectTest {
 
     public static void main(final String[] arguments) throws Throwable {
         Logger.log(time(ReflectTest::enumTest) / Math.pow(10, 6));
+        staticCast();
+        invokerOverload();
+        allFields();
+        unreflectTest();
+        methodTest();
+        classPointerTest();
+        invokerPerformance();
+        tes();
     }
 
     public static void enumTest() throws Throwable {
@@ -61,6 +69,8 @@ public class ReflectTest {
         Accessor.putLong(longg, "value", 0xFFFFFFFFFFL);
         System.out.println(longg);
         System.out.println(Classes.staticCast(longg, Double.class));
+
+        Classes.staticCast(A.class, (Object) Class.class);
     }
 
     public static void newInvokerUnreflectTest() {

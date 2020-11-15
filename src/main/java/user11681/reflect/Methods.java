@@ -189,8 +189,6 @@ public class Methods {
     }
 
     static {
-        Reflect.disableIllegalAccessLogger();
-
         try {
             MethodHandle tempGetDeclaredMethods = null;
             boolean tempGetDeclaredMethodsHasBoolean = false;

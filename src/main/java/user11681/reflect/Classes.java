@@ -412,8 +412,6 @@ public class Classes {
     }
 
     static {
-        Reflect.disableIllegalAccessLogger();
-
         ConstructorAccessor = load(Reflect.java9 ? "jdk.internal.reflect.ConstructorAccessor" : "sun.reflect.ConstructorAccessor");
         NativeConstructorAccessorImpl = load(Reflect.java9 ? "jdk.internal.reflect.NativeConstructorAccessorImpl" : "sun.reflect.NativeConstructorAccessorImpl");
         Reflection = load(Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
