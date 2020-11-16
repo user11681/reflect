@@ -12,22 +12,51 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import net.gudenau.lib.unsafe.Unsafe;
 import user11681.reflect.experimental.Classes2;
+import user11681.reflect.other.A;
+import user11681.reflect.other.C;
+import user11681.reflect.other.Enumeration;
+import user11681.reflect.util.Logger;
+import user11681.reflect.other.TestObject;
+import user11681.reflect.util.ThrowingRunnable;
 
 public class ReflectTest {
-    private static final int iterations = 20;
+    private static final int iterations = 1;
     private static final int tests = 10;
 
     private static final ReferenceArrayList<Object> dummy = ReferenceArrayList.wrap(new Object[]{0});
     private static int dummyIndex;
 
     public static void main(final String[] arguments) throws Throwable {
-        pointer();
-        enumTest();
-        tes();
-        classPointerTest();
-        allFields();
-        invokerOverload();
-        unreflectTest();
+        fixedArity();
+    }
+
+    public static void fixedArity() throws Throwable {
+        final MethodHandle handle = Invoker.bind(new C(), "print", void.class);
+
+        repeat(handle::invokeExact);
+
+        timeN("normal", handle::invokeExact);
+        timeN("fixed arity", handle.asFixedArity()::invokeExact);
+    }
+
+    public static void invokeExact() throws Throwable {
+        final C c = new C();
+        MethodHandle handle = Invoker.findSpecial(A.class, "print", void.class);
+
+        handle.invoke(c);
+        handle.invokeExact(c);
+
+        handle = handle.bindTo(c);
+
+        handle.invoke();
+        handle.invokeExact();
+    }
+
+    public static void cloneTest() {
+        final A a = new A();
+
+        timeN("clone", a::clone);
+        timeN("copy <init>", () -> new A(a));
     }
 
     public static void pointer() {

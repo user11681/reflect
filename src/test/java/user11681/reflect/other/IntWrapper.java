@@ -1,4 +1,4 @@
-package user11681.reflect;
+package user11681.reflect.other;
 
 public class IntWrapper {
     public final int value;

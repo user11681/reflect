@@ -1,4 +1,4 @@
-package user11681.reflect;
+package user11681.reflect.other;
 
 import java.util.Random;
 
