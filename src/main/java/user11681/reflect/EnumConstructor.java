@@ -86,14 +86,14 @@ public class EnumConstructor<E extends Enum<E>> {
     }
 
     public static <E extends Enum<E>> E add(final Class<E> enumClass, final E enumConstant) {
-        final Pointer enumArrayPointer = getEnumArrayPointer(enumClass);
+        final Pointer enumArrayPointer = getEnumArray(enumClass);
         final Object[] values = enumArrayPointer.get();
         final Object[] newValues = Arrays.copyOf(values, values.length + 1);
         newValues[values.length] = enumConstant;
 
         enumArrayPointer.put(newValues);
-        getEnumConstantPointer(enumClass).put(newValues);
-        getEnumConstantDirectoryPointer(enumClass).put(null);
+        getEnumConstants(enumClass).put(newValues);
+        getEnumConstantDirectory(enumClass).put(null);
 
         return enumConstant;
     }
@@ -153,7 +153,7 @@ public class EnumConstructor<E extends Enum<E>> {
         return arguments;
     }
 
-    public static Pointer getEnumConstantDirectoryPointer(final Class<?> klass) {
+    public static Pointer getEnumConstantDirectory(final Class<?> klass) {
         if (getEnumVars == null) {
             return enumConstantDirectoryPointer.clone().bind(klass);
         }
@@ -165,7 +165,7 @@ public class EnumConstructor<E extends Enum<E>> {
         }
     }
 
-    public static Pointer getEnumConstantPointer(final Class<?> klass) {
+    public static Pointer getEnumConstants(final Class<?> klass) {
         if (getEnumVars == null) {
             return enumConstantPointer.clone().bind(klass);
         }
@@ -177,7 +177,7 @@ public class EnumConstructor<E extends Enum<E>> {
         }
     }
 
-    public static Pointer getEnumArrayPointer(final Class<?> enumClass) {
+    public static Pointer getEnumArray(final Class<?> enumClass) {
         Pointer pointer = arrayFields.get(enumClass);
 
         if (pointer != null) {

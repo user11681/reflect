@@ -73,13 +73,7 @@ public class Fields {
     }
 
     public static Field getRawField(final String klass, final String name) {
-        for (final Field field : getRawFields(Classes.load(klass))) {
-            if (field.getName().equals(name)) {
-                return field;
-            }
-        }
-
-        return NOT_FOUND;
+        return getRawField(Classes.load(klass), name);
     }
 
     public static Field getRawField(final Class<?> klass, final String name) {
