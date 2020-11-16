@@ -2,19 +2,7 @@ package user11681.reflect;
 
 public class Primitives {
     public static boolean equals(final Class<?> klass, final Class<?> other) {
-        if (klass == other) {
-            return true;
-        }
-
-        if (klass == null) {
-            return false;
-        }
-
-        if (getPrimitive(klass) == other) {
-            return true;
-        }
-
-        return getPrimitive(other) == klass;
+        return klass == other || klass != null && (getPrimitive(klass) == other || getPrimitive(other) == klass);
     }
 
     public static boolean isWrapper(final Class<?> klass) {

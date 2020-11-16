@@ -3,6 +3,8 @@ package user11681.reflect;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import net.gudenau.lib.unsafe.Unsafe;
@@ -10,11 +12,43 @@ import net.gudenau.lib.unsafe.Unsafe;
 public class Methods {
     private static final MethodHandle getDeclaredMethods;
 
-    private static final boolean getDeclaredMethodsHasBoolean;
-
     private static final Reference2ReferenceOpenHashMap<Class<?>, Method[]> methodCache = new Reference2ReferenceOpenHashMap<>();
 
     private static final Method NOT_FOUND = null;
+
+    public static boolean argumentsMatchParameters(final Executable executable, final Object... arguments) {
+        return argumentsMatchParameters(true, 0, executable, arguments);
+    }
+
+    public static boolean argumentsMatchParameters(final int offset, final Executable executable, final Object... arguments) {
+        return argumentsMatchParameters(true, offset, executable, arguments);
+    }
+
+    public static boolean argumentsMatchParameters(final boolean unbox, final Executable executable, final Object... arguments) {
+        return argumentsMatchParameters(unbox, 0, executable, arguments);
+    }
+
+    public static boolean argumentsMatchParameters(final boolean unbox, final int offset, final Executable executable, final Object... arguments) {
+        final Class<?>[] types = executable.getParameterTypes();
+
+        if (types.length == arguments.length + 2) {
+            for (int i = 2, length = types.length; i != length; i++) {
+                final Class<?> parameterType = types[i];
+
+                if (unbox) {
+                    if (!Primitives.equals(arguments[i - 2].getClass(), parameterType) && arguments[i - 2].getClass() != parameterType) {
+                        return false;
+                    }
+                } else if (arguments[i - 2].getClass() != parameterType) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 
     public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
         try {
@@ -180,9 +214,7 @@ public class Methods {
 
     public static Method[] getRawMethods(final Class<?> klass) {
         try {
-            return getDeclaredMethodsHasBoolean
-                ? (Method[]) getDeclaredMethods.invokeExact(klass, false)
-                : (Method[]) getDeclaredMethods.invokeExact(klass);
+            return (Method[]) getDeclaredMethods.invokeExact(klass);
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
@@ -191,14 +223,13 @@ public class Methods {
     static {
         try {
             MethodHandle tempGetDeclaredMethods = null;
-            boolean tempGetDeclaredMethodsHasBoolean = false;
 
             for (final Method method : Class.class.getDeclaredMethods()) {
                 if (Modifier.isNative(method.getModifiers()) && method.getReturnType() == Method[].class) {
                     tempGetDeclaredMethods = Unsafe.trustedLookup.unreflect(method);
 
                     if (method.getParameterCount() > 0) {
-                        tempGetDeclaredMethodsHasBoolean = true;
+                        tempGetDeclaredMethods = MethodHandles.insertArguments(tempGetDeclaredMethods, 1, false);
                     }
 
                     break;
@@ -206,7 +237,6 @@ public class Methods {
             }
 
             getDeclaredMethods = tempGetDeclaredMethods;
-            getDeclaredMethodsHasBoolean = tempGetDeclaredMethodsHasBoolean;
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }

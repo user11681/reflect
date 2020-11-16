@@ -80,6 +80,23 @@ public class Invoker {
         }
     }
 
+
+    public static MethodHandle findSpecial(final Class<?> refc, final String name, final Class<?> returnType) {
+        try {
+            return Unsafe.trustedLookup.findSpecial(refc, name, MethodType.methodType(returnType), refc);
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
+    public static MethodHandle findSpecial(final Class<?> refc, final String name, final Class<?> returnType, final Class<?>... parameterTypes) {
+        try {
+            return Unsafe.trustedLookup.findSpecial(refc, name, MethodType.methodType(returnType), refc);
+        } catch (final IllegalAccessException | NoSuchMethodException exception) {
+            throw Unsafe.throwException(exception);
+        }
+    }
+
     public static MethodHandle findSpecial(final Class<?> specialCaller, final Class<?> refc, final String name, final Class<?> returnType) {
         try {
             return Unsafe.trustedLookup.findSpecial(refc, name, MethodType.methodType(returnType), specialCaller);

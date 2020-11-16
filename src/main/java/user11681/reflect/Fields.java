@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -12,14 +13,11 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 
-@SuppressWarnings("ConstantConditions")
 public class Fields {
     public static final long modifiersOffset;
     public static final long overrideOffset;
 
     private static final MethodHandle getDeclaredFields;
-
-    private static final boolean getDeclaredFieldsHasBoolean;
 
     private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Reference2ReferenceOpenHashMap<>();
     private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> staticFieldCache = new Reference2ReferenceOpenHashMap<>();
@@ -190,29 +188,30 @@ public class Fields {
 
     public static Field[] getRawFields(final Class<?> klass) {
         try {
-            return getDeclaredFieldsHasBoolean
-                ? (Field[]) getDeclaredFields.invokeExact(klass, false)
-                : (Field[]) getDeclaredFields.invokeExact(klass);
+            return (Field[]) getDeclaredFields.invokeExact(klass);
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
     static {
-        final Method[] methods = Class.class.getDeclaredMethods();
-        Method found = null;
-
-        for (final Method method : methods) {
-            if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
-                found = method;
-
-                break;
-            }
-        }
-
         try {
-            getDeclaredFields = Unsafe.trustedLookup.unreflectSpecial(found, Class.class);
-            getDeclaredFieldsHasBoolean = found.getParameterCount() > 0;
+            final Method[] methods = Class.class.getDeclaredMethods();
+            MethodHandle tempGetDeclaredFields = null;
+
+            for (final Method method : methods) {
+                if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
+                    tempGetDeclaredFields = Unsafe.trustedLookup.unreflectSpecial(method, Class.class);
+
+                    if (tempGetDeclaredFields.type().parameterCount() > 1) {
+                        tempGetDeclaredFields = MethodHandles.insertArguments(tempGetDeclaredFields, 1, false);
+                    }
+
+                    break;
+                }
+            }
+
+            getDeclaredFields = tempGetDeclaredFields;
 
             long offset = -1;
 

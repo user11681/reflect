@@ -1,7 +1,9 @@
 package user11681.reflect;
 
 public enum Enumeration {;
-    Enumeration(final double test) {
+    private final double test;
 
+    Enumeration(final double test) {
+        this.test = test;
     }
 }

@@ -14,22 +14,30 @@ import net.gudenau.lib.unsafe.Unsafe;
 import user11681.reflect.experimental.Classes2;
 
 public class ReflectTest {
-    private static final int iterations = 1000;
+    private static final int iterations = 20;
     private static final int tests = 10;
 
     private static final ReferenceArrayList<Object> dummy = ReferenceArrayList.wrap(new Object[]{0});
     private static int dummyIndex;
 
     public static void main(final String[] arguments) throws Throwable {
-        Logger.log(time(ReflectTest::enumTest) / Math.pow(10, 6));
-        staticCast();
-        invokerOverload();
-        allFields();
-        unreflectTest();
-        methodTest();
-        classPointerTest();
-        invokerPerformance();
+        pointer();
+        enumTest();
         tes();
+        classPointerTest();
+        allFields();
+        invokerOverload();
+        unreflectTest();
+    }
+
+    public static void pointer() {
+        final Enumeration enumeration = EnumConstructor.add(Enumeration.class, 0, "DDD", 4026D);
+        final Pointer pointer = new Pointer().bind(enumeration).instanceField("test");
+
+        repeat(() -> {
+            pointer.putDouble(pointer.getDouble() + 4);
+            System.out.println(pointer.getDouble());
+        });
     }
 
     public static void enumTest() throws Throwable {
@@ -199,13 +207,10 @@ public class ReflectTest {
     }
 
     public static void reflectFieldTime() {
-        final ThrowingRunnable test = () -> Fields.getField(TestObject.class, "integer");
+        repeat(() -> Fields.getRawFields(TestObject.class));
 
-        time(test);
-        time(test);
-        time(test);
-        time(test);
-        time(test);
+        time("cached", () -> repeat(() -> Fields.getFields(TestObject.class)));
+        time("raw", () -> repeat(() -> Fields.getRawFields(TestObject.class)));
     }
 
     public static void testCopy() {
