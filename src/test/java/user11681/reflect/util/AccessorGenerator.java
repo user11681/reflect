@@ -1,49 +1,62 @@
 package user11681.reflect.util;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
 
 @Testable
 class AccessorGenerator {
     static final String[] fieldDiscriminators = {"String", "Field", "long"};
-    static final Object2ObjectLinkedOpenHashMap<String, String> discriminatorNames = new Object2ObjectLinkedOpenHashMap<>(new String[]{
+    static final Map<String, String> discriminatorNames = wrap(new String[]{
         "String", "Field", "long"
     }, new String[]{
         "field", "field", "offset"
     });
-    static final Object2ObjectLinkedOpenHashMap<String, String> ownerTypes = new Object2ObjectLinkedOpenHashMap<>(new String[]{
+    static final Map<String, String> ownerTypes = wrap(new String[]{
         "Object", "Class<?>"
     }, new String[]{
         "Unsafe.objectFieldOffset", "Unsafe.staticFieldOffset"
     });
     static final String[] suffixes = {"", "Volatile"};
-    static final Object2ObjectLinkedOpenHashMap<String, String> accessTypes = new Object2ObjectLinkedOpenHashMap<>(new String[]{
+    static final Map<String, String> accessTypes = wrap(new String[]{
         "get", "put"
     }, new String[]{
         "return ", ""
     });
-    static final Object2ObjectLinkedOpenHashMap<String, String> types = new Object2ObjectLinkedOpenHashMap<>(new String[]{
-        "int",
-        "Object",
-        "boolean",
-        "byte",
-        "short",
-        "char",
-        "long",
-        "float",
-        "double"
-    }, new String[]{
-        "int",
-        "<T> T",
-        "boolean",
-        "byte",
-        "short",
-        "char",
-        "long",
-        "float",
-        "double"
-    });
+    static final Map<String, String> types = wrap(
+        new String[]{
+            "int",
+            "Object",
+            "boolean",
+            "byte",
+            "short",
+            "char",
+            "long",
+            "float",
+            "double"
+        }, new String[]{
+            "int",
+            "<T> T",
+            "boolean",
+            "byte",
+            "short",
+            "char",
+            "long",
+            "float",
+            "double"
+        }
+    );
+
+    static <K, V> HashMap<K, V> wrap(final K[] keys, final V[] values) {
+        final HashMap<K, V> map = new HashMap<>();
+
+        for (int i = 0; i < keys.length; i++) {
+            map.put(keys[i], values[i]);
+        }
+
+        return map;
+    }
 
     @Test
     void specifiedClassObject() {

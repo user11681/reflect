@@ -1,16 +1,14 @@
 plugins {
-    id("java")
     id("java-library")
-    id("maven")
     id("maven-publish")
-    id("com.jfrog.bintray") version("1.8.5")
+    id("com.jfrog.bintray").version("1.8.5")
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 project.group = "user11681"
-project.version = "0.15.0"
+project.version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -20,7 +18,6 @@ repositories {
 
 dependencies {
     api("net.gudenau.lib:unsafe:+")
-    api("it.unimi.dsi:fastutil:+")
 
     testImplementation("org.junit.jupiter:junit-jupiter:+")
     testImplementation("org.apache.logging.log4j:log4j-core:+")

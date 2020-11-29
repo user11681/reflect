@@ -1,6 +1,5 @@
 package user11681.reflect;
 
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.io.File;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.invoke.MethodHandle;
@@ -10,24 +9,49 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import net.gudenau.lib.unsafe.Unsafe;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.annotation.Testable;
 import user11681.reflect.experimental.Classes2;
+import user11681.reflect.experimental.Lists;
 import user11681.reflect.other.A;
 import user11681.reflect.other.C;
 import user11681.reflect.other.Enumeration;
-import user11681.reflect.util.Logger;
 import user11681.reflect.other.TestObject;
+import user11681.reflect.util.Logger;
 import user11681.reflect.util.ThrowingRunnable;
 
+@Testable
 public class ReflectTest {
-    private static final int iterations = 1;
+    private static final int iterations = 56;
     private static final int tests = 10;
 
-    private static final ReferenceArrayList<Object> dummy = ReferenceArrayList.wrap(new Object[]{0});
+    private static final ArrayList<Object> dummy = Lists.wrap(new Object[]{0});
     private static int dummyIndex;
 
-    public static void main(final String[] arguments) throws Throwable {
+    @Test
+    public void test() throws Throwable {
         fixedArity();
+    }
+
+    @Test
+    public void lists() {
+        final Integer[] array = new Integer[100];
+        Arrays.fill(array, 0, array.length, 29);
+
+        timeN("ArrayList constructor", () -> new ArrayList<>(Arrays.asList(array)));
+        timeN("Unsafe", () -> Lists.wrap(new ArrayList<>(), array, 100));
+
+        timeN("ArrayList addAll", () -> new ArrayList<>().addAll(Arrays.asList(array)));
+        timeN("Unsafe", () -> Lists.addAll(new ArrayList<>(), array));
+    }
+
+    @Test
+    public void instantiation() {
+        timeN("constructor", () -> new ArrayList<>());
+        timeN("Unsafe", () -> Unsafe.allocateInstance(ArrayList.class));
     }
 
     public static void fixedArity() throws Throwable {
@@ -280,7 +304,7 @@ public class ReflectTest {
         logFields(one);
     }
 
-    public static void test() throws Throwable {
+    public static void classPath() throws Throwable {
         final Object classPath = Classes.getClassPath(ReflectTest.class.getClassLoader());
         final File file = new File("test");
 
@@ -393,7 +417,10 @@ public class ReflectTest {
             "user11681.reflect.Invoker",
             "user11681.reflect.Fields",
             "user11681.reflect.Accessor",
-            "user11681.reflect.Methods"
+            "user11681.reflect.Methods",
+            "user11681.reflect.Lists",
+            "user11681.reflect.EnumConstructor",
+            "user11681.reflect.Pointer"
         );
     }
 }

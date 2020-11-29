@@ -1,18 +1,18 @@
 package user11681.reflect;
 
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Methods {
     private static final MethodHandle getDeclaredMethods;
 
-    private static final Reference2ReferenceOpenHashMap<Class<?>, Method[]> methodCache = new Reference2ReferenceOpenHashMap<>();
+    private static final HashMap<Class<?>, Method[]> methodCache = new HashMap<>();
 
     private static final Method NOT_FOUND = null;
 
@@ -36,7 +36,7 @@ public class Methods {
                 final Class<?> parameterType = types[i];
 
                 if (unbox) {
-                    if (!Primitives.equals(arguments[i - 2].getClass(), parameterType) && arguments[i - 2].getClass() != parameterType) {
+                    if (!Types.equals(arguments[i - 2].getClass(), parameterType) && arguments[i - 2].getClass() != parameterType) {
                         return false;
                     }
                 } else if (arguments[i - 2].getClass() != parameterType) {
@@ -201,12 +201,11 @@ public class Methods {
 
         if (methods == null) {
             methods = getRawMethods(klass);
+            methodCache.put(klass, methods);
 
             for (final Method method : methods) {
                 Unsafe.putBoolean(method, Fields.overrideOffset, true);
             }
-
-            methodCache.put(klass, methods);
         }
 
         return methods;

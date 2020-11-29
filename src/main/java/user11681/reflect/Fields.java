@@ -1,16 +1,15 @@
 package user11681.reflect;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Fields {
@@ -19,10 +18,10 @@ public class Fields {
 
     private static final MethodHandle getDeclaredFields;
 
-    private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> fieldCache = new Reference2ReferenceOpenHashMap<>();
-    private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> staticFieldCache = new Reference2ReferenceOpenHashMap<>();
-    private static final Reference2ReferenceOpenHashMap<Class<?>, Field[]> instanceFieldCache = new Reference2ReferenceOpenHashMap<>();
-    private static final Object2ReferenceOpenHashMap<String, Field> nameToField = new Object2ReferenceOpenHashMap<>();
+    private static final HashMap<Class<?>, Field[]> fieldCache = new HashMap<>();
+    private static final HashMap<Class<?>, Field[]> staticFieldCache = new HashMap<>();
+    private static final HashMap<Class<?>, Field[]> instanceFieldCache = new HashMap<>();
+    private static final HashMap<String, Field> nameToField = new HashMap<>();
 
     private static final Field NOT_FOUND = null;
 
@@ -95,7 +94,7 @@ public class Fields {
 
         fields = getFields(klass);
 
-        final IntArrayList instanceIndexes = new IntArrayList();
+        final List<Integer> instanceIndexes = new ArrayList<>();
 
         for (int i = 0, length = fields.length; i < length; i++) {
             if ((fields[i].getModifiers() & Modifier.STATIC) == 0) {
@@ -107,10 +106,8 @@ public class Fields {
         final Field[] instanceFields = new Field[instanceFieldCount];
         int size = 0;
 
-        final int[] indexArray = instanceIndexes.elements();
-
         for (int i = 0; i < instanceFieldCount; i++) {
-            instanceFields[size++] = fields[indexArray[i]];
+            instanceFields[size++] = fields[instanceIndexes.get(i)];
         }
 
         instanceFieldCache.put(klass, instanceFields);
@@ -127,7 +124,7 @@ public class Fields {
 
         fields = getFields(klass);
 
-        final IntArrayList staticIndexes = new IntArrayList();
+        final List<Integer> staticIndexes = new ArrayList<>();
 
         for (int i = 0, length = fields.length; i < length; i++) {
             if ((fields[i].getModifiers() & Modifier.STATIC) != 0) {
@@ -139,10 +136,8 @@ public class Fields {
         final Field[] staticFields = new Field[staticFieldCount];
         int size = 0;
 
-        final int[] indexArray = staticIndexes.elements();
-
         for (int i = 0; i < staticFieldCount; i++) {
-            staticFields[size++] = fields[indexArray[i]];
+            staticFields[size++] = fields[staticIndexes.get(i)];
         }
 
         staticFieldCache.put(klass, staticFields);
@@ -150,13 +145,13 @@ public class Fields {
         return staticFields;
     }
 
-    public static ReferenceArrayList<Field> getAllFields(Class<?> klass) {
-        final ReferenceArrayList<Field> fields = ReferenceArrayList.wrap(getFields(klass));
+    public static ArrayList<Field> getAllFields(Class<?> klass) {
+        final ArrayList<Field> fields = new ArrayList<>(Arrays.asList(getFields(klass)));
 
         klass = klass.getSuperclass();
 
         while (klass != null) {
-            fields.addElements(fields.size(), getFields(klass));
+            fields.addAll(new ArrayList<>(Arrays.asList(getFields(klass))));
 
             klass = klass.getSuperclass();
         }
@@ -169,7 +164,6 @@ public class Fields {
 
         if (fields == null) {
             fields = getRawFields(klass);
-
             fieldCache.put(klass, fields);
 
             for (final Field field : fields) {
@@ -231,14 +225,6 @@ public class Fields {
 
             Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "fieldFilterMap")), new HashMap<>());
             Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "methodFilterMap")), new HashMap<>());
-
-            final Field security = getRawField(System.class, "security");
-
-            if (Modifier.isVolatile(security.getModifiers())) {
-                Unsafe.putObject(security.getDeclaringClass(), Unsafe.staticFieldOffset(security), null);
-            } else {
-                Unsafe.putObjectVolatile(security.getDeclaringClass(), Unsafe.staticFieldOffset(security), null);
-            }
         } catch (final Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }

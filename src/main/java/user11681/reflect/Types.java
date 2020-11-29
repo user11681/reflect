@@ -1,6 +1,6 @@
 package user11681.reflect;
 
-public class Primitives {
+public class Types {
     public static boolean equals(final Class<?> klass, final Class<?> other) {
         return klass == other || klass != null && (getPrimitive(klass) == other || getPrimitive(other) == klass);
     }

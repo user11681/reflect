@@ -1,20 +1,20 @@
 package user11681.reflect;
 
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.HashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class EnumConstructor<E extends Enum<E>> {
-    private static final int ENUM_ARRAY = Modifier.PRIVATE | Modifier.STATIC | 0x1000 | Modifier.FINAL;
+    private static final int ENUM_ARRAY = Modifier.PRIVATE | Modifier.STATIC | 1 << 12 /*synthetic*/ | Modifier.FINAL;
 
     private static final Object NOT_FOUND = null;
 
-    private static final Reference2ReferenceOpenHashMap<Class<?>, Pointer> arrayFields = new Reference2ReferenceOpenHashMap<>();
-    private static final Reference2ReferenceOpenHashMap<Class<?>, EnumConstructor<?>> constructors = new Reference2ReferenceOpenHashMap<>();
+    private static final HashMap<Class<?>, Pointer> arrayFields = new HashMap<>();
+    private static final HashMap<Class<?>, EnumConstructor<?>> constructors = new HashMap<>();
 
     private static final MethodHandle getEnumVars;
     private static final MethodHandle acquireConstructorAccessor = Invoker.unreflect(Constructor.class, "acquireConstructorAccessor");
