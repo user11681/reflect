@@ -89,7 +89,7 @@ public class Classes {
      * @param <T>  a convenience type parameter for casting.
      * @return <a color = "#DDDDDD">{@code to}</a>.
      */
-    public static <T> T staticCast(final Object object, final int classPointer) {
+    public static <T> T staticCast(final Object object, final long classPointer) {
         if (longClassPointer) {
             Unsafe.putLong(object, classOffset, classPointer);
         } else {
