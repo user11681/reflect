@@ -4,11 +4,11 @@ plugins {
     id("com.jfrog.bintray").version("1.8.5")
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = 8
+targetCompatibility = 8
 
 project.group = "user11681"
-project.version = "1.0.0"
+project.version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -17,10 +17,30 @@ repositories {
 }
 
 dependencies {
-    api("net.gudenau.lib:unsafe:+")
+    api("net.gudenau.lib:unsafe:1.4.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:+")
-    testImplementation("org.apache.logging.log4j:log4j-core:+")
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        bintray(MavenPublication) {
+            groupId = project.group
+            artifactId = project.name
+            version = project.version
+
+            artifact(jar)
+            artifact(sourcesJar)
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
 }
 
 bintray {
@@ -30,8 +50,8 @@ bintray {
     publish = true
 
     pkg {
-        name = project.name
         repo = "maven"
+        name = project.name
         licenses = ["LGPL-3.0"]
         vcsUrl = "https://github.com/user11681/reflect"
 
@@ -41,32 +61,5 @@ bintray {
             githubRepo = "user11681/reflect"
             issueTrackerUrl = "https://github.com/user11681/reflect/issues"
         }
-    }
-}
-
-task sourceJar(type: Jar, dependsOn: classes) {
-    archiveClassifier.set("sources")
-
-    from(sourceSets.main.allSource)
-}
-
-artifacts {
-    archives(sourceJar)
-}
-
-publishing {
-    publications {
-        bintray(MavenPublication) {
-            groupId(project.group)
-            artifactId(project.name)
-            version(project.version)
-
-            artifact(jar)
-            artifact(sourceJar)
-        }
-    }
-
-    repositories {
-        mavenLocal()
     }
 }

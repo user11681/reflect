@@ -60,7 +60,7 @@ public class Classes {
      * @return <a color = "#DDDDDD">{@code object}</a>.
      */
     public static <T> T staticCast(final Object object, final Class<T> klass) {
-        return copyClass(object, Unsafe.allocateInstance(klass));
+        return staticCast(object, Unsafe.allocateInstance(klass));
     }
 
     /**
@@ -82,51 +82,21 @@ public class Classes {
     }
 
     /**
-     * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass().getName() == klass}.
+     * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code from}</a>.
      *
-     * @param object the object whose class pointer to change.
-     * @param klass  the name of class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
-     * @param <T>    the desired new type.
-     * @return <a color = "#DDDDDD">{@code object}</a>.
-     * @deprecated use {@link #staticCast(Object, String)}
-     */
-    @Deprecated
-    public static <T> T setClass(final Object object, final String klass) {
-        return setClass(object, load(Reflect.defaultClassLoader, false, klass));
-    }
-
-    /**
-     * Change the class of <a color = "#DDDDDD">{@code object}</a> to <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass() == klass}.
-     *
-     * @param object the object whose class pointer to change.
-     * @param klass  the class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
-     * @param <T>    the desired new type.
-     * @return <a color = "#DDDDDD">{@code object}</a>.
-     * @deprecated use {@link #staticCast(Object, Class)}
-     */
-    @Deprecated
-    public static <T> T setClass(final Object object, final Class<T> klass) {
-        return copyClass(object, Unsafe.allocateInstance(klass));
-    }
-
-    /**
-     * Change the class of <a color = "#DDDDDD">{@code to}</a> to that of <a color = "#DDDDDD">{@code from}</a> such that {@code to.getClass() == from.getClass()}.
-     *
-     * @param to   the object whose class pointer to change.
-     * @param from the object from which to get the class pointer.
-     * @param <T>  the desired new type.
+     * @param object   the object whose class pointer to change.
+     * @param classPointer the class pointer.
+     * @param <T>  a convenience type parameter for casting.
      * @return <a color = "#DDDDDD">{@code to}</a>.
-     * @deprecated use {@link #staticCast(Object, T)}
      */
-    @Deprecated
-    public static <T> T copyClass(final Object to, final T from) {
+    public static <T> T staticCast(final Object object, final int classPointer) {
         if (longClassPointer) {
-            Accessor.copyLong(to, from, classOffset);
+            Unsafe.putLong(object, classOffset, classPointer);
         } else {
-            Accessor.copyInt(to, from, classOffset);
+            Unsafe.putLong(object, classOffset, classPointer);
         }
 
-        return (T) to;
+        return (T) object;
     }
 
     public static long getClassPointer(final Class<?> klass) {
