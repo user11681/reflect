@@ -196,19 +196,19 @@ public class ReflectTest {
         Object object = Unsafe.allocateInstance(Object.class);
 
         System.out.println(object);
-        Classes.setClass(object, ReflectTest.class);
+        Classes.staticCast(object, ReflectTest.class);
         System.out.println(object);
 
         object = Unsafe.allocateInstance(ReflectTest.class);
 
         System.out.println(object);
-        Classes.setClass(object, ReflectTest.class);
+        Classes.staticCast(object, ReflectTest.class);
         System.out.println(object);
 
         object = Unsafe.allocateInstance(Object.class);
 
         System.out.println(object);
-        Classes.copyClass(object, new ReflectTest());
+        Classes.staticCast(object, new ReflectTest());
         System.out.println(object);
     }
 
