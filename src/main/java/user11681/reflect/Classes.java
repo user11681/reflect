@@ -93,7 +93,7 @@ public class Classes {
         if (longClassPointer) {
             Unsafe.putLong(object, classOffset, classPointer);
         } else {
-            Unsafe.putLong(object, classOffset, classPointer);
+            Unsafe.putInt(object, classOffset, (int) classPointer);
         }
 
         return (T) object;
