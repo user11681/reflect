@@ -11,6 +11,9 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
@@ -28,8 +31,25 @@ public class ReflectTest {
     private static final int iterations = 56;
     private static final int tests = 10;
 
-    private static final ArrayList<Object> dummy = Lists.wrap(new Object[]{0});
+    private static final List<Object> dummy = Lists.wrap(new Object[]{0});
     private static int dummyIndex;
+
+    @Test
+    public void constantPool() throws Throwable {
+        Function<Integer, Integer> lambda = i -> i;
+        ConstantPool pool = new ConstantPool(lambda.getClass());
+        int size = pool.getSize();
+
+        Logger.log(size);
+
+        for (int i = 0; i < size; i++) {
+            Object method = pool.getMethodAt(i);
+
+            if (method != null) {
+                Logger.log(method);
+            }
+        }
+    }
 
     @Test
     public void test() throws Throwable {
@@ -418,7 +438,6 @@ public class ReflectTest {
             "user11681.reflect.Fields",
             "user11681.reflect.Accessor",
             "user11681.reflect.Methods",
-            "user11681.reflect.Lists",
             "user11681.reflect.EnumConstructor",
             "user11681.reflect.Pointer"
         );

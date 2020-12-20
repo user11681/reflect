@@ -11,14 +11,18 @@ import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
+
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Classes {
     public static final SecureClassLoader systemClassLoader = (SecureClassLoader) ClassLoader.getSystemClassLoader();
 
+    public static final Class<?> ConstantPool;
     public static final Class<?> ConstructorAccessor;
+    public static final Class<?> JavaLangAccess;
     public static final Class<?> NativeConstructorAccessorImpl;
     public static final Class<?> Reflection;
+    public static final Class<?> SharedSecrets;
     public static final Class<?> URLClassPath;
 
     public static final Object systemClassPath;
@@ -84,9 +88,9 @@ public class Classes {
     /**
      * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code from}</a>.
      *
-     * @param object   the object whose class pointer to change.
+     * @param object       the object whose class pointer to change.
      * @param classPointer the class pointer.
-     * @param <T>  a convenience type parameter for casting.
+     * @param <T>          a convenience type parameter for casting.
      * @return <a color = "#DDDDDD">{@code to}</a>.
      */
     public static <T> T staticCast(final Object object, final long classPointer) {
@@ -382,10 +386,23 @@ public class Classes {
     }
 
     static {
-        ConstructorAccessor = load(Reflect.java9 ? "jdk.internal.reflect.ConstructorAccessor" : "sun.reflect.ConstructorAccessor");
-        NativeConstructorAccessorImpl = load(Reflect.java9 ? "jdk.internal.reflect.NativeConstructorAccessorImpl" : "sun.reflect.NativeConstructorAccessorImpl");
-        Reflection = load(Reflect.java9 ? "jdk.internal.reflect.Reflection" : "sun.reflect.Reflection");
-        URLClassPath = load(Reflect.java9 ? "jdk.internal.loader.URLClassPath" : "sun.misc.URLClassPath");
+        if (Reflect.java9) {
+            ConstantPool = load("jdk.internal.reflect.ConstantPool");
+            ConstructorAccessor = load("jdk.internal.reflect.ConstructorAccessor");
+            JavaLangAccess = load("jdk.internal.access.JavaLangAccess");
+            NativeConstructorAccessorImpl = load("jdk.internal.reflect.NativeConstructorAccessorImpl");
+            Reflection = load("jdk.internal.reflect.Reflection");
+            SharedSecrets = load("jdk.internal.access.SharedSecrets");
+            URLClassPath = load("jdk.internal.loader.URLClassPath");
+        } else {
+            ConstantPool = load("sun.reflect.ConstantPool");
+            ConstructorAccessor = load("sun.reflect.ConstructorAccessor");
+            JavaLangAccess = load("sun.misc.JavaLangAccess");
+            NativeConstructorAccessorImpl = load("sun.reflect.NativeConstructorAccessorImpl");
+            Reflection = load("sun.reflect.Reflection");
+            SharedSecrets = load("sun.misc.SharedSecrets");
+            URLClassPath = load("sun.misc.URLClassPath");
+        }
 
         try {
             findLoadedClass = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
