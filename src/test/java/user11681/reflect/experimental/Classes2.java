@@ -1,7 +1,6 @@
 package user11681.reflect.experimental;
 
 import net.gudenau.lib.unsafe.Unsafe;
-import user11681.reflect.Accessor;
 import user11681.reflect.Classes;
 
 public class Classes2 extends Classes {
@@ -27,9 +26,9 @@ public class Classes2 extends Classes {
 
     public static <T> T addClass(final Object to, final Object from) {
         if (longClassPointer) {
-            Unsafe.putAddress(Accessor.addressOf(Unsafe.getLong(to, classOffset)) + 36, Accessor.addressOf(Unsafe.getLong(from, classOffset)));
+            Unsafe.putAddress(Unsafe.getLong(to, classOffset) + 36, Unsafe.getLong(from, classOffset));
         } else {
-            Unsafe.putAddress(Accessor.addressOf(Unsafe.getInt(to, classOffset)) + 36, Accessor.addressOf(Unsafe.getInt(from, classOffset)));
+            Unsafe.putAddress(Integer.toUnsignedLong(Unsafe.getInt(to, classOffset)) + 36, Integer.toUnsignedLong(Unsafe.getInt(from, classOffset)));
         }
 
         return (T) to;

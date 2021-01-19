@@ -1,4 +1,4 @@
-package user11681.reflect;
+package user11681.reflect.generator;
 
 import java.io.FileOutputStream;
 import java.lang.reflect.Method;

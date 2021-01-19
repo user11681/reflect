@@ -17,11 +17,12 @@ repositories {
 }
 
 dependencies {
-    api("net.gudenau.lib:unsafe:1.4.0")
+    api("net.gudenau.lib:unsafe:latest.release")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:+")
+    testImplementation("org.junit.jupiter:junit-jupiter:latest.release")
     testImplementation("org.ow2.asm:asm:9.0")
     testImplementation("org.ow2.asm:asm-tree:9.0")
+    testImplementation("org.openjdk.jol:jol-core:latest.release")
 }
 
 java {
@@ -35,8 +36,7 @@ publishing {
             artifactId = project.name
             version = project.version
 
-            artifact(jar)
-            artifact(sourcesJar)
+            from(components.java)
         }
     }
 
