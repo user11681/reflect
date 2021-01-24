@@ -5,7 +5,7 @@ import java.security.ProtectionDomain;
 
 public class ReflectTransformer implements ClassFileTransformer {
     @Override
-    public byte[] transform(final ClassLoader loader, final String className, final Class<?> classBeingRedefined, final ProtectionDomain protectionDomain, final byte[] classfileBuffer) {
+    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         return classfileBuffer;
     }
 }

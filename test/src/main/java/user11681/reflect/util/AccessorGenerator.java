@@ -48,7 +48,7 @@ class AccessorGenerator {
         }
     );
 
-    static <K, V> HashMap<K, V> wrap(final K[] keys, final V[] values) {
+    static <K, V> HashMap<K, V> wrap(K[] keys, V[] values) {
         final HashMap<K, V> map = new HashMap<>();
 
         for (int i = 0; i < keys.length; i++) {
@@ -60,29 +60,29 @@ class AccessorGenerator {
 
     @Test
     void specifiedClassObject() {
-        for (final String suffix : suffixes) {
-            for (final String type : types.keySet()) {
-                for (final String accessType : accessTypes.keySet()) {
+        for (String suffix : suffixes) {
+            for (String type : types.keySet()) {
+                for (String accessType : accessTypes.keySet()) {
                     final String[] lines;
                     final String methodName = accessType + capitalize(type) + suffix;
 
                     if (accessType.equals("get")) {
                         lines = new String[]{
                             "",
-                            String.format("public static %s %s(final Object object, final Class<?> klass, final String field) {", types.get(type), methodName),
+                            String.format("public static %s %s(Object object, Class<?> klass, String field) {", types.get(type), methodName),
                             String.format("    %sUnsafe.%s(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));", accessTypes.get(accessType) + (type.equals("Object") ? "(T) " : ""), methodName),
                             "}"
                         };
                     } else {
                         lines = new String[]{
                             "",
-                            String.format("public static void %s(final Object object, final Class<?> klass, final String field, final %s value) {", methodName, type),
+                            String.format("public static void %s(Object object, Class<?> klass, String field, %s value) {", methodName, type),
                             String.format("    Unsafe.%s(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);", methodName),
                             "}"
                         };
                     }
 
-                    for (final String line : lines) {
+                    for (String line : lines) {
                         Logger.log(line);
                     }
                 }
@@ -92,8 +92,8 @@ class AccessorGenerator {
 
     @Test
     void copy() {
-        for (final String suffix : suffixes) {
-            for (final String type : types.keySet()) {
+        for (String suffix : suffixes) {
+            for (String type : types.keySet()) {
                 for (String ownerType : ownerTypes.keySet()) {
                     final String genericType;
                     final String parameterType;
@@ -106,7 +106,7 @@ class AccessorGenerator {
                         genericType = "";
                     }
 
-                    for (final String discriminator : fieldDiscriminators) {
+                    for (String discriminator : fieldDiscriminators) {
                         final String methodName = type.toUpperCase().charAt(0) + type.substring(1) + suffix;
                         final String offset;
 
@@ -123,7 +123,7 @@ class AccessorGenerator {
 
                         String[] lines = {
                             "",
-                            String.format("public static %svoid copy%s(final %3$s to, final %s from, final %s %s) {", genericType, methodName, parameterType, discriminator, discriminatorNames.get(discriminator)),
+                            String.format("public static %svoid copy%s(%3$s to, %s from, %s %s) {", genericType, methodName, parameterType, discriminator, discriminatorNames.get(discriminator)),
                             String.format("    Unsafe.put%s(to, offset, Unsafe.get%s(from, offset));", methodName, methodName),
                             "}"
                         };
@@ -139,7 +139,7 @@ class AccessorGenerator {
                             };
                         }
 
-                        for (final String line : lines) {
+                        for (String line : lines) {
                             Logger.log(line);
                         }
                     }
@@ -150,22 +150,22 @@ class AccessorGenerator {
 
     @Test
     void objectString() {
-        for (final String suffix : suffixes) {
-            for (final String type : types.keySet()) {
+        for (String suffix : suffixes) {
+            for (String type : types.keySet()) {
                 final boolean object = type.equals("Object");
 
-                for (final String accessType : accessTypes.keySet()) {
+                for (String accessType : accessTypes.keySet()) {
                     final boolean put = accessType.equals("put");
                     final String methodName = accessType + type.toUpperCase().charAt(0) + type.substring(1) + suffix;
 
                     final String[] lines = {
                         "",
-                        String.format("public static %s %s(final Object object, final String field" + (put ? ", " + type + " value" : "") + ") {", put ? "void" : object ? "<T> T" : type, methodName),
+                        String.format("public static %s %s(Object object, String field" + (put ? ", " + type + " value" : "") + ") {", put ? "void" : object ? "<T> T" : type, methodName),
                         String.format("    " + (put ? "" : "return " + (object ? "(T) " : "")) + "Unsafe.%s(object, Unsafe.objectFieldOffset(Fields.getField(object, field))" + (put ? ", value" : "") + ");", methodName),
                         "}"
                     };
 
-                    for (final String line : lines) {
+                    for (String line : lines) {
                         Logger.log(line);
                     }
                 }
@@ -173,7 +173,7 @@ class AccessorGenerator {
         }
     }
 
-    static String capitalize(final String string) {
+    static String capitalize(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 }

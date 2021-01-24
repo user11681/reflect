@@ -11,54 +11,54 @@ public class Pointer implements Cloneable {
     public Pointer clone() {
         try {
             return (Pointer) super.clone();
-        } catch (final CloneNotSupportedException exception) {
+        } catch (CloneNotSupportedException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public Pointer bind(final Object object) {
+    public Pointer bind(Object object) {
         this.object = object;
 
         return this;
     }
 
-    public Pointer offset(final long offset) {
+    public Pointer offset(long offset) {
         this.offset = offset;
 
         return this;
     }
 
-    public Pointer staticField(final Class<?> klass, final String name) {
+    public Pointer staticField(Class<?> klass, String name) {
         this.offset = Unsafe.staticFieldOffset(Fields.getField(klass, name));
 
         return this;
     }
 
-    public Pointer staticField(final String name) {
+    public Pointer staticField(String name) {
         this.offset = Unsafe.staticFieldOffset(Fields.getField((Class<?>) this.object, name));
 
         return this;
     }
 
-    public Pointer staticField(final Field field) {
+    public Pointer staticField(Field field) {
         this.offset = Unsafe.staticFieldOffset(field);
 
         return this;
     }
 
-    public Pointer instanceField(final Class<?> klass, final String name) {
+    public Pointer instanceField(Class<?> klass, String name) {
         this.offset = Unsafe.objectFieldOffset(Fields.getField(klass, name));
 
         return this;
     }
 
-    public Pointer instanceField(final String name) {
+    public Pointer instanceField(String name) {
         this.offset = Unsafe.objectFieldOffset(Fields.getField(this.object, name));
 
         return this;
     }
 
-    public Pointer instanceField(final Field field) {
+    public Pointer instanceField(Field field) {
         this.offset = Unsafe.objectFieldOffset(field);
 
         return this;
@@ -68,15 +68,15 @@ public class Pointer implements Cloneable {
         return (T) Unsafe.getObject(this.object, this.offset);
     }
 
-    public <T> T get(final Object object) {
+    public <T> T get(Object object) {
         return (T) Unsafe.getObject(object, this.offset);
     }
 
-    public void put(final Object object, final Object value) {
+    public void put(Object object, Object value) {
         Unsafe.putObject(object, this.offset, value);
     }
 
-    public void put(final Object value) {
+    public void put(Object value) {
         Unsafe.putObject(this.object, this.offset, value);
     }
 
@@ -84,15 +84,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getBoolean(this.object, this.offset);
     }
 
-    public boolean getBoolean(final Object object) {
+    public boolean getBoolean(Object object) {
         return Unsafe.getBoolean(object, this.offset);
     }
 
-    public void putBoolean(final Object object, final boolean value) {
+    public void putBoolean(Object object, boolean value) {
         Unsafe.putBoolean(object, this.offset, value);
     }
 
-    public void putBoolean(final boolean value) {
+    public void putBoolean(boolean value) {
         Unsafe.putBoolean(this.object, this.offset, value);
     }
 
@@ -100,15 +100,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getByte(this.object, this.offset);
     }
 
-    public byte getByte(final Object object) {
+    public byte getByte(Object object) {
         return Unsafe.getByte(object, this.offset);
     }
 
-    public void putByte(final Object object, final byte value) {
+    public void putByte(Object object, byte value) {
         Unsafe.putByte(object, this.offset, value);
     }
 
-    public void putByte(final byte value) {
+    public void putByte(byte value) {
         Unsafe.putByte(this.object, this.offset, value);
     }
 
@@ -116,15 +116,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getShort(this.object, this.offset);
     }
 
-    public short getShort(final Object object) {
+    public short getShort(Object object) {
         return Unsafe.getShort(object, this.offset);
     }
 
-    public void putShort(final Object object, final short value) {
+    public void putShort(Object object, short value) {
         Unsafe.putShort(object, this.offset, value);
     }
 
-    public void putShort(final short value) {
+    public void putShort(short value) {
         Unsafe.putShort(this.object, this.offset, value);
     }
 
@@ -132,15 +132,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getChar(this.object, this.offset);
     }
 
-    public char getChar(final Object object) {
+    public char getChar(Object object) {
         return Unsafe.getChar(object, this.offset);
     }
 
-    public void putChar(final Object object, final char value) {
+    public void putChar(Object object, char value) {
         Unsafe.putChar(object, this.offset, value);
     }
 
-    public void putChar(final char value) {
+    public void putChar(char value) {
         Unsafe.putChar(this.object, this.offset, value);
     }
 
@@ -148,15 +148,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getInt(this.object, this.offset);
     }
 
-    public int getInt(final Object object) {
+    public int getInt(Object object) {
         return Unsafe.getInt(object, this.offset);
     }
 
-    public void putInt(final Object object, final int value) {
+    public void putInt(Object object, int value) {
         Unsafe.putInt(object, this.offset, value);
     }
 
-    public void putInt(final int value) {
+    public void putInt(int value) {
         Unsafe.putInt(this.object, this.offset, value);
     }
 
@@ -164,15 +164,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getLong(this.object, this.offset);
     }
 
-    public long getLong(final Object object) {
+    public long getLong(Object object) {
         return Unsafe.getLong(object, this.offset);
     }
 
-    public void putLong(final Object object, final long value) {
+    public void putLong(Object object, long value) {
         Unsafe.putLong(object, this.offset, value);
     }
 
-    public void putLong(final long value) {
+    public void putLong(long value) {
         Unsafe.putLong(this.object, this.offset, value);
     }
 
@@ -180,15 +180,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getFloat(this.object, this.offset);
     }
 
-    public float getFloat(final Object object) {
+    public float getFloat(Object object) {
         return Unsafe.getFloat(object, this.offset);
     }
 
-    public void putFloat(final Object object, final float value) {
+    public void putFloat(Object object, float value) {
         Unsafe.putFloat(object, this.offset, value);
     }
 
-    public void putFloat(final float value) {
+    public void putFloat(float value) {
         Unsafe.putFloat(this.object, this.offset, value);
     }
 
@@ -196,15 +196,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getDouble(this.object, this.offset);
     }
 
-    public double getDouble(final Object object) {
+    public double getDouble(Object object) {
         return Unsafe.getDouble(object, this.offset);
     }
 
-    public void putDouble(final Object object, final double value) {
+    public void putDouble(Object object, double value) {
         Unsafe.putDouble(object, this.offset, value);
     }
 
-    public void putDouble(final double value) {
+    public void putDouble(double value) {
         Unsafe.putDouble(this.object, this.offset, value);
     }
 
@@ -212,15 +212,15 @@ public class Pointer implements Cloneable {
         return (T) Unsafe.getObjectVolatile(this.object, this.offset);
     }
 
-    public <T> T getVolatile(final Object object) {
+    public <T> T getVolatile(Object object) {
         return (T) Unsafe.getObjectVolatile(object, this.offset);
     }
 
-    public void putVolatile(final Object object, final Object value) {
+    public void putVolatile(Object object, Object value) {
         Unsafe.putObjectVolatile(object, this.offset, value);
     }
 
-    public void putVolatile(final Object value) {
+    public void putVolatile(Object value) {
         Unsafe.putObjectVolatile(this.object, this.offset, value);
     }
 
@@ -228,15 +228,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getBooleanVolatile(this.object, this.offset);
     }
 
-    public boolean getBooleanVolatile(final Object object) {
+    public boolean getBooleanVolatile(Object object) {
         return Unsafe.getBooleanVolatile(object, this.offset);
     }
 
-    public void putBooleanVolatile(final Object object, final boolean value) {
+    public void putBooleanVolatile(Object object, boolean value) {
         Unsafe.putBooleanVolatile(object, this.offset, value);
     }
 
-    public void putBooleanVolatile(final boolean value) {
+    public void putBooleanVolatile(boolean value) {
         Unsafe.putBooleanVolatile(this.object, this.offset, value);
     }
 
@@ -244,15 +244,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getByteVolatile(this.object, this.offset);
     }
 
-    public byte getByteVolatile(final Object object) {
+    public byte getByteVolatile(Object object) {
         return Unsafe.getByteVolatile(object, this.offset);
     }
 
-    public void putByteVolatile(final Object object, final byte value) {
+    public void putByteVolatile(Object object, byte value) {
         Unsafe.putByteVolatile(object, this.offset, value);
     }
 
-    public void putByteVolatile(final byte value) {
+    public void putByteVolatile(byte value) {
         Unsafe.putByteVolatile(this.object, this.offset, value);
     }
 
@@ -260,15 +260,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getShortVolatile(this.object, this.offset);
     }
 
-    public short getShortVolatile(final Object object) {
+    public short getShortVolatile(Object object) {
         return Unsafe.getShortVolatile(object, this.offset);
     }
 
-    public void putShortVolatile(final Object object, final short value) {
+    public void putShortVolatile(Object object, short value) {
         Unsafe.putShortVolatile(object, this.offset, value);
     }
 
-    public void putShortVolatile(final short value) {
+    public void putShortVolatile(short value) {
         Unsafe.putShortVolatile(this.object, this.offset, value);
     }
 
@@ -276,15 +276,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getCharVolatile(this.object, this.offset);
     }
 
-    public char getCharVolatile(final Object object) {
+    public char getCharVolatile(Object object) {
         return Unsafe.getCharVolatile(object, this.offset);
     }
 
-    public void putCharVolatile(final Object object, final char value) {
+    public void putCharVolatile(Object object, char value) {
         Unsafe.putCharVolatile(object, this.offset, value);
     }
 
-    public void putCharVolatile(final char value) {
+    public void putCharVolatile(char value) {
         Unsafe.putCharVolatile(this.object, this.offset, value);
     }
 
@@ -292,15 +292,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getIntVolatile(this.object, this.offset);
     }
 
-    public int getIntVolatile(final Object object) {
+    public int getIntVolatile(Object object) {
         return Unsafe.getIntVolatile(object, this.offset);
     }
 
-    public void putIntVolatile(final Object object, final int value) {
+    public void putIntVolatile(Object object, int value) {
         Unsafe.putIntVolatile(object, this.offset, value);
     }
 
-    public void putIntVolatile(final int value) {
+    public void putIntVolatile(int value) {
         Unsafe.putIntVolatile(this.object, this.offset, value);
     }
 
@@ -308,15 +308,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getLongVolatile(this.object, this.offset);
     }
 
-    public long getLongVolatile(final Object object) {
+    public long getLongVolatile(Object object) {
         return Unsafe.getLongVolatile(object, this.offset);
     }
 
-    public void putLongVolatile(final Object object, final long value) {
+    public void putLongVolatile(Object object, long value) {
         Unsafe.putLongVolatile(object, this.offset, value);
     }
 
-    public void putLongVolatile(final long value) {
+    public void putLongVolatile(long value) {
         Unsafe.putLongVolatile(this.object, this.offset, value);
     }
 
@@ -324,15 +324,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getFloatVolatile(this.object, this.offset);
     }
 
-    public float getFloatVolatile(final Object object) {
+    public float getFloatVolatile(Object object) {
         return Unsafe.getFloatVolatile(object, this.offset);
     }
 
-    public void putFloatVolatile(final Object object, final float value) {
+    public void putFloatVolatile(Object object, float value) {
         Unsafe.putFloatVolatile(object, this.offset, value);
     }
 
-    public void putFloatVolatile(final float value) {
+    public void putFloatVolatile(float value) {
         Unsafe.putFloatVolatile(this.object, this.offset, value);
     }
 
@@ -340,15 +340,15 @@ public class Pointer implements Cloneable {
         return Unsafe.getDoubleVolatile(this.object, this.offset);
     }
 
-    public double getDoubleVolatile(final Object object) {
+    public double getDoubleVolatile(Object object) {
         return Unsafe.getDoubleVolatile(object, this.offset);
     }
 
-    public void putDoubleVolatile(final Object object, final double value) {
+    public void putDoubleVolatile(Object object, double value) {
         Unsafe.putDoubleVolatile(object, this.offset, value);
     }
 
-    public void putDoubleVolatile(final double value) {
+    public void putDoubleVolatile(double value) {
         Unsafe.putDoubleVolatile(this.object, this.offset, value);
     }
 }

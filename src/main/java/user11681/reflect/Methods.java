@@ -16,19 +16,19 @@ public class Methods {
 
     private static final Method NOT_FOUND = null;
 
-    public static boolean argumentsMatchParameters(final Executable executable, final Object... arguments) {
+    public static boolean argumentsMatchParameters(Executable executable, Object... arguments) {
         return argumentsMatchParameters(true, 0, executable, arguments);
     }
 
-    public static boolean argumentsMatchParameters(final int offset, final Executable executable, final Object... arguments) {
+    public static boolean argumentsMatchParameters(int offset, Executable executable, Object... arguments) {
         return argumentsMatchParameters(true, offset, executable, arguments);
     }
 
-    public static boolean argumentsMatchParameters(final boolean unbox, final Executable executable, final Object... arguments) {
+    public static boolean argumentsMatchParameters(boolean unbox, Executable executable, Object... arguments) {
         return argumentsMatchParameters(unbox, 0, executable, arguments);
     }
 
-    public static boolean argumentsMatchParameters(final boolean unbox, final int offset, final Executable executable, final Object... arguments) {
+    public static boolean argumentsMatchParameters(boolean unbox, int offset, Executable executable, Object... arguments) {
         final Class<?>[] types = executable.getParameterTypes();
 
         if (types.length == arguments.length + 2) {
@@ -50,15 +50,15 @@ public class Methods {
         return false;
     }
 
-    public static <T> T getDefaultValue(final Class<? extends Annotation> annotationType, final String elementName) {
+    public static <T> T getDefaultValue(Class<? extends Annotation> annotationType, String elementName) {
         try {
             return (T) annotationType.getDeclaredMethod(elementName).getDefaultValue();
-        } catch (final NoSuchMethodException exception) {
+        } catch (NoSuchMethodException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static Method getMethod(final Object object, final String name) {
+    public static Method getMethod(Object object, String name) {
         Class<?> klass = object.getClass();
         Method method;
 
@@ -73,7 +73,7 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getMethod(final Class<?> klass, final String name) {
+    public static Method getMethod(Class<?> klass, String name) {
         final Method[] methods = getMethods(klass);
 
         for (int i = 0, length = methods.length; i < length; i++) {
@@ -85,7 +85,7 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getMethod(final Object object, final String name, final Class<?>... parameterTypes) {
+    public static Method getMethod(Object object, String name, Class<?>... parameterTypes) {
         Class<?> klass = object.getClass();
         Method method;
 
@@ -100,7 +100,7 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getMethod(final Class<?> klass, final String name, final Class<?>... parameterTypes) {
+    public static Method getMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
         final Method[] methods = getMethods(klass);
         Class<?>[] parameterTypes1;
         Method method;
@@ -127,7 +127,7 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getRawMethod(final Object object, final String name) {
+    public static Method getRawMethod(Object object, String name) {
         Class<?> klass = object.getClass();
         Method method;
 
@@ -142,7 +142,7 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getRawMethod(final Class<?> klass, final String name) {
+    public static Method getRawMethod(Class<?> klass, String name) {
         final Method[] methods = getRawMethods(klass);
 
         for (int i = 0, length = methods.length; i < length; i++) {
@@ -154,7 +154,7 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getRawMethod(final Object object, final String name, final Class<?>... parameterTypes) {
+    public static Method getRawMethod(Object object, String name, Class<?>... parameterTypes) {
         Class<?> klass = object.getClass();
         Method method;
 
@@ -169,7 +169,7 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method getRawMethod(final Class<?> klass, final String name, final Class<?>... parameterTypes) {
+    public static Method getRawMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
         final Method[] methods = getRawMethods(klass);
         Class<?>[] parameterTypes1;
         Method method;
@@ -196,14 +196,14 @@ public class Methods {
         return NOT_FOUND;
     }
 
-    public static Method[] getMethods(final Class<?> klass) {
+    public static Method[] getMethods(Class<?> klass) {
         Method[] methods = methodCache.get(klass);
 
         if (methods == null) {
             methods = getRawMethods(klass);
             methodCache.put(klass, methods);
 
-            for (final Method method : methods) {
+            for (Method method : methods) {
                 Unsafe.putBoolean(method, Fields.overrideOffset, true);
             }
         }
@@ -211,10 +211,10 @@ public class Methods {
         return methods;
     }
 
-    public static Method[] getRawMethods(final Class<?> klass) {
+    public static Method[] getRawMethods(Class<?> klass) {
         try {
             return (Method[]) getDeclaredMethods.invokeExact(klass);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
@@ -223,7 +223,7 @@ public class Methods {
         try {
             MethodHandle tempGetDeclaredMethods = null;
 
-            for (final Method method : Class.class.getDeclaredMethods()) {
+            for (Method method : Class.class.getDeclaredMethods()) {
                 if (Modifier.isNative(method.getModifiers()) && method.getReturnType() == Method[].class) {
                     tempGetDeclaredMethods = Unsafe.trustedLookup.unreflect(method);
 
@@ -236,7 +236,7 @@ public class Methods {
             }
 
             getDeclaredMethods = tempGetDeclaredMethods;
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }

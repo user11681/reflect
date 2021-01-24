@@ -22,7 +22,7 @@ public class Reflect {
                     final Class<?> IllegalAccessLogger = Class.forName("jdk.internal.module.IllegalAccessLogger", false, defaultClassLoader);
 
                     Unsafe.putObjectVolatile(IllegalAccessLogger, Unsafe.staticFieldOffset(IllegalAccessLogger.getDeclaredField("logger")), null);
-                } catch (final Throwable throwable) {
+                } catch (Throwable throwable) {
                     throw Unsafe.throwException(throwable);
                 }
             }

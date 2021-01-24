@@ -6,12 +6,15 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.ByteBuffer;
 import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Classes {
@@ -34,8 +37,9 @@ public class Classes {
     public static final boolean x64;
 
     private static final MethodHandle findLoadedClass;
-    private static final MethodHandle addURL;
-    private static final MethodHandle getURLs;
+    private static final MethodHandle URLClassPath$addURL;
+    private static final MethodHandle URLClassLoader$addURL;
+    private static final MethodHandle URLClassLoader$getURLs;
     private static final MethodHandle defineClass0;
     private static final MethodHandle defineClass1;
     private static final MethodHandle defineClass2;
@@ -43,39 +47,54 @@ public class Classes {
     private static final MethodHandle defineClass4;
     private static final MethodHandle defineClass5;
 
+    private static final Object notFound = null;
+
     /**
-     * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass().getName() == klass}.
+     * Change the class of <b>{@code object}</b> to that represented by <b>{@code T}</b> such that <b>{@code to.getClass() == T}</b>.
+     *
+     * @param object   the object whose class pointer to change.
+     * @param dummy a dummy varargs parameter for getting <b>{@code T}</b>.
+     * @param <T>  the desired new type.
+     * @return <b>{@code object}</b>.
+     */
+    @SafeVarargs
+    public static <T> T staticCast(Object object, T... dummy) {
+        return (T) staticCast(object, dummy.getClass().getComponentType());
+    }
+
+    /**
+     * Change the class of <b>{@code object}</b> to the class represented by <b>{@code klass}</b> such that <b>{@code object.getClass().getName() == klass}</b>.
      *
      * @param object the object whose class pointer to change.
-     * @param klass  the name of class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
+     * @param klass  the name of class to set as <b>{@code object}</b>'s class.
      * @param <T>    the desired new type.
-     * @return <a color = "#DDDDDD">{@code object}</a>.
+     * @return <b>{@code object}</b>.
      */
-    public static <T> T staticCast(final Object object, final String klass) {
+    public static <T> T staticCast(Object object, String klass) {
         return staticCast(object, load(Reflect.defaultClassLoader, false, klass));
     }
 
     /**
-     * Change the class of <a color = "#DDDDDD">{@code object}</a> to <a color = "#DDDDDD">{@code klass}</a> such that {@code object.getClass() == klass}.
+     * Change the class of <b>{@code object}</b> to <b>{@code klass}</b> such that <b>{@code object.getClass() == klass}</b>.
      *
      * @param object the object whose class pointer to change.
-     * @param klass  the class to set as <a color = "#DDDDDD">{@code object}</a>'s class.
+     * @param klass  the class to set as <b>{@code object}</b>'s class.
      * @param <T>    the desired new type.
-     * @return <a color = "#DDDDDD">{@code object}</a>.
+     * @return <b>{@code object}</b>.
      */
-    public static <T> T staticCast(final Object object, final Class<T> klass) {
+    public static <T> T staticCast(Object object, Class<T> klass) {
         return staticCast(object, Unsafe.allocateInstance(klass));
     }
 
     /**
-     * Change the class of <a color = "#DDDDDD">{@code to}</a> to that of <a color = "#DDDDDD">{@code from}</a> such that {@code to.getClass() == from.getClass()}.
+     * Change the class of <b>{@code to}</b> to that of <b>{@code from}</b> such that {@code to.getClass() == from.getClass()}.
      *
      * @param to   the object whose class pointer to change.
      * @param from the object from which to get the class pointer.
      * @param <T>  the desired new type.
-     * @return <a color = "#DDDDDD">{@code to}</a>.
+     * @return <b>{@code to}</b>.
      */
-    public static <T> T staticCast(final Object to, final T from) {
+    public static <T> T staticCast(Object to, T from) {
         if (longClassPointer) {
             Accessor.copyLong(to, from, classOffset);
         } else {
@@ -86,14 +105,14 @@ public class Classes {
     }
 
     /**
-     * Change the class of <a color = "#DDDDDD">{@code object}</a> to the class represented by <a color = "#DDDDDD">{@code from}</a>.
+     * Change the class of <b>{@code object}</b> to the class represented by <b>{@code from}</b>.
      *
      * @param object       the object whose class pointer to change.
      * @param classPointer the class pointer.
      * @param <T>          a convenience type parameter for casting.
-     * @return <a color = "#DDDDDD">{@code to}</a>.
+     * @return <b>{@code to}</b>.
      */
-    public static <T> T staticCast(final Object object, final long classPointer) {
+    public static <T> T staticCast(Object object, long classPointer) {
         if (longClassPointer) {
             Unsafe.putLong(object, classOffset, classPointer);
         } else {
@@ -103,93 +122,104 @@ public class Classes {
         return (T) object;
     }
 
-    public static long getClassPointer(final Class<?> klass) {
+    public static long getClassPointer(Class<?> klass) {
         return getClassPointer(Unsafe.allocateInstance(klass));
     }
 
-    public static long getClassPointer(final Object object) {
+    public static long getClassPointer(Object object) {
         return longClassPointer ? Unsafe.getLong(object, classOffset) : Unsafe.getInt(object, classOffset);
     }
 
-    public static <T> T cast(final Object object) {
+    public static <T> T cast(Object object) {
         return (T) object;
     }
 
-    public static <T> Class<T> findLoadedClass(final ClassLoader loader, final String klass) {
+    public List<Class<?>> supertypes(Class<?> klass) {
+        List<Class<?>> supertypes = new ArrayList<>(Arrays.asList(klass.getInterfaces()));
+        Class<?> superclass = klass.getSuperclass();
+
+        if (superclass != null) {
+            supertypes.add(superclass);
+        }
+
+        return supertypes;
+    }
+
+    public static <T> Class<T> findLoadedClass(ClassLoader loader, String klass) {
         try {
             return (Class<T>) findLoadedClass.invokeExact(loader, klass);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static URL[] getURLs(final ClassLoader classLoader) {
+    public static URL[] getURLs(ClassLoader classLoader) {
         return getURLs(getClassPath(classLoader));
     }
 
-    public static URL[] getURLs(final Object classPath) {
+    public static URL[] getURLs(Object classPath) {
         try {
-            return (URL[]) getURLs.invoke(classPath);
-        } catch (final Throwable throwable) {
+            return (URL[]) URLClassLoader$getURLs.invoke(classPath);
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static void addSystemURL(final URL... url) {
+    public static void addSystemURL(URL... url) {
         addURL(systemClassPath, url);
     }
 
-    public static void addSystemURL(final URL url) {
+    public static void addSystemURL(URL url) {
         addURL(systemClassPath, url);
     }
 
-    public static void addURL(final ClassLoader classLoader, final URL... urls) {
+    public static void addURL(ClassLoader classLoader, URL... urls) {
         final Object classPath = getClassPath(classLoader);
 
-        for (final URL url : urls) {
+        for (URL url : urls) {
             try {
-                addURL.invoke(classPath, url);
-            } catch (final Throwable throwable) {
+                URLClassPath$addURL.invoke(classPath, url);
+            } catch (Throwable throwable) {
                 throw Unsafe.throwException(throwable);
             }
         }
     }
 
-    public static void addURL(final ClassLoader classLoader, final URL url) {
+    public static void addURL(ClassLoader classLoader, URL url) {
         try {
-            addURL.invoke(getClassPath(classLoader), url);
-        } catch (final Throwable throwable) {
+            URLClassPath$addURL.invoke(getClassPath(classLoader), url);
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static void addURL(final Object classPath, final URL... urls) {
+    public static void addURL(Object classPath, URL... urls) {
         try {
-            for (final URL url : urls) {
-                addURL.invoke(classPath, url);
+            for (URL url : urls) {
+                URLClassPath$addURL.invoke(classPath, url);
             }
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static void addURL(final Object classPath, final URL url) {
+    public static void addURL(Object classPath, URL url) {
         try {
-            addURL.invoke(classPath, url);
-        } catch (final Throwable throwable) {
+            URLClassPath$addURL.invoke(classPath, url);
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static Object getClassPath(final ClassLoader classLoader) {
+    public static Object getClassPath(ClassLoader classLoader) {
         return Accessor.getObject(classLoader, getClassPathField(classLoader.getClass()));
     }
 
-    public static Field getClassPathField(final Class<?> loaderClass) {
+    public static Field getClassPathField(Class<?> loaderClass) {
         Class<?> klass = loaderClass;
 
         while (klass != Object.class) {
-            for (final Field field : Fields.getFields(klass)) {
+            for (Field field : Fields.getFields(klass)) {
                 if (URLClassPath.isAssignableFrom(field.getType())) {
                     return field;
                 }
@@ -198,83 +228,49 @@ public class Classes {
             klass = klass.getSuperclass();
         }
 
-        throw new IllegalArgumentException(String.format("%s does not have a URLClassPath", loaderClass));
+        return (Field) notFound;
     }
 
-    public static void load(final String... classes) {
-        for (final String klass : classes) {
-            try {
-                Class.forName(klass, true, Reflect.defaultClassLoader);
-            } catch (final ClassNotFoundException exception) {
-                throw Unsafe.throwException(exception);
-            }
+    public static void load(String... classes) {
+        load(Reflect.defaultClassLoader, true, classes);
+    }
+
+    public static void load(boolean initialize, String... classes) {
+        load(Reflect.defaultClassLoader, initialize, classes);
+    }
+
+    public static void load(ClassLoader loader, String... classes) {
+        load(loader, true, classes);
+    }
+
+    public static void load(ClassLoader loader, boolean initialize, String... classes) {
+        for (String klass : classes) {
+            load(loader, initialize, klass);
         }
     }
 
-    public static void load(final boolean initialize, final String... classes) {
-        for (final String klass : classes) {
-            try {
-                Class.forName(klass, initialize, Reflect.defaultClassLoader);
-            } catch (final ClassNotFoundException exception) {
-                throw Unsafe.throwException(exception);
-            }
-        }
+    public static <T> Class<T> load(String name) {
+        return load(Reflect.defaultClassLoader, true, name);
     }
 
-    public static void load(final ClassLoader loader, final String... classes) {
-        for (final String klass : classes) {
-            try {
-                Class.forName(klass, true, loader);
-            } catch (final ClassNotFoundException exception) {
-                throw Unsafe.throwException(exception);
-            }
-        }
+    public static <T> Class<T> load(boolean initialize, String name) {
+        return load(Reflect.defaultClassLoader, initialize, name);
     }
 
-    public static void load(final ClassLoader loader, final boolean initialize, final String... classes) {
-        for (final String klass : classes) {
-            try {
-                Class.forName(klass, initialize, loader);
-            } catch (final ClassNotFoundException exception) {
-                throw Unsafe.throwException(exception);
-            }
-        }
+    public static <T> Class<T> load(ClassLoader loader, String name) {
+        return load(loader, true, name);
     }
 
-    public static <T> Class<T> load(final String name) {
-        try {
-            return (Class<T>) Class.forName(name, true, Reflect.defaultClassLoader);
-        } catch (final ClassNotFoundException exception) {
-            throw Unsafe.throwException(exception);
-        }
-    }
-
-    public static <T> Class<T> load(final boolean initialize, final String name) {
-        try {
-            return (Class<T>) Class.forName(name, initialize, Reflect.defaultClassLoader);
-        } catch (final ClassNotFoundException exception) {
-            throw Unsafe.throwException(exception);
-        }
-    }
-
-    public static <T> Class<T> load(final ClassLoader loader, final String name) {
-        try {
-            return (Class<T>) Class.forName(name, true, loader);
-        } catch (final ClassNotFoundException exception) {
-            throw Unsafe.throwException(exception);
-        }
-    }
-
-    public static <T> Class<T> load(final ClassLoader loader, final boolean initialize, final String name) {
+    public static <T> Class<T> load(ClassLoader loader, boolean initialize, String name) {
         try {
             return (Class<T>) Class.forName(name, initialize, loader);
-        } catch (final ClassNotFoundException exception) {
-            throw Unsafe.throwException(exception);
+        } catch (ClassNotFoundException exception) {
+            return (Class<T>) notFound;
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static <T> Class<T> defineBootstrapClass(final ClassLoader resourceLoader, final String name) {
+    public static <T> Class<T> defineBootstrapClass(ClassLoader resourceLoader, String name) {
         try {
             final URL url = resourceLoader.getResource(name.replace('.', '/') + ".class");
             final InputStream stream = url.openStream();
@@ -283,132 +279,121 @@ public class Classes {
             while (stream.read(bytecode) != -1) {}
 
             return Unsafe.defineClass(name, bytecode, 0, bytecode.length, null, new ProtectionDomain(new CodeSource(url, (CodeSigner[]) null), null, null, null));
-        } catch (final IOException exception) {
+        } catch (IOException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static <T> Class<T> defineSystemClass(final ClassLoader resourceLoader, final String name) {
+    public static <T> Class<T> defineSystemClass(ClassLoader resourceLoader, String name) {
         try {
-            final URL url = resourceLoader.getResource(name.replace('.', '/') + ".class");
-            final InputStream stream = url.openStream();
-            final byte[] bytecode = new byte[stream.available()];
+            URL url = resourceLoader.getResource(name.replace('.', '/') + ".class");
+            InputStream stream = url.openStream();
+            byte[] bytecode = new byte[stream.available()];
 
             while (stream.read(bytecode) != -1) {}
 
             return defineClass(systemClassLoader, name, bytecode, 0, bytecode.length, new CodeSource(url, (CodeSigner[]) null));
-        } catch (final IOException exception) {
+        } catch (IOException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static <T> Class<T> defineClass(final ClassLoader resourceLoader, final ClassLoader classLoader, final String name) {
+    public static <T> Class<T> defineClass(ClassLoader resourceLoader, ClassLoader classLoader, String name) {
         return defineClass(resourceLoader, classLoader, name, null);
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static <T> Class<T> defineClass(final ClassLoader resourceLoader, final ClassLoader classLoader, final String name, final ProtectionDomain protectionDomain) {
+    public static <T> Class<T> defineClass(ClassLoader resourceLoader, ClassLoader classLoader, String name, ProtectionDomain protectionDomain) {
         try {
-            final InputStream stream = resourceLoader.getResourceAsStream(name.replace('.', '/') + ".class");
-            final byte[] bytecode = new byte[stream.available()];
+            InputStream stream = resourceLoader.getResourceAsStream(name.replace('.', '/') + ".class");
+            byte[] bytecode = new byte[stream.available()];
 
             while (stream.read(bytecode) != -1) {}
 
             return defineClass(classLoader, name, bytecode, 0, bytecode.length, protectionDomain);
-        } catch (final IOException exception) {
+        } catch (IOException exception) {
             throw Unsafe.throwException(exception);
         }
     }
 
-    public static <T> Class<T> defineClass(final ClassLoader classLoader, final byte[] bytecode, final int offset, final int length) {
+    public static <T> Class<T> defineClass(ClassLoader classLoader, byte[] bytecode, int offset, int length) {
         try {
             return (Class<T>) defineClass0.invokeExact(classLoader, bytecode, offset, length);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static <T> Class<T> defineClass(final ClassLoader classLoader, final String name, final byte[] bytecode) {
-        try {
-            return (Class<T>) defineClass1.invokeExact(classLoader, name, bytecode, 0, bytecode.length);
-        } catch (final Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
+    public static <T> Class<T> defineClass(ClassLoader classLoader, String name, byte[] bytecode) {
+        return defineClass(classLoader, name, bytecode, 0, bytecode.length);
     }
 
-    public static <T> Class<T> defineClass(final ClassLoader classLoader, final String name, final byte[] bytecode, final ProtectionDomain protectionDomain) {
-        try {
-            return (Class<T>) defineClass2.invokeExact(classLoader, name, bytecode, 0, bytecode.length, protectionDomain);
-        } catch (final Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-    }
-
-    public static <T> Class<T> defineClass(final ClassLoader classLoader, final String name, final byte[] bytecode, final int offset, final int length) {
+    public static <T> Class<T> defineClass(ClassLoader classLoader, String name, byte[] bytecode, int offset, int length) {
         try {
             return (Class<T>) defineClass1.invokeExact(classLoader, name, bytecode, offset, length);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static <T> Class<T> defineClass(final ClassLoader classLoader, final String name, final byte[] bytecode, final int offset, final int length, final ProtectionDomain protectionDomain) {
+    public static <T> Class<T> defineClass(ClassLoader classLoader, String name, byte[] bytecode, ProtectionDomain protectionDomain) {
+        return defineClass(classLoader, name, bytecode, 0, bytecode.length, protectionDomain);
+    }
+
+    public static <T> Class<T> defineClass(ClassLoader classLoader, String name, byte[] bytecode, int offset, int length, ProtectionDomain protectionDomain) {
         try {
             return (Class<T>) defineClass2.invokeExact(classLoader, name, bytecode, offset, length, protectionDomain);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static <T> Class<T> defineClass(final ClassLoader classLoader, final String name, final ByteBuffer bytecode, final ProtectionDomain protectionDomain) {
+    public static <T> Class<T> defineClass(ClassLoader classLoader, String name, ByteBuffer bytecode, ProtectionDomain protectionDomain) {
         try {
             return (Class<T>) defineClass3.invokeExact(classLoader, name, bytecode, protectionDomain);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static <T> Class<T> defineClass(final SecureClassLoader classLoader, final String name, final byte[] bytecode, final int offset, final int length, final CodeSource codeSource) {
+    public static <T> Class<T> defineClass(SecureClassLoader classLoader, String name, byte[] bytecode, int offset, int length, CodeSource codeSource) {
         try {
             return (Class<T>) defineClass4.invokeExact(classLoader, name, bytecode, offset, length, codeSource);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    public static <T> Class<T> defineClass(final SecureClassLoader classLoader, final String name, final ByteBuffer bytecode, final CodeSource codeSource) {
+    public static <T> Class<T> defineClass(SecureClassLoader classLoader, String name, ByteBuffer bytecode, CodeSource codeSource) {
         try {
             return (Class<T>) defineClass5.invokeExact(classLoader, name, bytecode, codeSource);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
+    }
+
+    private static Class<?> tryLoad(String first, String second) {
+        Class<?> klass = load(first);
+
+        return klass == null ? load(second) : klass;
     }
 
     static {
-        if (Reflect.java9) {
-            ConstantPool = load("jdk.internal.reflect.ConstantPool");
-            ConstructorAccessor = load("jdk.internal.reflect.ConstructorAccessor");
-            JavaLangAccess = load("jdk.internal.access.JavaLangAccess");
-            NativeConstructorAccessorImpl = load("jdk.internal.reflect.NativeConstructorAccessorImpl");
-            Reflection = load("jdk.internal.reflect.Reflection");
-            SharedSecrets = load("jdk.internal.access.SharedSecrets");
-            URLClassPath = load("jdk.internal.loader.URLClassPath");
-        } else {
-            ConstantPool = load("sun.reflect.ConstantPool");
-            ConstructorAccessor = load("sun.reflect.ConstructorAccessor");
-            JavaLangAccess = load("sun.misc.JavaLangAccess");
-            NativeConstructorAccessorImpl = load("sun.reflect.NativeConstructorAccessorImpl");
-            Reflection = load("sun.reflect.Reflection");
-            SharedSecrets = load("sun.misc.SharedSecrets");
-            URLClassPath = load("sun.misc.URLClassPath");
-        }
+        ConstantPool = tryLoad("jdk.internal.reflect.ConstantPool", "sun.reflect.ConstantPool");
+        ConstructorAccessor = tryLoad("jdk.internal.reflect.ConstructorAccessor", "sun.reflect.ConstructorAccessor");
+        JavaLangAccess = tryLoad("jdk.internal.access.JavaLangAccess", "sun.misc.JavaLangAccess");
+        NativeConstructorAccessorImpl = tryLoad("jdk.internal.reflect.NativeConstructorAccessorImpl", "sun.reflect.NativeConstructorAccessorImpl");
+        Reflection = tryLoad("jdk.internal.reflect.Reflection", "sun.reflect.Reflection");
+        SharedSecrets = tryLoad("jdk.internal.access.SharedSecrets", "sun.misc.SharedSecrets");
+        URLClassPath = tryLoad("jdk.internal.loader.URLClassPath", "sun.misc.URLClassPath");
 
         try {
             findLoadedClass = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
 
-            addURL = Unsafe.trustedLookup.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
-            getURLs = Unsafe.trustedLookup.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
+            URLClassPath$addURL = Unsafe.trustedLookup.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
+            URLClassLoader$addURL = Unsafe.trustedLookup.findVirtual(URLClassLoader.class, "addURL", MethodType.methodType(void.class, URL.class));
+            URLClassLoader$getURLs = Unsafe.trustedLookup.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
 
             defineClass0 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
             defineClass1 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
@@ -428,17 +413,17 @@ public class Classes {
 
             classOffset = offset;
             fieldOffset = Unsafe.objectFieldOffset(Integer.class.getDeclaredField("value"));
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
 
-        if (fieldOffset == 8) { // 32bit JVM
+        if (fieldOffset == 8) { // 32-bit JVM
             x64 = false;
             longClassPointer = false;
-        } else if (fieldOffset == 12) { // 64bit JVM with compressed OOPs
+        } else if (fieldOffset == 12) { // 64-bit JVM with compressed OOPs
             x64 = true;
             longClassPointer = false;
-        } else if (fieldOffset == 16) { // 64bit JVM
+        } else if (fieldOffset == 16) { // 64-bit JVM
             x64 = true;
             longClassPointer = true;
         } else {

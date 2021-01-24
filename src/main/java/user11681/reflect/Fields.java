@@ -25,7 +25,7 @@ public class Fields {
 
     private static final Field NOT_FOUND = null;
 
-    public static Field getField(final Object object, final String name) {
+    public static Field getField(Object object, String name) {
         Class<?> klass = object.getClass();
         Field field;
 
@@ -40,11 +40,11 @@ public class Fields {
         return NOT_FOUND;
     }
 
-    public static Field getField(final String klass, final String name) {
+    public static Field getField(String klass, String name) {
         return getField(Classes.load(klass), name);
     }
 
-    public static Field getField(final Class<?> klass, final String name) {
+    public static Field getField(Class<?> klass, String name) {
         final Field field = nameToField.get(klass.getName() + '.' + name);
 
         if (field != null) {
@@ -56,7 +56,7 @@ public class Fields {
         return nameToField.get(klass.getName() + '.' + name);
     }
 
-    public static Field getRawField(final Object object, final String name) {
+    public static Field getRawField(Object object, String name) {
         Class<?> klass = object.getClass();
         Field field;
 
@@ -71,12 +71,12 @@ public class Fields {
         return NOT_FOUND;
     }
 
-    public static Field getRawField(final String klass, final String name) {
+    public static Field getRawField(String klass, String name) {
         return getRawField(Classes.load(klass), name);
     }
 
-    public static Field getRawField(final Class<?> klass, final String name) {
-        for (final Field field : getRawFields(klass)) {
+    public static Field getRawField(Class<?> klass, String name) {
+        for (Field field : getRawFields(klass)) {
             if (field.getName().equals(name)) {
                 return field;
             }
@@ -85,7 +85,7 @@ public class Fields {
         return NOT_FOUND;
     }
 
-    public static Field[] getInstanceFields(final Class<?> klass) {
+    public static Field[] getInstanceFields(Class<?> klass) {
         Field[] fields = instanceFieldCache.get(klass);
 
         if (fields != null) {
@@ -115,7 +115,7 @@ public class Fields {
         return instanceFields;
     }
 
-    public static Field[] getStaticFields(final Class<?> klass) {
+    public static Field[] getStaticFields(Class<?> klass) {
         Field[] fields = staticFieldCache.get(klass);
 
         if (fields != null) {
@@ -159,14 +159,14 @@ public class Fields {
         return fields;
     }
 
-    public static Field[] getFields(final Class<?> klass) {
+    public static Field[] getFields(Class<?> klass) {
         Field[] fields = fieldCache.get(klass);
 
         if (fields == null) {
             fields = getRawFields(klass);
             fieldCache.put(klass, fields);
 
-            for (final Field field : fields) {
+            for (Field field : fields) {
                 nameToField.put(klass.getName() + '.' + field.getName(), field);
             }
         }
@@ -174,10 +174,10 @@ public class Fields {
         return fields;
     }
 
-    public static Field[] getRawFields(final Class<?> klass) {
+    public static Field[] getRawFields(Class<?> klass) {
         try {
             return (Field[]) getDeclaredFields.invokeExact(klass);
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
@@ -187,7 +187,7 @@ public class Fields {
             final Method[] methods = Class.class.getDeclaredMethods();
             MethodHandle tempGetDeclaredFields = null;
 
-            for (final Method method : methods) {
+            for (Method method : methods) {
                 if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
                     tempGetDeclaredFields = Unsafe.trustedLookup.unreflectSpecial(method, Class.class);
 
@@ -203,7 +203,7 @@ public class Fields {
 
             long offset = -1;
 
-            for (final Field field : getRawFields(Field.class)) {
+            for (Field field : getRawFields(Field.class)) {
                 if (field.getName().equals("modifiers")) {
                     offset = Unsafe.objectFieldOffset(field);
 
@@ -213,7 +213,7 @@ public class Fields {
 
             modifiersOffset = offset;
 
-            for (final Field field : getRawFields(AccessibleObject.class)) {
+            for (Field field : getRawFields(AccessibleObject.class)) {
                 if (field.getName().equals("override")) {
                     offset = Unsafe.objectFieldOffset(field);
 
@@ -225,7 +225,7 @@ public class Fields {
 
             Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "fieldFilterMap")), new HashMap<>());
             Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "methodFilterMap")), new HashMap<>());
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }

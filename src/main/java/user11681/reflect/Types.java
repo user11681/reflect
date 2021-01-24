@@ -1,15 +1,15 @@
 package user11681.reflect;
 
 public class Types {
-    public static boolean equals(final Class<?> klass, final Class<?> other) {
+    public static boolean equals(Class<?> klass, Class<?> other) {
         return klass == other || klass != null && (getPrimitive(klass) == other || getPrimitive(other) == klass);
     }
 
-    public static boolean isWrapper(final Class<?> klass) {
+    public static boolean isWrapper(Class<?> klass) {
         return getPrimitive(klass) != null;
     }
 
-    public static Class<?> getPrimitive(final Class<?> klass) {
+    public static Class<?> getPrimitive(Class<?> klass) {
         if (klass == Void.class) {
             return void.class;
         } else if (klass == Boolean.class) {

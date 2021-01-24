@@ -12,7 +12,7 @@ public class ReflectionFactory {
 
     public static boolean defaultTrustedFinal = false;
 
-    public static Field newField(final Class<?> declaringClass,
+    public static Field newField(Class<?> declaringClass,
                                  final String name,
                                  final Class<?> type,
                                  final int modifiers,
@@ -28,7 +28,7 @@ public class ReflectionFactory {
         }
     }
 
-    public static Field newField(final Class<?> declaringClass,
+    public static Field newField(Class<?> declaringClass,
                                  final String name,
                                  final Class<?> type,
                                  final int modifiers,

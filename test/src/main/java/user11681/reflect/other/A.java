@@ -22,7 +22,7 @@ public class A implements Cloneable {
         this.l = 8;
     }
 
-    public A(final A that) {
+    public A(A that) {
         this.a2 = that.a2;
         this.yes = that.yes;
         this.no = that.no;
@@ -33,7 +33,7 @@ public class A implements Cloneable {
     public Object clone() {
         try {
             return super.clone();
-        } catch (final CloneNotSupportedException exception) {
+        } catch (CloneNotSupportedException exception) {
             throw Unsafe.throwException(exception);
         }
     }
@@ -42,7 +42,7 @@ public class A implements Cloneable {
         return strings[random.nextInt(10)];
     }
 
-    private static String privateMethod2(final int number) {
+    private static String privateMethod2(int number) {
         return strings[random.nextInt(10)];
     }
 

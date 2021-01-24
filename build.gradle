@@ -1,29 +1,27 @@
 plugins {
-    id("java-library")
     id("maven-publish")
     id("com.jfrog.bintray").version("1.8.5")
 }
 
-sourceCompatibility = 8
-targetCompatibility = 8
-
 project.group = "user11681"
 project.version = "1.2.0"
 
-repositories {
-    mavenCentral()
+allprojects {
+    plugins.apply("java-library")
 
-    maven {url = "https://dl.bintray.com/user11681/maven"}
+    repositories {
+        mavenCentral()
+
+        maven {url = "https://dl.bintray.com/user11681/maven"}
+    }
+
+    dependencies {
+        api("net.gudenau.lib:unsafe:latest.release")
+    }
 }
 
-dependencies {
-    api("net.gudenau.lib:unsafe:latest.release")
-
-    testImplementation("org.junit.jupiter:junit-jupiter:latest.release")
-    testImplementation("org.ow2.asm:asm:9.0")
-    testImplementation("org.ow2.asm:asm-tree:9.0")
-    testImplementation("org.openjdk.jol:jol-core:latest.release")
-}
+sourceCompatibility = 8
+targetCompatibility = 8
 
 java {
     withSourcesJar()

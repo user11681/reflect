@@ -8,18 +8,27 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
 import org.openjdk.jol.info.ClassData;
 import user11681.reflect.experimental.Classes2;
 import user11681.reflect.experimental.Lists;
+import user11681.reflect.experimental.generics.Generics;
+import user11681.reflect.experimental.generics.TypeArgument;
+import user11681.reflect.generics.GenericTypeAware;
 import user11681.reflect.generics.GenericTypeAwareTest;
 import user11681.reflect.other.A;
 import user11681.reflect.other.C;
@@ -30,11 +39,13 @@ import user11681.reflect.util.ThrowingRunnable;
 
 @Testable
 public class ReflectTest {
-    private static final int iterations = 56;
+    private static final int iterations = 10000;
     private static final int tests = 10;
 
     private static final List<Object> dummy = Lists.wrap(new Object[]{0});
     private static int dummyIndex;
+
+    public static Object nul;
 
     public static <T, R> R var(T object, Function<T, R> function) {
         return function.apply(object);
@@ -60,6 +71,22 @@ public class ReflectTest {
             object.field0 = "new0";
             object.field1 = "new1";
         });
+    }
+
+    @Test
+    public void castPerformance() {
+        timeN("checkcast", () -> {ReflectTest test = (ReflectTest) (Object) (nul);});
+        timeN("Class#cast", () -> {ReflectTest test = ReflectTest.class.cast(nul);});
+    }
+
+    @Test
+    public void genericMetadata() {
+        Type[] interfaces = GenericTypeAwareTest.class.getGenericInterfaces();
+        Type superclass = GenericTypeAwareTest.class.getGenericSuperclass();
+        Type[] parameters = GenericTypeAware.class.getTypeParameters();
+        List<TypeArgument> typeArguments = Generics.typeArguments(GenericTypeAwareTest.Sub.Sub1.class);
+
+        boolean bp = true;
     }
 
     @Test
@@ -117,7 +144,7 @@ public class ReflectTest {
 
     @Test
     public void lists() {
-        final Integer[] array = new Integer[100];
+        Integer[] array = new Integer[100];
         Arrays.fill(array, 0, array.length, 29);
 
         timeN("ArrayList constructor", () -> new ArrayList<>(Arrays.asList(array)));
@@ -135,7 +162,7 @@ public class ReflectTest {
 
     @Test
     public void fixedArity() throws Throwable {
-        final MethodHandle handle = Invoker.bind(new C(), "print", void.class);
+        MethodHandle handle = Invoker.bind(new C(), "print", void.class);
 
         repeat(handle::invokeExact);
 
@@ -145,7 +172,7 @@ public class ReflectTest {
 
     @Test
     public void invokeExact() throws Throwable {
-        final C c = new C();
+        C c = new C();
         MethodHandle handle = Invoker.findSpecial(A.class, "print", void.class);
 
         handle.invoke(c);
@@ -159,7 +186,7 @@ public class ReflectTest {
 
     @Test
     public void cloneTest() {
-        final A a = new A();
+        A a = new A();
 
         timeN("clone", a::clone);
         timeN("copy <init>", () -> new A(a));
@@ -167,8 +194,8 @@ public class ReflectTest {
 
     @Test
     public void pointer() {
-        final Enumeration enumeration = EnumConstructor.add(Enumeration.class, 0, "DDD", 4026D);
-        final Pointer pointer = new Pointer().bind(enumeration).instanceField("test");
+        Enumeration enumeration = EnumConstructor.add(Enumeration.class, 0, "DDD", 4026D);
+        Pointer pointer = new Pointer().bind(enumeration).instanceField("test");
 
         repeat(() -> {
             pointer.putDouble(pointer.getDouble() + 4);
@@ -178,14 +205,15 @@ public class ReflectTest {
 
     @Test
     public void enumTest() throws Throwable {
-        final Constructor<?> retentionPolicyConstructor = EnumConstructor.findConstructor(false, RetentionPolicy.class);
-        final Constructor<?> enumerationConstructor = EnumConstructor.findConstructor(true, Enumeration.class, 0D);
+        Constructor<?> retentionPolicyConstructor = EnumConstructor.findConstructor(false, RetentionPolicy.class);
+        Constructor<?> enumerationConstructor = EnumConstructor.findConstructor(true, Enumeration.class, 0D);
+
         EnumConstructor.newInstance(Enumeration.class, "TEST", 1D);
         EnumConstructor.newInstance(Enumeration.class, 0, "TEST", 3D);
         EnumConstructor.newInstance(false, Enumeration.class, "TEST", 4D);
         EnumConstructor.newInstance(false, Enumeration.class, 1, "TEST", 5D);
 
-        final Enumeration enumeration = EnumConstructor.newInstance(Enumeration.class, 2, "TEST", 2D);
+        Enumeration enumeration = EnumConstructor.newInstance(Enumeration.class, 2, "TEST", 2D);
         assert enumeration != null;
 
         EnumConstructor.add(Enumeration.class, "TEST", 1D);
@@ -194,7 +222,7 @@ public class ReflectTest {
         EnumConstructor.add(false, Enumeration.class, 1, "TEST", 5D);
         EnumConstructor.add(Enumeration.class, enumeration);
 
-        final EnumConstructor<RetentionPolicy> constructor = new EnumConstructor<>(RetentionPolicy.class);
+        EnumConstructor<RetentionPolicy> constructor = new EnumConstructor<>(RetentionPolicy.class);
 
         repeat(() -> constructor.add("TEST", 0D));
 
@@ -203,13 +231,13 @@ public class ReflectTest {
 
     @Test
     public void staticCast() {
-        final Integer a = Classes.staticCast(A.class, Integer.class);
+        Integer a = Classes.staticCast(A.class, Integer.class);
 
         System.out.println(a);
         System.out.println(A.class.getClassLoader());
 
-        final Double dubble = 0D;
-        final Long longg = Classes.staticCast(dubble, Long.class);
+        Double dubble = 0D;
+        Long longg = Classes.staticCast(dubble, Long.class);
 
         System.out.println(dubble);
         Accessor.putLong(longg, "value", 0xFFFFFFFFFFL);
@@ -236,23 +264,23 @@ public class ReflectTest {
     public void addClass() {
         Classes2.addClass(String.class, Integer.class);
 
-        final String integer = (String) (Object) 0;
-        final Integer string = (Integer) (Object) "";
+        String integer = (String) (Object) 0;
+        Integer string = (Integer) (Object) "";
     }
 
     @Test
     public void allFields() {
-        for (final Field field : Fields.getAllFields(C.class)) {
+        for (Field field : Fields.getAllFields(C.class)) {
             Logger.log(field);
         }
     }
 
     @Test
     public void unreflectTest() throws Throwable {
-        final Method method = Methods.getMethod(A.class, "privateMethod");
-        final Method declaredMethod = A.class.getDeclaredMethod("privateMethod");
-        final MethodHandle methodHandle = Invoker.findStatic(A.class, "privateMethod", String.class);
-        final MethodHandle unreflected = Invoker.unreflect(method);
+        Method method = Methods.getMethod(A.class, "privateMethod");
+        Method declaredMethod = A.class.getDeclaredMethod("privateMethod");
+        MethodHandle methodHandle = Invoker.findStatic(A.class, "privateMethod", String.class);
+        MethodHandle unreflected = Invoker.unreflect(method);
 
         timeN("Method 0", () -> {
             Methods.getMethod(A.class, "privateMethod2", int.class);
@@ -263,7 +291,7 @@ public class ReflectTest {
         });
 
         timeN("Method 2", () -> {
-            final Method method1 = A.class.getDeclaredMethod("privateMethod");
+            Method method1 = A.class.getDeclaredMethod("privateMethod");
 
             method.setAccessible(true);
         });
@@ -331,12 +359,12 @@ public class ReflectTest {
 
     @Test
     public void normalFieldTime() {
-        final ThrowingRunnable test = () -> {
-            final Field field = TestObject.class.getDeclaredField("integer");
+        ThrowingRunnable test = () -> {
+            Field field = TestObject.class.getDeclaredField("integer");
 
             field.setAccessible(true);
 
-            final Field modifiers = Field.class.getDeclaredField("modifiers");
+            Field modifiers = Field.class.getDeclaredField("modifiers");
 
             modifiers.setAccessible(true);
             modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
@@ -398,10 +426,10 @@ public class ReflectTest {
 
     @Test
     public void classPath() throws Throwable {
-        final Object classPath = Classes.getClassPath(ReflectTest.class.getClassLoader());
-        final File file = new File("test");
+        Object classPath = Classes.getClassPath(ReflectTest.class.getClassLoader());
+        File file = new File("test");
 
-        for (final URL url : Classes.getURLs(classPath)) {
+        for (URL url : Classes.getURLs(classPath)) {
             Logger.log(url);
         }
 
@@ -411,63 +439,62 @@ public class ReflectTest {
 
         Classes.addURL(classPath, file.toURL());
 
-        for (final URL url : Classes.getURLs(classPath)) {
+        for (URL url : Classes.getURLs(classPath)) {
             Logger.log(url);
         }
     }
 
     @Test
-    public <T> T invokeStatic(final Class<?> klass, final String name, final MethodType methodType, final Object... arguments) throws Throwable {
+    public <T> T invokeStatic(Class<?> klass, String name, MethodType methodType, Object... arguments) throws Throwable {
         return (T) Unsafe.trustedLookup.findStatic(klass, name, methodType).invokeWithArguments(arguments);
     }
 
     @Test
-    public void logFields(final Object object) {
-        for (final Field field : Fields.getInstanceFields(object.getClass())) {
+    public void logFields(Object object) {
+        for (Field field : Fields.getInstanceFields(object.getClass())) {
             System.out.printf("%s: %s\n", field, Accessor.getObject(object, field));
         }
     }
 
     @Test
-    public double timeN(final ThrowingRunnable test) {
+    public double timeN(ThrowingRunnable test) {
         try {
-            final long time = System.nanoTime();
+            long time = System.nanoTime();
 
             for (int i = 0; i < iterations; i++) {
                 test.run();
             }
 
-            final double duration = (double) (System.nanoTime() - time) / iterations;
+            double duration = (double) (System.nanoTime() - time) / iterations;
 
             Logger.log(duration);
 
             return duration;
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
     @Test
-    public double timeN(final String label, final ThrowingRunnable test) {
+    public double timeN(String label, ThrowingRunnable test) {
         try {
-            final long time = System.nanoTime();
+            long time = System.nanoTime();
 
             for (int i = 0; i < iterations; i++) {
                 test.run();
             }
 
-            final double duration = (double) (System.nanoTime() - time) / iterations;
+            double duration = (double) (System.nanoTime() - time) / iterations;
 
             Logger.log("%s: %s", label, duration);
 
             return duration;
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    @Test
-    public long time(final ThrowingRunnable test) {
+    public static long time(ThrowingRunnable test) {
         try {
             long time = System.nanoTime();
 
@@ -478,13 +505,12 @@ public class ReflectTest {
             Logger.log(time);
 
             return time;
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
-    @Test
-    public long time(final String label, final ThrowingRunnable test) {
+    public static long time(String label, ThrowingRunnable test) {
         try {
             long time = System.nanoTime();
 
@@ -495,17 +521,17 @@ public class ReflectTest {
             Logger.log("%s: %s", label, time);
 
             return time;
-        } catch (final Throwable throwable) {
+        } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
     }
 
     @Test
-    public void repeat(final ThrowingRunnable test) {
+    public void repeat(ThrowingRunnable test) {
         for (int i = 0; i < iterations; i++) {
             try {
                 test.run();
-            } catch (final Throwable throwable) {
+            } catch (Throwable throwable) {
                 throw Unsafe.throwException(throwable);
             }
         }
@@ -514,14 +540,22 @@ public class ReflectTest {
     static {
         System.setProperty("jol.tryWithSudo", "true");
 
-        Classes.load(true,
-            "user11681.reflect.Reflect",
-            "user11681.reflect.Invoker",
-            "user11681.reflect.Fields",
-            "user11681.reflect.Accessor",
-            "user11681.reflect.Methods",
-            "user11681.reflect.EnumConstructor",
-            "user11681.reflect.Pointer"
-        );
+        long time = time(() -> Classes.load(true, "user11681.reflect.Reflect"));
+
+        try (Stream<Path> classStream = Files.list(Paths.get(Reflect.class.getProtectionDomain().getCodeSource().getLocation().toURI()).resolve("user11681/reflect"))) {
+            List<Path> classes = classStream.collect(Collectors.toList());
+
+            time += time(() -> {
+                for (Path klass : classes) {
+                    try {
+                        Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", ""));
+                    } catch (Throwable ignored) {}
+                }
+            });
+
+            Logger.log("initialized in %s ms", time / 1000000D);
+        } catch (Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
     }
 }
