@@ -547,9 +547,7 @@ public class ReflectTest {
 
             time += time(() -> {
                 for (Path klass : classes) {
-                    try {
-                        Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", ""));
-                    } catch (Throwable ignored) {}
+                    Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", ""));
                 }
             });
 

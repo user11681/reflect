@@ -373,19 +373,25 @@ public class Classes {
         }
     }
 
-    private static Class<?> tryLoad(String first, String second) {
-        Class<?> klass = load(first);
+    private static Class<?> tryLoad(String... classes) {
+        for (String name : classes) {
+            Class<?> klass = load(name);
 
-        return klass == null ? load(second) : klass;
+            if (klass != null) {
+                return klass;
+            }
+        }
+
+        return (Class<?>) notFound;
     }
 
     static {
         ConstantPool = tryLoad("jdk.internal.reflect.ConstantPool", "sun.reflect.ConstantPool");
         ConstructorAccessor = tryLoad("jdk.internal.reflect.ConstructorAccessor", "sun.reflect.ConstructorAccessor");
-        JavaLangAccess = tryLoad("jdk.internal.access.JavaLangAccess", "sun.misc.JavaLangAccess");
+        JavaLangAccess = tryLoad("jdk.internal.access.JavaLangAccess", "jdk.internal.misc.JavaLangAccess", "sun.misc.JavaLangAccess");
         NativeConstructorAccessorImpl = tryLoad("jdk.internal.reflect.NativeConstructorAccessorImpl", "sun.reflect.NativeConstructorAccessorImpl");
         Reflection = tryLoad("jdk.internal.reflect.Reflection", "sun.reflect.Reflection");
-        SharedSecrets = tryLoad("jdk.internal.access.SharedSecrets", "sun.misc.SharedSecrets");
+        SharedSecrets = tryLoad("jdk.internal.access.SharedSecrets", "jdk.internal.misc.SharedSecrets", "sun.misc.SharedSecrets");
         URLClassPath = tryLoad("jdk.internal.loader.URLClassPath", "sun.misc.URLClassPath");
 
         try {
