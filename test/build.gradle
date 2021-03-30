@@ -1,3 +1,5 @@
+targetCompatibility = sourceCompatibility = 15
+
 dependencies {
     api(project(":"))
 
@@ -5,4 +7,5 @@ dependencies {
     api("org.ow2.asm:asm:9.0")
     api("org.ow2.asm:asm-tree:9.0")
     api("org.openjdk.jol:jol-core:latest.release")
+    api("user11681:uncheck:latest.release")
 }

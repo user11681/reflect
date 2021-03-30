@@ -1,4 +1,4 @@
-package user11681.reflect.other;
+package user11681.reflect.misc;
 
 public class C extends B {
     public static A c0 = new A();

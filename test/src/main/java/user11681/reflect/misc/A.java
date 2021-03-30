@@ -1,4 +1,4 @@
-package user11681.reflect.other;
+package user11681.reflect.misc;
 
 import java.util.Random;
 import net.gudenau.lib.unsafe.Unsafe;

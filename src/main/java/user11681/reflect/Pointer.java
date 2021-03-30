@@ -209,11 +209,11 @@ public class Pointer implements Cloneable {
     }
 
     public <T> T getVolatile() {
-        return (T) Unsafe.getObjectVolatile(this.object, this.offset);
+        return Unsafe.getObjectVolatile(this.object, this.offset);
     }
 
     public <T> T getVolatile(Object object) {
-        return (T) Unsafe.getObjectVolatile(object, this.offset);
+        return Unsafe.getObjectVolatile(object, this.offset);
     }
 
     public void putVolatile(Object object, Object value) {

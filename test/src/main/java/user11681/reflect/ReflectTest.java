@@ -7,19 +7,11 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
@@ -30,22 +22,17 @@ import user11681.reflect.experimental.generics.Generics;
 import user11681.reflect.experimental.generics.TypeArgument;
 import user11681.reflect.generics.GenericTypeAware;
 import user11681.reflect.generics.GenericTypeAwareTest;
-import user11681.reflect.other.A;
-import user11681.reflect.other.C;
-import user11681.reflect.other.Enumeration;
-import user11681.reflect.other.TestObject;
+import user11681.reflect.misc.A;
+import user11681.reflect.misc.C;
+import user11681.reflect.misc.Enumeration;
+import user11681.reflect.misc.TestObject;
 import user11681.reflect.util.Logger;
-import user11681.reflect.util.ThrowingRunnable;
+import user11681.reflect.util.Util;
 
 @Testable
 public class ReflectTest {
-    private static final int iterations = 10000;
-    private static final int tests = 10;
-
     private static final List<Object> dummy = Lists.wrap(new Object[]{0});
     private static int dummyIndex;
-
-    public static Object nul;
 
     public static <T, R> R var(T object, Function<T, R> function) {
         return function.apply(object);
@@ -71,12 +58,6 @@ public class ReflectTest {
             object.field0 = "new0";
             object.field1 = "new1";
         });
-    }
-
-    @Test
-    public void castPerformance() {
-        timeN("checkcast", () -> {ReflectTest test = (ReflectTest) (Object) (nul);});
-        timeN("Class#cast", () -> {ReflectTest test = ReflectTest.class.cast(nul);});
     }
 
     @Test
@@ -143,34 +124,6 @@ public class ReflectTest {
     }
 
     @Test
-    public void lists() {
-        Integer[] array = new Integer[100];
-        Arrays.fill(array, 0, array.length, 29);
-
-        timeN("ArrayList constructor", () -> new ArrayList<>(Arrays.asList(array)));
-        timeN("Unsafe", () -> Lists.wrap(new ArrayList<>(), array, 100));
-
-        timeN("ArrayList addAll", () -> new ArrayList<>().addAll(Arrays.asList(array)));
-        timeN("Unsafe", () -> Lists.addAll(new ArrayList<>(), array));
-    }
-
-    @Test
-    public void instantiation() {
-        timeN("constructor", () -> new ArrayList<>());
-        timeN("Unsafe", () -> Unsafe.allocateInstance(ArrayList.class));
-    }
-
-    @Test
-    public void fixedArity() throws Throwable {
-        MethodHandle handle = Invoker.bind(new C(), "print", void.class);
-
-        repeat(handle::invokeExact);
-
-        timeN("normal", handle::invokeExact);
-        timeN("fixed arity", handle.asFixedArity()::invokeExact);
-    }
-
-    @Test
     public void invokeExact() throws Throwable {
         C c = new C();
         MethodHandle handle = Invoker.findSpecial(A.class, "print", void.class);
@@ -185,26 +138,18 @@ public class ReflectTest {
     }
 
     @Test
-    public void cloneTest() {
-        A a = new A();
-
-        timeN("clone", a::clone);
-        timeN("copy <init>", () -> new A(a));
-    }
-
-    @Test
     public void pointer() {
         Enumeration enumeration = EnumConstructor.add(Enumeration.class, 0, "DDD", 4026D);
         Pointer pointer = new Pointer().bind(enumeration).instanceField("test");
 
-        repeat(() -> {
+        Util.repeat(() -> {
             pointer.putDouble(pointer.getDouble() + 4);
             System.out.println(pointer.getDouble());
         });
     }
 
     @Test
-    public void enumTest() throws Throwable {
+    public void enumeration() {
         Constructor<?> retentionPolicyConstructor = EnumConstructor.findConstructor(false, RetentionPolicy.class);
         Constructor<?> enumerationConstructor = EnumConstructor.findConstructor(true, Enumeration.class, 0D);
 
@@ -224,7 +169,7 @@ public class ReflectTest {
 
         EnumConstructor<RetentionPolicy> constructor = new EnumConstructor<>(RetentionPolicy.class);
 
-        repeat(() -> constructor.add("TEST", 0D));
+        Util.repeat(() -> constructor.add("TEST", 0D));
 
         Enumeration.valueOf("TEST");
     }
@@ -245,13 +190,6 @@ public class ReflectTest {
         System.out.println(Classes.staticCast(longg, Double.class));
 
         Classes.staticCast(A.class, (Object) Class.class);
-    }
-
-    @Test
-    public void newInvokerUnreflectTest() {
-//        timeN("new", () -> Invoker.unreflect2(A.class, "privateMethod"));
-
-        timeN("old", () -> Invoker.unreflect(A.class, "privateMethod"));
     }
 
     @Test
@@ -276,43 +214,7 @@ public class ReflectTest {
     }
 
     @Test
-    public void unreflectTest() throws Throwable {
-        Method method = Methods.getMethod(A.class, "privateMethod");
-        Method declaredMethod = A.class.getDeclaredMethod("privateMethod");
-        MethodHandle methodHandle = Invoker.findStatic(A.class, "privateMethod", String.class);
-        MethodHandle unreflected = Invoker.unreflect(method);
-
-        timeN("Method 0", () -> {
-            Methods.getMethod(A.class, "privateMethod2", int.class);
-        });
-
-        timeN("Method 1", () -> {
-            Methods.getMethod(A.class, "privateMethod");
-        });
-
-        timeN("Method 2", () -> {
-            Method method1 = A.class.getDeclaredMethod("privateMethod");
-
-            method.setAccessible(true);
-        });
-
-        timeN("MethodHandle unreflection", () -> {
-            Invoker.unreflect(declaredMethod);
-        });
-
-        timeN("MethodHandle", () -> {
-            Invoker.findStatic(A.class, "privateMethod", String.class);
-        });
-    }
-
-    @Test
-    public void methodTest() {
-        timeN(() -> Methods.getMethods(TestObject.class));
-        timeN(ReflectTest.class::getDeclaredMethods);
-    }
-
-    @Test
-    public void classPointerTest() {
+    public void classPointer() {
         Object object = Unsafe.allocateInstance(Object.class);
 
         System.out.println(object);
@@ -330,59 +232,6 @@ public class ReflectTest {
         System.out.println(object);
         Classes.staticCast(object, new ReflectTest());
         System.out.println(object);
-    }
-
-    @Test
-    public void invokerPerformance() throws Throwable {
-        Object object = new Object();
-
-        long start = System.nanoTime();
-
-        MethodHandle handle = Invoker.findVirtual(Object.class, "hashCode", MethodType.methodType(int.class));
-
-        for (int i = 0; i < iterations; i++) {
-            int code = (int) handle.invokeExact(object);
-        }
-
-        System.out.println(System.nanoTime() - start);
-
-        start = System.nanoTime();
-
-        Method method = Object.class.getMethod("hashCode");
-
-        for (int i = 0; i < iterations; i++) {
-            int code = (int) method.invoke(object);
-        }
-
-        System.out.println(System.nanoTime() - start);
-    }
-
-    @Test
-    public void normalFieldTime() {
-        ThrowingRunnable test = () -> {
-            Field field = TestObject.class.getDeclaredField("integer");
-
-            field.setAccessible(true);
-
-            Field modifiers = Field.class.getDeclaredField("modifiers");
-
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-        };
-
-        time(test);
-        time(test);
-        time(test);
-        time(test);
-        time(test);
-    }
-
-    @Test
-    public void reflectFieldTime() {
-        repeat(() -> Fields.getRawFields(TestObject.class));
-
-        time("cached", () -> repeat(() -> Fields.getFields(TestObject.class)));
-        time("raw", () -> repeat(() -> Fields.getRawFields(TestObject.class)));
     }
 
     @Test
@@ -456,104 +305,7 @@ public class ReflectTest {
         }
     }
 
-    @Test
-    public double timeN(ThrowingRunnable test) {
-        try {
-            long time = System.nanoTime();
-
-            for (int i = 0; i < iterations; i++) {
-                test.run();
-            }
-
-            double duration = (double) (System.nanoTime() - time) / iterations;
-
-            Logger.log(duration);
-
-            return duration;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-    }
-
-    @Test
-    public double timeN(String label, ThrowingRunnable test) {
-        try {
-            long time = System.nanoTime();
-
-            for (int i = 0; i < iterations; i++) {
-                test.run();
-            }
-
-            double duration = (double) (System.nanoTime() - time) / iterations;
-
-            Logger.log("%s: %s", label, duration);
-
-            return duration;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-    }
-
-    public static long time(ThrowingRunnable test) {
-        try {
-            long time = System.nanoTime();
-
-            test.run();
-
-            time = System.nanoTime() - time;
-
-            Logger.log(time);
-
-            return time;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-    }
-
-    public static long time(String label, ThrowingRunnable test) {
-        try {
-            long time = System.nanoTime();
-
-            test.run();
-
-            time = System.nanoTime() - time;
-
-            Logger.log("%s: %s", label, time);
-
-            return time;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-    }
-
-    @Test
-    public void repeat(ThrowingRunnable test) {
-        for (int i = 0; i < iterations; i++) {
-            try {
-                test.run();
-            } catch (Throwable throwable) {
-                throw Unsafe.throwException(throwable);
-            }
-        }
-    }
-
     static {
         System.setProperty("jol.tryWithSudo", "true");
-
-        long time = time(() -> Classes.load(true, "user11681.reflect.Reflect"));
-
-        try (Stream<Path> classStream = Files.list(Paths.get(Reflect.class.getProtectionDomain().getCodeSource().getLocation().toURI()).resolve("user11681/reflect"))) {
-            List<Path> classes = classStream.collect(Collectors.toList());
-
-            time += time(() -> {
-                for (Path klass : classes) {
-                    Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", ""));
-                }
-            });
-
-            Logger.log("initialized in %s ms", time / 1000000D);
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
     }
 }

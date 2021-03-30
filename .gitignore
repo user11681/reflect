@@ -1,6 +1,7 @@
 .*
 !/.gitignore
 
+bin
 build
 out
 run

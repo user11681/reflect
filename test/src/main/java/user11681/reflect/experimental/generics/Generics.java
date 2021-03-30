@@ -9,6 +9,8 @@ import java.util.List;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Generics {
+    private static final int TEST = 0;
+
     public static List<Type> genericSupertypes(Class<?> klass) {
         Type genericSuperclass = klass.getGenericSuperclass();
         List<Type> genericSupertypes = new ArrayList<>(Arrays.asList(klass.getGenericInterfaces()));

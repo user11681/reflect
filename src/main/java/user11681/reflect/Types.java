@@ -2,14 +2,19 @@ package user11681.reflect;
 
 public class Types {
     public static boolean equals(Class<?> klass, Class<?> other) {
-        return klass == other || klass != null && (getPrimitive(klass) == other || getPrimitive(other) == klass);
+        return klass == other || klass != null && (primitive(klass) == other || primitive(other) == klass);
     }
 
     public static boolean isWrapper(Class<?> klass) {
-        return getPrimitive(klass) != null;
+        return primitive(klass) != null;
     }
 
+    @Deprecated // use primitive
     public static Class<?> getPrimitive(Class<?> klass) {
+        return primitive(klass);
+    }
+
+    public static Class<?> primitive(Class<?> klass) {
         if (klass == Void.class) {
             return void.class;
         } else if (klass == Boolean.class) {
@@ -28,6 +33,30 @@ public class Types {
             return float.class;
         } else if (klass == Double.class) {
             return double.class;
+        }
+
+        return null;
+    }
+
+    public static Class<?> wrapper(Class<?> klass) {
+        if (klass == void.class) {
+            return Void.class;
+        } else if (klass == boolean.class) {
+            return Boolean.class;
+        } else if (klass == byte.class) {
+            return Byte.class;
+        } else if (klass == char.class) {
+            return Character.class;
+        } else if (klass == short.class) {
+            return Short.class;
+        } else if (klass == int.class) {
+            return Integer.class;
+        } else if (klass == long.class) {
+            return Long.class;
+        } else if (klass == float.class) {
+            return Float.class;
+        } else if (klass == double.class) {
+            return Double.class;
         }
 
         return null;
