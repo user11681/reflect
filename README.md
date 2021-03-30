@@ -15,16 +15,16 @@ in the official launcher due to maintenance burden and bloat.
 
 I try to keep this library mostly stable, although occasionally (with prior notice) I may break things.
 
-reflect is hosted on Bintray. It depends on [my fork](https://github.com/user11681/unsafe) of [unsafe](https://github.com/gudenau/java-unsafe).
+reflect is hosted on Artifactory. It depends on [my fork](https://github.com/user11681/unsafe) of [unsafe](https://github.com/gudenau/java-unsafe).
 ```groovy
 repositories {
-    maven {url = "https://dl.bintray.com/user11681/maven"}
+    maven {url = "https://auoeke.jfrog.io/artifactory/maven"}
 }
 
 dependencies {
     // Use "latest.release" for the latest version or see
-    // https://dl.bintray.com/user11681/maven/net/gudenau/lib/unsafe and
-    // https://dl.bintray.com/user11681/maven/user11681/reflect
+    // https://auoeke.jfrog.io/artifactory/maven/net/gudenau/lib/unsafe and
+    // https://auoeke.jfrog.io/artifactory/maven/user11681/reflect
     api("net.gudenau.lib:unsafe:latest.release")
     api("user11681:reflect:latest.release")
 }
