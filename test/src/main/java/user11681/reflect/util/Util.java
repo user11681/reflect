@@ -10,6 +10,8 @@ public class Util {
         return null;
     }
 
+    public static void bp() {}
+
     public static void repeat(ThrowingRunnable test) {
         repeat(repetitions, test);
     }

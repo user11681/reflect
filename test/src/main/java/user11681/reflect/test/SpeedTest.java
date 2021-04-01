@@ -28,7 +28,9 @@ import user11681.reflect.misc.TestObject;
 import user11681.reflect.util.Logger;
 import user11681.reflect.util.Util;
 import user11681.uncheck.ThrowingRunnable;
+import user11681.uncheck.Uncheck;
 
+@SuppressWarnings("UnusedReturnValue")
 public class SpeedTest {
     static final int iterations = 10000;
     static final int tests = 10;
@@ -37,7 +39,7 @@ public class SpeedTest {
 
     @Test
     static double timeN(ThrowingRunnable test) {
-        try {
+        return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
             for (int i = 0; i < iterations; i++) {
@@ -49,13 +51,11 @@ public class SpeedTest {
             Logger.log(duration);
 
             return duration;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
+        });
     }
 
     static double timeN(String label, ThrowingRunnable test) {
-        try {
+        return Uncheck.handle(() ->  {
             long time = System.nanoTime();
 
             for (int i = 0; i < iterations; i++) {
@@ -67,13 +67,11 @@ public class SpeedTest {
             Logger.log("%s: %s", label, duration);
 
             return duration;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
+        });
     }
 
     static long time(ThrowingRunnable test) {
-        try {
+        return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
             test.run();
@@ -83,13 +81,11 @@ public class SpeedTest {
             Logger.log(time);
 
             return time;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
+        });
     }
 
     static long time(String label, ThrowingRunnable test) {
-        try {
+        return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
             test.run();
@@ -99,9 +95,7 @@ public class SpeedTest {
             Logger.log("%s: %s", label, time);
 
             return time;
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
+        });
     }
 
     @Test

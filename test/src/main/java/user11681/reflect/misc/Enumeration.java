@@ -1,7 +1,7 @@
 package user11681.reflect.misc;
 
 public enum Enumeration implements GenericInterface<A> {;
-    private final double test;
+    public final double test;
 
     Enumeration(double test) {
         this.test = test;

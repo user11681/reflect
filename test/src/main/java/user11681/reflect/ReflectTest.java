@@ -10,12 +10,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
-import org.openjdk.jol.info.ClassData;
 import user11681.reflect.experimental.Classes2;
 import user11681.reflect.experimental.Lists;
 import user11681.reflect.experimental.generics.Generics;
@@ -29,18 +27,11 @@ import user11681.reflect.misc.TestObject;
 import user11681.reflect.util.Logger;
 import user11681.reflect.util.Util;
 
+@SuppressWarnings("AssertWithSideEffects")
 @Testable
 public class ReflectTest {
     private static final List<Object> dummy = Lists.wrap(new Object[]{0});
     private static int dummyIndex;
-
-    public static <T, R> R var(T object, Function<T, R> function) {
-        return function.apply(object);
-    }
-
-    public static <T> void var(T object, Consumer<T> consumer) {
-        consumer.accept(object);
-    }
 
     public static <T extends Enum<T>> T valueOf(Class<?> klass, String name) {
         return Enum.valueOf((Class<T>) klass, name);
@@ -50,16 +41,6 @@ public class ReflectTest {
         RetentionPolicy source = valueOf(RetentionPolicy.class, "SOURCE");
     }
 
-    static {
-        var(new Object() {
-            Object field0 = "field0";
-            Object field1 = "field1";
-        }, object -> {
-            object.field0 = "new0";
-            object.field1 = "new1";
-        });
-    }
-
     @Test
     public void genericMetadata() {
         Type[] interfaces = GenericTypeAwareTest.class.getGenericInterfaces();
@@ -67,7 +48,7 @@ public class ReflectTest {
         Type[] parameters = GenericTypeAware.class.getTypeParameters();
         List<TypeArgument> typeArguments = Generics.typeArguments(GenericTypeAwareTest.Sub.Sub1.class);
 
-        boolean bp = true;
+        Util.bp();
     }
 
     @Test
@@ -86,24 +67,6 @@ public class ReflectTest {
         assert PackagePrivate.getClassLoader() == Reflect.defaultClassLoader;
 
 //        Classes.load("user11681.reflect.Public");
-    }
-
-    @Test
-    public void accessFlags() {
-        Class<?> klass = ReflectTest.class;
-        ClassData data = ClassData.parseInstance(klass);
-
-        boolean bp = true;
-    }
-
-    @Test
-    public void multipleInheritance() {
-        long IntegerPointer = Classes.getClassPointer(Integer.class) & 0xFFFFFFFFL;
-        long StringPointer = Classes.getClassPointer(String.class) & 0xFFFFFFFFL;
-
-        Unsafe.putAddress(IntegerPointer + 4 * 19, StringPointer);
-
-        String string = (String) (Object) 0;
     }
 
     @Test
@@ -153,19 +116,38 @@ public class ReflectTest {
         Constructor<?> retentionPolicyConstructor = EnumConstructor.findConstructor(false, RetentionPolicy.class);
         Constructor<?> enumerationConstructor = EnumConstructor.findConstructor(true, Enumeration.class, 0D);
 
-        EnumConstructor.newInstance(Enumeration.class, "TEST", 1D);
-        EnumConstructor.newInstance(Enumeration.class, 0, "TEST", 3D);
-        EnumConstructor.newInstance(false, Enumeration.class, "TEST", 4D);
-        EnumConstructor.newInstance(false, Enumeration.class, 1, "TEST", 5D);
+        assert EnumConstructor.newInstance(Enumeration.class, "TEST", 1D).ordinal() == 0;
+        assert EnumConstructor.newInstance(Enumeration.class, 0, "TEST", 553D).test == 553;
+        assert EnumConstructor.newInstance(false, Enumeration.class, "TEST", 4D).test == 4;
+        assert EnumConstructor.newInstance(false, Enumeration.class, 1, "TEST", 9023D).test == 9023;
 
         Enumeration enumeration = EnumConstructor.newInstance(Enumeration.class, 2, "TEST", 2D);
-        assert enumeration != null;
+        assert enumeration != null && enumeration.test == 2;
+
+        var expectedLength = new Object() {
+            int length = 0;
+        };
+
+        Runnable verifySize = () -> {
+            assert Enumeration.values().length == expectedLength.length++;
+        };
+
+        verifySize.run();
 
         EnumConstructor.add(Enumeration.class, "TEST", 1D);
+        verifySize.run();
+
         EnumConstructor.add(Enumeration.class, 0, "TEST", 3D);
+        verifySize.run();
+
         EnumConstructor.add(false, Enumeration.class, "TEST", 4D);
+        verifySize.run();
+
         EnumConstructor.add(false, Enumeration.class, 1, "TEST", 5D);
+        verifySize.run();
+
         EnumConstructor.add(Enumeration.class, enumeration);
+        verifySize.run();
 
         EnumConstructor<RetentionPolicy> constructor = new EnumConstructor<>(RetentionPolicy.class);
 

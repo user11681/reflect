@@ -1,5 +1,3 @@
-targetCompatibility = sourceCompatibility = 15
-
 dependencies {
     api(project(":"))
 
