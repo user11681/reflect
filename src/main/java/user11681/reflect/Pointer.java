@@ -29,6 +29,7 @@ public class Pointer implements Cloneable {
     }
 
     public Pointer staticField(Class<?> klass, String name) {
+        this.object = klass;
         this.offset = Unsafe.staticFieldOffset(Fields.getField(klass, name));
 
         return this;
@@ -41,6 +42,7 @@ public class Pointer implements Cloneable {
     }
 
     public Pointer staticField(Field field) {
+        this.object = field.getDeclaringClass();
         this.offset = Unsafe.staticFieldOffset(field);
 
         return this;
