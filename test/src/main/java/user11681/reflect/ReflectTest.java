@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
@@ -26,15 +27,6 @@ import user11681.uncheck.Uncheck;
 @Testable
 public class ReflectTest {
     private static final List<Object> dummy = Lists.wrap(new Object[]{0});
-    private static int dummyIndex;
-
-    public static <T extends Enum<T>> T valueOf(Class<?> klass, String name) {
-        return Enum.valueOf((Class<T>) klass, name);
-    }
-
-    static {
-        RetentionPolicy source = valueOf(RetentionPolicy.class, "SOURCE");
-    }
 
     @Test
     public void changeLoader() {
@@ -43,8 +35,6 @@ public class ReflectTest {
 
         Accessor.putObject((Object) PackagePrivate, "classLoader", Reflect.defaultClassLoader);
         assert PackagePrivate.getClassLoader() == Reflect.defaultClassLoader;
-
-//        Classes.load("user11681.reflect.Public");
     }
 
     @Test
@@ -273,6 +263,18 @@ public class ReflectTest {
     void method() throws Throwable {
         assert Constructors.constructor(false, Enumeration.class, "", 1, 4D) == null;
         assert Constructors.constructor(true, Enumeration.class, "", 1, 4D) != null;
+    }
+
+    @Test
+    void invoke() throws Throwable {
+        Runnable runnable = () -> {};
+        Function<Integer, String> function = String::valueOf;
+        IntFunction<Integer> consumer = Integer::valueOf;
+
+        Invoker.run(Invoker.bind(runnable, "run", void.class));
+
+        assert "123".equals(Invoker.apply(Invoker.bind(function, "apply", Object.class, Object.class), 123));
+        assert (Integer) Invoker.apply(Invoker.bind(consumer, "apply", Object.class, int.class), 57) == 57;
     }
 
     public void logFields(Object object) {

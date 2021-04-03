@@ -8,6 +8,22 @@ import java.lang.reflect.Method;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Invoker {
+    public static <T> T apply(MethodHandle handle, Object... arguments) {
+        try {
+            return (T) handle.invokeWithArguments(arguments);
+        } catch (Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
+    }
+
+    public static void run(MethodHandle handle, Object... arguments) {
+        try {
+            handle.invokeWithArguments(arguments);
+        } catch (Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
+    }
+
     public static MethodHandle bind(Object receiver, String name, MethodType type) {
         try {
             return Unsafe.trustedLookup.bind(receiver, name, type);
