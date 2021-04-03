@@ -14,6 +14,16 @@ public class Constructors {
 
     private static final Object notFound = null;
 
+    public static <T> T instantiate(Class<T> klass) {
+        Constructor<T> constructor = Constructors.constructor(klass);
+
+        if (constructor == null) {
+            return Unsafe.allocateInstance(klass);
+        }
+
+        return Invoker.apply(Invoker.unreflectConstructor(constructor));
+    }
+
     public static <T> T construct(Class<T> klass, Object... arguments) {
         try {
             return (T) Invoker.unreflectConstructor(constructor(klass, arguments)).invokeWithArguments(arguments);
