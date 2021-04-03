@@ -191,7 +191,7 @@ public class Fields {
                 if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
                     tempGetDeclaredFields = Unsafe.trustedLookup.unreflectSpecial(method, Class.class);
 
-                    if (tempGetDeclaredFields.type().parameterCount() > 1) {
+                    if (method.getParameterCount() > 0) {
                         tempGetDeclaredFields = MethodHandles.insertArguments(tempGetDeclaredFields, 1, false);
                     }
 

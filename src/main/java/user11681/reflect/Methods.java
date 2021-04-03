@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 
@@ -14,7 +15,39 @@ public class Methods {
 
     private static final HashMap<Class<?>, Method[]> methodCache = new HashMap<>();
 
-    private static final Method notFound = null;
+    private static final Object notFound = null;
+
+    public static <T extends Executable> T find(T[] methods, Class<?>... parameterTypes) {
+        for (T method : methods) {
+            if (Arrays.equals(method.getParameterTypes(), parameterTypes)) {
+                return method;
+            }
+        }
+
+        return (T) notFound;
+    }
+
+    public static <T extends Executable> T find(T[] methods, Object... arguments) {
+        return find(true, 0, methods, arguments);
+    }
+
+    public static <T extends Executable> T find(int offset, T[] methods, Object... arguments) {
+        return find(true, offset, methods, arguments);
+    }
+
+    public static <T extends Executable> T find(boolean unbox, T[] methods, Object... arguments) {
+        return find(unbox, 0, methods, arguments);
+    }
+
+    public static <T extends Executable> T find(boolean unbox, int offset, T[] methods, Object... arguments) {
+        for (Executable method : methods) {
+            if (Methods.argumentsMatchParameters(unbox, offset, method, arguments)) {
+                return (T) method;
+            }
+        }
+
+        return (T) notFound;
+    }
 
     public static boolean argumentsMatchParameters(Executable executable, Object... arguments) {
         return argumentsMatchParameters(true, 0, executable, arguments);
@@ -70,7 +103,7 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method getMethod(Class<?> klass, String name) {
@@ -82,7 +115,7 @@ public class Methods {
             }
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method getMethod(Object object, String name, Class<?>... parameterTypes) {
@@ -97,7 +130,7 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method getMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
@@ -124,7 +157,7 @@ public class Methods {
             }
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method getRawMethod(Object object, String name) {
@@ -139,7 +172,7 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method getRawMethod(Class<?> klass, String name) {
@@ -151,7 +184,7 @@ public class Methods {
             }
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method getRawMethod(Object object, String name, Class<?>... parameterTypes) {
@@ -166,7 +199,7 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method getRawMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
@@ -193,7 +226,7 @@ public class Methods {
             }
         }
 
-        return notFound;
+        return (Method) notFound;
     }
 
     public static Method[] getMethods(Class<?> klass) {

@@ -272,9 +272,9 @@ public class Classes {
     @SuppressWarnings("ConstantConditions")
     public static <T> Class<T> defineBootstrapClass(ClassLoader resourceLoader, String name) {
         try {
-            final URL url = resourceLoader.getResource(name.replace('.', '/') + ".class");
-            final InputStream stream = url.openStream();
-            final byte[] bytecode = new byte[stream.available()];
+            URL url = resourceLoader.getResource(name.replace('.', '/') + ".class");
+            InputStream stream = url.openStream();
+            byte[] bytecode = new byte[stream.available()];
 
             while (stream.read(bytecode) != -1) {}
 
@@ -433,7 +433,7 @@ public class Classes {
             x64 = true;
             longClassPointer = true;
         } else {
-            throw new IllegalStateException("unsupported field offset. Report this exception to https://github.com/user11681/reflect/issues.");
+            throw new Error("unsupported field offset; report to https://github.com/user11681/reflect/issues.");
         }
 
         addressFactor = x64 ? 8 : 1;

@@ -1,7 +1,9 @@
 package user11681.reflect.test;
 
+import java.lang.annotation.RetentionPolicy;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -32,7 +34,7 @@ import user11681.uncheck.Uncheck;
 
 @SuppressWarnings("UnusedReturnValue")
 public class SpeedTest {
-    static final int iterations = 10000;
+    static final int iterations = 1000;
     static final int tests = 10;
     static Runnable runnable0;
     static Runnable runnable1;
@@ -237,6 +239,17 @@ public class SpeedTest {
     public void cast() {
         timeN("checkcast", () -> {ReflectTest test = Util.nul();});
         timeN("Class#cast", () -> {ReflectTest test = ReflectTest.class.cast(Util.nul());});
+    }
+
+    @Test
+    void enumConstruction() throws Throwable {
+        MethodHandle handle = Invoker.findConstructor(RetentionPolicy.class, String.class, int.class);
+        MethodHandle newInstance0 = Invoker.findStatic(Classes.NativeConstructorAccessorImpl, "newInstance0", Object.class, Constructor.class, Object[].class).bindTo(RetentionPolicy.class.getDeclaredConstructor(String.class, int.class));
+
+        Util.repeat(10000, () -> handle.invoke("", 1));
+
+        timeN("MethodHandle", () -> handle.invoke("", 1));
+        timeN("NativeConstructorAccessorImpl", () -> newInstance0.invoke(new Object[]{"", 1}));
     }
 
     static {

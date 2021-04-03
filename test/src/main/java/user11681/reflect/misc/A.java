@@ -3,7 +3,6 @@ package user11681.reflect.misc;
 import java.util.Random;
 import net.gudenau.lib.unsafe.Unsafe;
 
-@SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
 public class A implements Cloneable {
     public static final String[] strings = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
     public static final Random random = new Random();

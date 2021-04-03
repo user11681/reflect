@@ -16,6 +16,8 @@ allprojects {
 
     dependencies {
         api("net.gudenau.lib:unsafe:latest.release")
+
+        compileOnly("org.jetbrains:annotations:latest.release")
     }
 }
 

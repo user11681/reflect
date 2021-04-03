@@ -3,29 +3,24 @@ package user11681.reflect;
 import java.io.File;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
-import user11681.reflect.experimental.Classes2;
 import user11681.reflect.experimental.Lists;
-import user11681.reflect.experimental.generics.Generics;
-import user11681.reflect.experimental.generics.TypeArgument;
-import user11681.reflect.generics.GenericTypeAware;
-import user11681.reflect.generics.GenericTypeAwareTest;
 import user11681.reflect.misc.A;
 import user11681.reflect.misc.C;
 import user11681.reflect.misc.Enumeration;
 import user11681.reflect.misc.TestObject;
 import user11681.reflect.util.Logger;
 import user11681.reflect.util.Util;
+import user11681.uncheck.Uncheck;
 
 @SuppressWarnings("AssertWithSideEffects")
 @Testable
@@ -42,25 +37,8 @@ public class ReflectTest {
     }
 
     @Test
-    public void genericMetadata() {
-        Type[] interfaces = GenericTypeAwareTest.class.getGenericInterfaces();
-        Type superclass = GenericTypeAwareTest.class.getGenericSuperclass();
-        Type[] parameters = GenericTypeAware.class.getTypeParameters();
-        List<TypeArgument> typeArguments = Generics.typeArguments(GenericTypeAwareTest.Sub.Sub1.class);
-
-        Util.bp();
-    }
-
-    @Test
-    public void genericTypeAware() {
-        GenericTypeAwareTest typeAware = new GenericTypeAwareTest();
-
-        Logger.log(typeAware.type);
-    }
-
-    @Test
     public void changeLoader() {
-        Class<?> PackagePrivate = Classes.defineBootstrapClass(ReflectTest.class.getClassLoader(), "user11681/reflect/PackagePrivate");
+        Class<?> PackagePrivate = Classes.defineBootstrapClass(ReflectTest.class.getClassLoader(), "user11681/reflect/misc/PackagePrivate");
         assert PackagePrivate.getClassLoader() == null;
 
         Accessor.putObject((Object) PackagePrivate, "classLoader", Reflect.defaultClassLoader);
@@ -92,7 +70,7 @@ public class ReflectTest {
         MethodHandle handle = Invoker.findSpecial(A.class, "print", void.class);
 
         handle.invoke(c);
-        handle.invokeExact(c);
+        handle.invokeExact((A) c);
 
         handle = handle.bindTo(c);
 
@@ -100,14 +78,21 @@ public class ReflectTest {
         handle.invokeExact();
     }
 
+    @SuppressWarnings("WrapperTypeMayBePrimitive")
     @Test
     public void pointer() {
-        Enumeration enumeration = EnumConstructor.add(Enumeration.class, 0, "DDD", 4026D);
-        Pointer pointer = new Pointer().bind(enumeration).instanceField("test");
+        A a = new A();
+        a.yes = 446;
+        Double yes = a.yes;
+
+        Pointer pointer = new Pointer().bind(a).instanceField("yes");
 
         Util.repeat(() -> {
             pointer.putDouble(pointer.getDouble() + 4);
-            System.out.println(pointer.getDouble());
+
+            Accessor.putDouble(yes, "value", yes + 4);
+
+            assert yes == pointer.getDouble();
         });
     }
 
@@ -178,14 +163,6 @@ public class ReflectTest {
     public void invokerOverload() throws Throwable {
         Logger.log(Invoker.unreflect(Boolean.class, "getBoolean", String.class).invoke("123"));
         Logger.log(Invoker.unreflectConstructor(Boolean.class, boolean.class).invoke(true));
-    }
-
-    @Test
-    public void addClass() {
-        Classes2.addClass(String.class, Integer.class);
-
-        String integer = (String) (Object) 0;
-        Integer string = (Integer) (Object) "";
     }
 
     @Test
@@ -276,15 +253,28 @@ public class ReflectTest {
     }
 
     @Test
-    public <T> T invokeStatic(Class<?> klass, String name, MethodType methodType, Object... arguments) throws Throwable {
-        return (T) Unsafe.trustedLookup.findStatic(klass, name, methodType).invokeWithArguments(arguments);
+    void constructor() throws Throwable {
+        class PrivateCtor {
+            public final int test;
+
+            private PrivateCtor(int test) {
+                this.test = test;
+            }
+        }
+
+        Constructor<PrivateCtor> constructor = PrivateCtor.class.getDeclaredConstructor(ReflectTest.class, int.class);
+
+        assert Arrays.equals(Constructors.constructors(PrivateCtor.class), new Constructor[]{constructor});
+        assert Constructors.constructor(PrivateCtor.class, ReflectTest.class, int.class).newInstance(this, 4).test == 4;
+        assert Constructors.construct(PrivateCtor.class, this, 27).test == 27;
     }
 
-    @Test
     public void logFields(Object object) {
-        for (Field field : Fields.getInstanceFields(object.getClass())) {
-            System.out.printf("%s: %s\n", field, Accessor.getObject(object, field));
-        }
+        Uncheck.handle(() -> {
+            for (Field field : Fields.getInstanceFields(object.getClass())) {
+                System.out.printf("%s: %s\n", field, field.get(object));
+            }
+        });
     }
 
     static {

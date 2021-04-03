@@ -11,14 +11,12 @@ import net.gudenau.lib.unsafe.Unsafe;
 public class EnumConstructor<E extends Enum<E>> {
     private static final int ENUM_ARRAY = Modifier.PRIVATE | Modifier.STATIC | 1 << 12 /*synthetic*/ | Modifier.FINAL;
 
-    private static final Object NOT_FOUND = null;
+    private static final Object notFound = null;
 
     private static final HashMap<Class<?>, Pointer> arrayFields = new HashMap<>();
     private static final HashMap<Class<?>, EnumConstructor<?>> constructors = new HashMap<>();
 
     private static final MethodHandle getEnumVars;
-    private static final MethodHandle acquireConstructorAccessor = Invoker.unreflect(Constructor.class, "acquireConstructorAccessor");
-    private static final MethodHandle newInstance0 = Invoker.findStatic(Classes.NativeConstructorAccessorImpl, "newInstance0", Object.class, Constructor.class, Object[].class);
 
     private static final Pointer enumConstantPointer;
     private static final Pointer enumConstantDirectoryPointer;
@@ -32,7 +30,7 @@ public class EnumConstructor<E extends Enum<E>> {
 
     protected EnumConstructor(Class<E> enumClass, Constructor<?> constructor) {
         this.enumClass = enumClass;
-        this.newInstance = newInstance0.bindTo(constructor);
+        this.newInstance = Invoker.unreflectConstructor(constructor).asSpreader(Object[].class, constructor.getParameterCount() - 2);
     }
 
     public static <E extends Enum<E>> EnumConstructor<E> get(Class<E> enumClass, Object... arguments) {
@@ -42,12 +40,10 @@ public class EnumConstructor<E extends Enum<E>> {
     public static <E extends Enum<E>> EnumConstructor<E> get(boolean unbox, Class<E> enumClass, Object... arguments) {
         EnumConstructor<E> constructor = (EnumConstructor<E>) constructors.get(enumClass);
 
-        if (constructor != null) {
-            return constructor;
+        if (constructor == null) {
+            constructor = new EnumConstructor<>(enumClass, findConstructor(unbox, enumClass, arguments));
+            constructors.put(enumClass, constructor);
         }
-
-        constructor = new EnumConstructor<>(enumClass, findConstructor(unbox, enumClass, arguments));
-        constructors.put(enumClass, constructor);
 
         return constructor;
     }
@@ -59,12 +55,10 @@ public class EnumConstructor<E extends Enum<E>> {
     public static <E extends Enum<E>> EnumConstructor<E> get(Class<E> enumClass, Class<?>... parameterTypes) {
         EnumConstructor<E> constructor = (EnumConstructor<E>) constructors.get(enumClass);
 
-        if (constructor != null) {
-            return constructor;
+        if (constructor == null) {
+            constructor = new EnumConstructor<>(enumClass, parameterTypes);
+            constructors.put(enumClass, constructor);
         }
-
-        constructor = new EnumConstructor<>(enumClass, parameterTypes);
-        constructors.put(enumClass, constructor);
 
         return constructor;
     }
@@ -86,9 +80,9 @@ public class EnumConstructor<E extends Enum<E>> {
     }
 
     public static <E extends Enum<E>> E add(Class<E> enumClass, E enumConstant) {
-        final Pointer enumArrayPointer = getEnumArray(enumClass);
-        final Object[] values = enumArrayPointer.get();
-        final Object[] newValues = Arrays.copyOf(values, values.length + 1);
+        Pointer enumArrayPointer = getEnumArray(enumClass);
+        Object[] values = enumArrayPointer.get();
+        Object[] newValues = Arrays.copyOf(values, values.length + 1);
         newValues[values.length] = enumConstant;
 
         enumArrayPointer.put(newValues);
@@ -114,43 +108,22 @@ public class EnumConstructor<E extends Enum<E>> {
         return get(unbox, enumClass, arguments).newInstance(ordinal, name, arguments);
     }
 
-    public static <E extends Enum<?>> Constructor<E> findConstructor(Class<E> enumClass, Object... arguments) {
+    public static <E extends Enum<E>> Constructor<E> findConstructor(Class<E> enumClass, Object... arguments) {
         return findConstructor(true, enumClass, arguments);
     }
 
-    public static <E extends Enum<?>> Constructor<E> findConstructor(boolean unbox, Class<E> enumClass, Object... arguments) {
-        for (Constructor<?> declaredConstructor : enumClass.getDeclaredConstructors()) {
-            if (Methods.argumentsMatchParameters(unbox, 2, declaredConstructor, arguments)) {
-                return (Constructor<E>) declaredConstructor;
-            }
-        }
-
-        return (Constructor<E>) NOT_FOUND;
+    public static <E extends Enum<E>> Constructor<E> findConstructor(boolean unbox, Class<E> enumClass, Object... arguments) {
+        return Methods.find(unbox, 2, Constructors.constructors(enumClass), arguments);
     }
 
     public static <E> Constructor<E> getConstructor(Class<E> enumClass, Class<?>... parameterTypes) {
-        try {
-            final Class<?>[] trueParameterTypes = new Class<?>[parameterTypes.length + 2];
-            trueParameterTypes[0] = String.class;
-            trueParameterTypes[1] = int.class;
+        Class<?>[] trueParameterTypes = new Class<?>[parameterTypes.length + 2];
+        trueParameterTypes[0] = String.class;
+        trueParameterTypes[1] = int.class;
 
-            System.arraycopy(parameterTypes, 0, trueParameterTypes, 2, parameterTypes.length);
+        System.arraycopy(parameterTypes, 0, trueParameterTypes, 2, parameterTypes.length);
 
-            return enumClass.getDeclaredConstructor(trueParameterTypes);
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-    }
-
-    public Object[] joinArguments(int ordinal, String name, Object... others) {
-        final int length = others.length;
-        final Object[] arguments = new Object[length + 2];
-        arguments[0] = name;
-        arguments[1] = ordinal;
-
-        System.arraycopy(others, 0, arguments, 2, length);
-
-        return arguments;
+        return Constructors.constructor(enumClass, trueParameterTypes);
     }
 
     public static Pointer getEnumConstantDirectory(Class<?> klass) {
@@ -186,7 +159,7 @@ public class EnumConstructor<E extends Enum<E>> {
 
         pointer = new Pointer().bind(enumClass);
 
-        final Field[] fields = Fields.getRawFields(enumClass);
+        Field[] fields = Fields.getRawFields(enumClass);
 
         for (Field field : fields) {
             if (isArrayField(field)) {
@@ -198,7 +171,7 @@ public class EnumConstructor<E extends Enum<E>> {
             }
         }
 
-        return (Pointer) NOT_FOUND;
+        return (Pointer) notFound;
     }
 
     public static boolean isArrayField(Field field) {
@@ -206,13 +179,25 @@ public class EnumConstructor<E extends Enum<E>> {
             return false;
         }
 
-        final Class<?> owner = field.getDeclaringClass();
+        Class<?> owner = field.getDeclaringClass();
 
         return owner.isEnum() && field.getType().getComponentType() == owner;
     }
 
     public static int getNextOrdinal(Class<?> enumClass) {
         return enumClass.getEnumConstants().length;
+    }
+
+    @Deprecated // for removal
+    public /* not static? */ Object[] joinArguments(int ordinal, String name, Object... others) {
+        int length = others.length;
+        Object[] arguments = new Object[length + 2];
+        arguments[0] = name;
+        arguments[1] = ordinal;
+
+        System.arraycopy(others, 0, arguments, 2, length);
+
+        return arguments;
     }
 
     public E add(String name, Object... arguments) {
@@ -229,7 +214,7 @@ public class EnumConstructor<E extends Enum<E>> {
 
     public E newInstance(int ordinal, String name, Object... arguments) {
         try {
-            return (E) (Object) this.newInstance.invokeExact(joinArguments(ordinal, name, arguments));
+            return (E) this.newInstance.invoke(name, ordinal, arguments);
         } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }

@@ -34,6 +34,7 @@ dependencies {
 - `Accessor`: a collection of methods for reading and mutating fields
 - `Classes`: a set of methods for working with classes (`defineClass`, change class of object)
 - `ConstantPool`: a proxy for the JDK's internal `ConstantPool` that reads constant pools
+- `Constructors`: a collection of utilities for finding and invoking constructors
 - `EnumConstructor`: a class that constructs enum constants and adds them to the `values` array and a few other places;
   it can be used through static methods or directly as an object (more performant)
 - `Fields`: a set of utilities for enumerating class fields directly (without slow security checks)
