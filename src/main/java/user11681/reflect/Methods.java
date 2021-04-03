@@ -14,7 +14,7 @@ public class Methods {
 
     private static final HashMap<Class<?>, Method[]> methodCache = new HashMap<>();
 
-    private static final Method NOT_FOUND = null;
+    private static final Method notFound = null;
 
     public static boolean argumentsMatchParameters(Executable executable, Object... arguments) {
         return argumentsMatchParameters(true, 0, executable, arguments);
@@ -29,17 +29,17 @@ public class Methods {
     }
 
     public static boolean argumentsMatchParameters(boolean unbox, int offset, Executable executable, Object... arguments) {
-        final Class<?>[] types = executable.getParameterTypes();
+        Class<?>[] types = executable.getParameterTypes();
 
-        if (types.length == arguments.length + 2) {
-            for (int i = 2, length = types.length; i != length; i++) {
-                final Class<?> parameterType = types[i];
+        if (types.length == arguments.length + offset) {
+            for (int i = offset, length = types.length; i != length; i++) {
+                Class<?> parameterType = types[i];
 
                 if (unbox) {
-                    if (!Types.equals(arguments[i - 2].getClass(), parameterType) && arguments[i - 2].getClass() != parameterType) {
+                    if (!Types.equals(arguments[i - offset].getClass(), parameterType) && arguments[i - offset].getClass() != parameterType) {
                         return false;
                     }
-                } else if (arguments[i - 2].getClass() != parameterType) {
+                } else if (arguments[i - offset].getClass() != parameterType) {
                     return false;
                 }
             }
@@ -70,11 +70,11 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method getMethod(Class<?> klass, String name) {
-        final Method[] methods = getMethods(klass);
+        Method[] methods = getMethods(klass);
 
         for (int i = 0, length = methods.length; i < length; i++) {
             if (methods[i].getName().equals(name)) {
@@ -82,7 +82,7 @@ public class Methods {
             }
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method getMethod(Object object, String name, Class<?>... parameterTypes) {
@@ -97,11 +97,11 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method getMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
-        final Method[] methods = getMethods(klass);
+        Method[] methods = getMethods(klass);
         Class<?>[] parameterTypes1;
         Method method;
         int parameterCount;
@@ -124,7 +124,7 @@ public class Methods {
             }
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method getRawMethod(Object object, String name) {
@@ -139,11 +139,11 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method getRawMethod(Class<?> klass, String name) {
-        final Method[] methods = getRawMethods(klass);
+        Method[] methods = getRawMethods(klass);
 
         for (int i = 0, length = methods.length; i < length; i++) {
             if (methods[i].getName().equals(name)) {
@@ -151,7 +151,7 @@ public class Methods {
             }
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method getRawMethod(Object object, String name, Class<?>... parameterTypes) {
@@ -166,11 +166,11 @@ public class Methods {
             klass = klass.getSuperclass();
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method getRawMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
-        final Method[] methods = getRawMethods(klass);
+        Method[] methods = getRawMethods(klass);
         Class<?>[] parameterTypes1;
         Method method;
         int parameterCount;
@@ -193,7 +193,7 @@ public class Methods {
             }
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
     public static Method[] getMethods(Class<?> klass) {
@@ -224,8 +224,8 @@ public class Methods {
             MethodHandle tempGetDeclaredMethods = null;
 
             for (Method method : Class.class.getDeclaredMethods()) {
-                if (Modifier.isNative(method.getModifiers()) && method.getReturnType() == Method[].class) {
-                    tempGetDeclaredMethods = Unsafe.trustedLookup.unreflect(method);
+                if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Method[].class) {
+                    tempGetDeclaredMethods = Unsafe.trustedLookup.unreflectSpecial(method, Class.class);
 
                     if (method.getParameterCount() > 0) {
                         tempGetDeclaredMethods = MethodHandles.insertArguments(tempGetDeclaredMethods, 1, false);
