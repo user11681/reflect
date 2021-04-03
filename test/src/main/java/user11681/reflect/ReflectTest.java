@@ -269,6 +269,12 @@ public class ReflectTest {
         assert Constructors.construct(PrivateCtor.class, this, 27).test == 27;
     }
 
+    @Test
+    void method() throws Throwable {
+        assert Constructors.constructor(false, Enumeration.class, "", 1, 4D) == null;
+        assert Constructors.constructor(true, Enumeration.class, "", 1, 4D) != null;
+    }
+
     public void logFields(Object object) {
         Uncheck.handle(() -> {
             for (Field field : Fields.getInstanceFields(object.getClass())) {

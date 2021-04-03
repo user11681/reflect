@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import net.gudenau.lib.unsafe.Unsafe;
 
+// todo: caching?
 public class Constructors {
     private static final MethodHandle getDeclaredConstructors;
 
@@ -15,7 +16,7 @@ public class Constructors {
 
     public static <T> T construct(Class<T> klass, Object... arguments) {
         try {
-            return (T) Invoker.unreflectConstructor(constructor(klass, arguments)).asSpreader(Object[].class, arguments.length).invoke(arguments);
+            return (T) Invoker.unreflectConstructor(constructor(klass, arguments)).invokeWithArguments(arguments);
         } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
