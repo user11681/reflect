@@ -15,7 +15,7 @@ public class Constructors {
     private static final Object notFound = null;
 
     public static <T> T instantiate(Class<T> klass) {
-        Constructor<T> constructor = Constructors.constructor(klass);
+        Constructor<T> constructor = constructor(klass);
 
         if (constructor == null) {
             return Unsafe.allocateInstance(klass);
