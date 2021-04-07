@@ -2,7 +2,6 @@ package user11681.reflect.test;
 
 import java.lang.annotation.RetentionPolicy;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -106,7 +105,7 @@ public class SpeedTest {
 
         long start = System.nanoTime();
 
-        MethodHandle handle = Invoker.findVirtual(Object.class, "hashCode", MethodType.methodType(int.class));
+        MethodHandle handle = Invoker.findVirtual(Object.class, "hashCode", int.class);
 
         for (int i = 0; i < iterations; i++) {
             int code = (int) handle.invokeExact(object);

@@ -184,12 +184,12 @@ public class Fields {
 
     static {
         try {
-            final Method[] methods = Class.class.getDeclaredMethods();
+            Method[] methods = Class.class.getDeclaredMethods();
             MethodHandle tempGetDeclaredFields = null;
 
             for (Method method : methods) {
                 if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Field[].class) {
-                    tempGetDeclaredFields = Unsafe.trustedLookup.unreflectSpecial(method, Class.class);
+                    tempGetDeclaredFields = Invoker.unreflectSpecial(method, Class.class);
 
                     if (method.getParameterCount() > 0) {
                         tempGetDeclaredFields = MethodHandles.insertArguments(tempGetDeclaredFields, 1, false);

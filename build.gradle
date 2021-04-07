@@ -3,7 +3,7 @@ plugins {
 }
 
 group("user11681")
-version("1.6.0")
+version("1.7.0")
 
 allprojects {
     plugins.apply("java-library")

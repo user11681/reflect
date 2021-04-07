@@ -1,9 +1,10 @@
-package user11681.reflect.util;
+package user11681.reflect.generator;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
+import user11681.reflect.util.Logger;
 
 @Testable
 class AccessorGenerator {

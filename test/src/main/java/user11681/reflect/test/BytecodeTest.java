@@ -7,7 +7,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import user11681.reflect.Invoker;
-import user11681.reflect.util.ClassNode2;
+import user11681.reflect.asm.ClassNode2;
+import user11681.reflect.asm.MethodNode2;
 
 @Testable
 public class BytecodeTest implements Opcodes {
@@ -38,18 +39,18 @@ public class BytecodeTest implements Opcodes {
         //        class A {final int a;
         //            A() {this.a = 1;}
         //            A(int b) {this(); this.a = b;}}
-        ClassNode2 klass = new ClassNode2(V15, ACC_PUBLIC, "A", null, "java/lang/Object", null);
-        klass.visitField(ACC_FINAL, "a", "I", null, null);
+        ClassNode2 klass = new ClassNode2(ACC_PUBLIC, "A");
+        klass.visitField(ACC_FINAL, "a", "I");
 
-        MethodNode ctr0 = klass.visitMethod(0, "<init>", "()V", null, null);
+        MethodNode2 ctr0 = klass.visitMethod(0, "<init>", "()V");
         ctr0.visitVarInsn(ALOAD, 0);
-        ctr0.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        ctr0.method(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
         ctr0.visitVarInsn(ALOAD, 0);
         ctr0.visitInsn(ICONST_1);
         ctr0.visitFieldInsn(PUTFIELD, "A", "a", "I");
         ctr0.visitInsn(RETURN);
 
-        MethodNode ctr1 = klass.visitMethod(ACC_PUBLIC, "<init>", "(I)V", null, null);
+        MethodNode2 ctr1 = klass.visitMethod(ACC_PUBLIC, "<init>", "(I)V");
         ctr1.visitVarInsn(ALOAD, 0);
         ctr1.visitMethodInsn(INVOKESPECIAL, "A", "<init>", "()V", false);
         ctr1.visitVarInsn(ALOAD, 0);
@@ -63,9 +64,9 @@ public class BytecodeTest implements Opcodes {
 
     @Test
     void allocate() throws Throwable {
-        ClassNode2 node = new ClassNode2(ACC_PUBLIC, "allocate", null, "java/lang/Object", null);
+        ClassNode2 node = new ClassNode2(ACC_PUBLIC, "allocate");
 
-        MethodNode allocate = node.visitMethod(ACC_PUBLIC | ACC_STATIC, "allocate", "()Ljava/lang/Object;", null, null);
+        MethodNode allocate = node.visitMethod(ACC_PUBLIC | ACC_STATIC, "allocate", "()Ljava/lang/Object;");
         allocate.visitTypeInsn(NEW, "java/lang/Object");
         allocate.visitInsn(ARETURN);
 
@@ -76,9 +77,9 @@ public class BytecodeTest implements Opcodes {
 
     @Test
     void defaultMethod() throws Throwable {
-        ClassNode2 node = new ClassNode2(ACC_PUBLIC | ACC_ABSTRACT | ACC_INTERFACE, "defaultMethod", null, "java/lang/Object", null);
+        ClassNode2 node = new ClassNode2(ACC_PUBLIC | ACC_ABSTRACT | ACC_INTERFACE, "defaultMethod");
 
-        MethodNode defaultMethod = node.visitMethod(ACC_PUBLIC, "defaultMethod", "()V", null, null);
+        MethodNode defaultMethod = node.visitMethod(ACC_PUBLIC, "defaultMethod", "()V");
         defaultMethod.visitInsn(RETURN);
 
         node.define();
@@ -86,11 +87,28 @@ public class BytecodeTest implements Opcodes {
 
     @Test
     void interfaceField() throws Throwable {
-        ClassNode2 node = new ClassNode2(ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT, "interfaceField", null, "java/lang/Object", null);
-
-        FieldNode field = node.visitField(ACC_PUBLIC | ACC_ABSTRACT | ACC_STATIC | ACC_FINAL, "field", "I", null, null);
-
+        ClassNode2 node = new ClassNode2(ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT, "interfaceField");
+        node.visitField(ACC_PUBLIC | ACC_ABSTRACT | ACC_STATIC | ACC_FINAL, "field", "I");
         node.define().getFields();
+    }
+
+    @Test
+    void finalReassignment() {
+        ClassNode2 node = new ClassNode2(ACC_PUBLIC, "finalReassignment");
+        FieldNode field = node.visitField(ACC_STATIC | ACC_FINAL, "final", "I");
+        MethodNode2 clinit = node.clinit();
+
+        clinit.visitInsn(ICONST_4);
+        clinit.field(PUTSTATIC, field.name);
+        clinit.printI(() -> clinit.field(GETSTATIC, field.name));
+
+        clinit.visitInsn(ICONST_M1);
+        clinit.field(PUTSTATIC, field.name);
+        clinit.printI(() -> clinit.field(GETSTATIC, field.name));
+
+        clinit.visitInsn(RETURN);
+
+        node.init();
     }
 
     static class A {

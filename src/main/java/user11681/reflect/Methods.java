@@ -258,7 +258,7 @@ public class Methods {
 
             for (Method method : Class.class.getDeclaredMethods()) {
                 if ((method.getModifiers() & Modifier.NATIVE) != 0 && method.getReturnType() == Method[].class) {
-                    tempGetDeclaredMethods = Unsafe.trustedLookup.unreflectSpecial(method, Class.class);
+                    tempGetDeclaredMethods = Invoker.unreflectSpecial(method, Class.class);
 
                     if (method.getParameterCount() > 0) {
                         tempGetDeclaredMethods = MethodHandles.insertArguments(tempGetDeclaredMethods, 1, false);

@@ -224,10 +224,10 @@ public class ReflectTest {
 
     @Test
     public void classPath() throws Throwable {
-        Object classPath = Classes.getClassPath(ReflectTest.class.getClassLoader());
+        Object classPath = Classes.classPath(ReflectTest.class.getClassLoader());
         File file = new File("test");
 
-        for (URL url : Classes.getURLs(classPath)) {
+        for (URL url : Classes.urls(classPath)) {
             Logger.log(url);
         }
 
@@ -237,7 +237,7 @@ public class ReflectTest {
 
         Classes.addURL(classPath, file.toURL());
 
-        for (URL url : Classes.getURLs(classPath)) {
+        for (URL url : Classes.urls(classPath)) {
             Logger.log(url);
         }
     }

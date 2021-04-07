@@ -485,7 +485,7 @@ public class Accessor {
     }
 
     public static <T> T getObjectVolatile(Field field) {
-        return (T) Unsafe.getObjectVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
+        return Unsafe.getObjectVolatile(field.getDeclaringClass(), Unsafe.staticFieldOffset(field));
     }
 
     public static void putObjectVolatile(Field field, Object value) {
@@ -493,7 +493,7 @@ public class Accessor {
     }
 
     public static <T> T getObjectVolatile(Object object, String field) {
-        return (T) Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(Fields.getField(object, field)));
+        return Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(Fields.getField(object, field)));
     }
 
     public static void putObjectVolatile(Object object, String field, Object value) {
@@ -501,7 +501,7 @@ public class Accessor {
     }
 
     public static <T> T getObjectVolatile(Object object, Field field) {
-        return (T) Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(field));
+        return Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(field));
     }
 
     public static void putObjectVolatile(Object object, Field field, Object value) {
@@ -509,7 +509,7 @@ public class Accessor {
     }
 
     public static <T> T getObjectVolatile(Class<?> klass, Field field) {
-        return (T) Unsafe.getObjectVolatile(klass, Unsafe.staticFieldOffset(field));
+        return Unsafe.getObjectVolatile(klass, Unsafe.staticFieldOffset(field));
     }
 
     public static void putObjectVolatile(Class<?> klass, Field field, Object value) {
@@ -517,7 +517,7 @@ public class Accessor {
     }
 
     public static <T> T getObjectVolatile(Class<?> klass, String name) {
-        return (T) Unsafe.getObjectVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)));
+        return Unsafe.getObjectVolatile(klass, Unsafe.staticFieldOffset(Fields.getField(klass, name)));
     }
 
     public static void putObjectVolatile(Class<?> klass, String name, Object value) {
@@ -525,7 +525,7 @@ public class Accessor {
     }
 
     public static <T> T getObjectVolatile(Object object, Class<?> klass, String field) {
-        return (T) Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
+        return Unsafe.getObjectVolatile(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));
     }
 
     public static void putObjectVolatile(Object object, Class<?> klass, String field, Object value) {
@@ -873,13 +873,13 @@ public class Accessor {
     }
 
     public static <T> void copyInt(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putInt(to, offset, Unsafe.getInt(from, offset));
     }
 
     public static <T> void copyInt(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putInt(to, offset, Unsafe.getInt(from, offset));
     }
@@ -889,13 +889,13 @@ public class Accessor {
     }
 
     public static void copyInt(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putInt(to, offset, Unsafe.getInt(from, offset));
     }
 
     public static void copyInt(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putInt(to, offset, Unsafe.getInt(from, offset));
     }
@@ -905,13 +905,13 @@ public class Accessor {
     }
 
     public static <T> void copyObject(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putObject(to, offset, Unsafe.getObject(from, offset));
     }
 
     public static <T> void copyObject(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putObject(to, offset, Unsafe.getObject(from, offset));
     }
@@ -921,13 +921,13 @@ public class Accessor {
     }
 
     public static void copyObject(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putObject(to, offset, Unsafe.getObject(from, offset));
     }
 
     public static void copyObject(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putObject(to, offset, Unsafe.getObject(from, offset));
     }
@@ -937,13 +937,13 @@ public class Accessor {
     }
 
     public static <T> void copyBoolean(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putBoolean(to, offset, Unsafe.getBoolean(from, offset));
     }
 
     public static <T> void copyBoolean(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putBoolean(to, offset, Unsafe.getBoolean(from, offset));
     }
@@ -953,13 +953,13 @@ public class Accessor {
     }
 
     public static void copyBoolean(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putBoolean(to, offset, Unsafe.getBoolean(from, offset));
     }
 
     public static void copyBoolean(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putBoolean(to, offset, Unsafe.getBoolean(from, offset));
     }
@@ -969,13 +969,13 @@ public class Accessor {
     }
 
     public static <T> void copyByte(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putByte(to, offset, Unsafe.getByte(from, offset));
     }
 
     public static <T> void copyByte(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putByte(to, offset, Unsafe.getByte(from, offset));
     }
@@ -985,13 +985,13 @@ public class Accessor {
     }
 
     public static void copyByte(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putByte(to, offset, Unsafe.getByte(from, offset));
     }
 
     public static void copyByte(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putByte(to, offset, Unsafe.getByte(from, offset));
     }
@@ -1001,13 +1001,13 @@ public class Accessor {
     }
 
     public static <T> void copyShort(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putShort(to, offset, Unsafe.getShort(from, offset));
     }
 
     public static <T> void copyShort(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putShort(to, offset, Unsafe.getShort(from, offset));
     }
@@ -1017,13 +1017,13 @@ public class Accessor {
     }
 
     public static void copyShort(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putShort(to, offset, Unsafe.getShort(from, offset));
     }
 
     public static void copyShort(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putShort(to, offset, Unsafe.getShort(from, offset));
     }
@@ -1033,13 +1033,13 @@ public class Accessor {
     }
 
     public static <T> void copyChar(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putChar(to, offset, Unsafe.getChar(from, offset));
     }
 
     public static <T> void copyChar(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putChar(to, offset, Unsafe.getChar(from, offset));
     }
@@ -1049,13 +1049,13 @@ public class Accessor {
     }
 
     public static void copyChar(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putChar(to, offset, Unsafe.getChar(from, offset));
     }
 
     public static void copyChar(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putChar(to, offset, Unsafe.getChar(from, offset));
     }
@@ -1065,13 +1065,13 @@ public class Accessor {
     }
 
     public static <T> void copyLong(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putLong(to, offset, Unsafe.getLong(from, offset));
     }
 
     public static <T> void copyLong(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putLong(to, offset, Unsafe.getLong(from, offset));
     }
@@ -1081,13 +1081,13 @@ public class Accessor {
     }
 
     public static void copyLong(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putLong(to, offset, Unsafe.getLong(from, offset));
     }
 
     public static void copyLong(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putLong(to, offset, Unsafe.getLong(from, offset));
     }
@@ -1097,13 +1097,13 @@ public class Accessor {
     }
 
     public static <T> void copyFloat(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putFloat(to, offset, Unsafe.getFloat(from, offset));
     }
 
     public static <T> void copyFloat(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putFloat(to, offset, Unsafe.getFloat(from, offset));
     }
@@ -1113,13 +1113,13 @@ public class Accessor {
     }
 
     public static void copyFloat(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putFloat(to, offset, Unsafe.getFloat(from, offset));
     }
 
     public static void copyFloat(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putFloat(to, offset, Unsafe.getFloat(from, offset));
     }
@@ -1129,13 +1129,13 @@ public class Accessor {
     }
 
     public static <T> void copyDouble(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putDouble(to, offset, Unsafe.getDouble(from, offset));
     }
 
     public static <T> void copyDouble(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putDouble(to, offset, Unsafe.getDouble(from, offset));
     }
@@ -1145,13 +1145,13 @@ public class Accessor {
     }
 
     public static void copyDouble(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putDouble(to, offset, Unsafe.getDouble(from, offset));
     }
 
     public static void copyDouble(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putDouble(to, offset, Unsafe.getDouble(from, offset));
     }
@@ -1161,13 +1161,13 @@ public class Accessor {
     }
 
     public static <T> void copyIntVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putIntVolatile(to, offset, Unsafe.getIntVolatile(from, offset));
     }
 
     public static <T> void copyIntVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putIntVolatile(to, offset, Unsafe.getIntVolatile(from, offset));
     }
@@ -1177,13 +1177,13 @@ public class Accessor {
     }
 
     public static void copyIntVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putIntVolatile(to, offset, Unsafe.getIntVolatile(from, offset));
     }
 
     public static void copyIntVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putIntVolatile(to, offset, Unsafe.getIntVolatile(from, offset));
     }
@@ -1193,13 +1193,13 @@ public class Accessor {
     }
 
     public static <T> void copyObjectVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putObjectVolatile(to, offset, Unsafe.getObjectVolatile(from, offset));
     }
 
     public static <T> void copyObjectVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putObjectVolatile(to, offset, Unsafe.getObjectVolatile(from, offset));
     }
@@ -1209,13 +1209,13 @@ public class Accessor {
     }
 
     public static void copyObjectVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putObjectVolatile(to, offset, Unsafe.getObjectVolatile(from, offset));
     }
 
     public static void copyObjectVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putObjectVolatile(to, offset, Unsafe.getObjectVolatile(from, offset));
     }
@@ -1225,13 +1225,13 @@ public class Accessor {
     }
 
     public static <T> void copyBooleanVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putBooleanVolatile(to, offset, Unsafe.getBooleanVolatile(from, offset));
     }
 
     public static <T> void copyBooleanVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putBooleanVolatile(to, offset, Unsafe.getBooleanVolatile(from, offset));
     }
@@ -1241,13 +1241,13 @@ public class Accessor {
     }
 
     public static void copyBooleanVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putBooleanVolatile(to, offset, Unsafe.getBooleanVolatile(from, offset));
     }
 
     public static void copyBooleanVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putBooleanVolatile(to, offset, Unsafe.getBooleanVolatile(from, offset));
     }
@@ -1257,13 +1257,13 @@ public class Accessor {
     }
 
     public static <T> void copyByteVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putByteVolatile(to, offset, Unsafe.getByteVolatile(from, offset));
     }
 
     public static <T> void copyByteVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putByteVolatile(to, offset, Unsafe.getByteVolatile(from, offset));
     }
@@ -1273,13 +1273,13 @@ public class Accessor {
     }
 
     public static void copyByteVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putByteVolatile(to, offset, Unsafe.getByteVolatile(from, offset));
     }
 
     public static void copyByteVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putByteVolatile(to, offset, Unsafe.getByteVolatile(from, offset));
     }
@@ -1289,13 +1289,13 @@ public class Accessor {
     }
 
     public static <T> void copyShortVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putShortVolatile(to, offset, Unsafe.getShortVolatile(from, offset));
     }
 
     public static <T> void copyShortVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putShortVolatile(to, offset, Unsafe.getShortVolatile(from, offset));
     }
@@ -1305,13 +1305,13 @@ public class Accessor {
     }
 
     public static void copyShortVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putShortVolatile(to, offset, Unsafe.getShortVolatile(from, offset));
     }
 
     public static void copyShortVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putShortVolatile(to, offset, Unsafe.getShortVolatile(from, offset));
     }
@@ -1321,13 +1321,13 @@ public class Accessor {
     }
 
     public static <T> void copyCharVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putCharVolatile(to, offset, Unsafe.getCharVolatile(from, offset));
     }
 
     public static <T> void copyCharVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putCharVolatile(to, offset, Unsafe.getCharVolatile(from, offset));
     }
@@ -1337,13 +1337,13 @@ public class Accessor {
     }
 
     public static void copyCharVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putCharVolatile(to, offset, Unsafe.getCharVolatile(from, offset));
     }
 
     public static void copyCharVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putCharVolatile(to, offset, Unsafe.getCharVolatile(from, offset));
     }
@@ -1353,13 +1353,13 @@ public class Accessor {
     }
 
     public static <T> void copyLongVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putLongVolatile(to, offset, Unsafe.getLongVolatile(from, offset));
     }
 
     public static <T> void copyLongVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putLongVolatile(to, offset, Unsafe.getLongVolatile(from, offset));
     }
@@ -1369,13 +1369,13 @@ public class Accessor {
     }
 
     public static void copyLongVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putLongVolatile(to, offset, Unsafe.getLongVolatile(from, offset));
     }
 
     public static void copyLongVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putLongVolatile(to, offset, Unsafe.getLongVolatile(from, offset));
     }
@@ -1385,13 +1385,13 @@ public class Accessor {
     }
 
     public static <T> void copyFloatVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putFloatVolatile(to, offset, Unsafe.getFloatVolatile(from, offset));
     }
 
     public static <T> void copyFloatVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putFloatVolatile(to, offset, Unsafe.getFloatVolatile(from, offset));
     }
@@ -1401,13 +1401,13 @@ public class Accessor {
     }
 
     public static void copyFloatVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putFloatVolatile(to, offset, Unsafe.getFloatVolatile(from, offset));
     }
 
     public static void copyFloatVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putFloatVolatile(to, offset, Unsafe.getFloatVolatile(from, offset));
     }
@@ -1417,13 +1417,13 @@ public class Accessor {
     }
 
     public static <T> void copyDoubleVolatile(T to, T from, String field) {
-        final long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.objectFieldOffset(Fields.getField(to, field));
 
         Unsafe.putDoubleVolatile(to, offset, Unsafe.getDoubleVolatile(from, offset));
     }
 
     public static <T> void copyDoubleVolatile(T to, T from, Field field) {
-        final long offset = Unsafe.objectFieldOffset(field);
+        long offset = Unsafe.objectFieldOffset(field);
 
         Unsafe.putDoubleVolatile(to, offset, Unsafe.getDoubleVolatile(from, offset));
     }
@@ -1433,13 +1433,13 @@ public class Accessor {
     }
 
     public static void copyDoubleVolatile(Class<?> to, Class<?> from, String field) {
-        final long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
+        long offset = Unsafe.staticFieldOffset(Fields.getField(to, field));
 
         Unsafe.putDoubleVolatile(to, offset, Unsafe.getDoubleVolatile(from, offset));
     }
 
     public static void copyDoubleVolatile(Class<?> to, Class<?> from, Field field) {
-        final long offset = Unsafe.staticFieldOffset(field);
+        long offset = Unsafe.staticFieldOffset(field);
 
         Unsafe.putDoubleVolatile(to, offset, Unsafe.getDoubleVolatile(from, offset));
     }

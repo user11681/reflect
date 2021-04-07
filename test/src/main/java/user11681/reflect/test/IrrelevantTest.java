@@ -83,6 +83,11 @@ public class IrrelevantTest {
         assert (Integer) Unsafe.getObject(new C(), Unsafe.objectFieldOffset(C.class.getDeclaredField("field"))) == 374;
     }
 
+    @Test
+    void allocateClass() throws Throwable {
+        Unsafe.allocateInstance(Class.class);
+    }
+
     static {
         var(new Object() {
             Object field0 = "field0";

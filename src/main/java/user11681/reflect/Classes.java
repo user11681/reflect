@@ -3,7 +3,6 @@ package user11681.reflect;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -52,26 +51,28 @@ public class Classes {
     /**
      * Change the class of <b>{@code object}</b> to that represented by <b>{@code T}</b> such that <b>{@code to.getClass() == T}</b>.
      *
-     * @param object   the object whose class pointer to change.
-     * @param dummy a dummy varargs parameter for getting <b>{@code T}</b>.
-     * @param <T>  the desired new type.
+     * @param object the object whose class pointer to change.
+     * @param dummy  a dummy varargs parameter for reifying <b>{@code T}</b>.
+     * @param <T>    the desired new type.
+     *
      * @return <b>{@code object}</b>.
      */
     @SafeVarargs
-    public static <T> T staticCast(Object object, T... dummy) {
-        return (T) staticCast(object, dummy.getClass().getComponentType());
+    public static <T> T reinterpret(Object object, T... dummy) {
+        return (T) reinterpret(object, Unsafe.allocateInstance(dummy.getClass().getComponentType()));
     }
 
     /**
-     * Change the class of <b>{@code object}</b> to the class represented by <b>{@code klass}</b> such that <b>{@code object.getClass().getName() == klass}</b>.
+     * Change the class of <b>{@code object}</b> to the class represented by <b>{@code klass}</b> such that <b>{@code object.getClass().getName().equals(klass)}</b>.
      *
      * @param object the object whose class pointer to change.
      * @param klass  the name of class to set as <b>{@code object}</b>'s class.
      * @param <T>    the desired new type.
+     *
      * @return <b>{@code object}</b>.
      */
-    public static <T> T staticCast(Object object, String klass) {
-        return staticCast(object, load(Reflect.defaultClassLoader, false, klass));
+    public static <T> T reinterpret(Object object, String klass) {
+        return reinterpret(object, (T) Unsafe.allocateInstance(load(Reflect.defaultClassLoader, false, klass)));
     }
 
     /**
@@ -80,21 +81,23 @@ public class Classes {
      * @param object the object whose class pointer to change.
      * @param klass  the class to set as <b>{@code object}</b>'s class.
      * @param <T>    the desired new type.
+     *
      * @return <b>{@code object}</b>.
      */
-    public static <T> T staticCast(Object object, Class<T> klass) {
-        return staticCast(object, Unsafe.allocateInstance(klass));
+    public static <T> T reinterpret(Object object, Class<T> klass) {
+        return reinterpret(object, Unsafe.allocateInstance(klass));
     }
 
     /**
-     * Change the class of <b>{@code to}</b> to that of <b>{@code from}</b> such that {@code to.getClass() == from.getClass()}.
+     * Change the class of <b>{@code to}</b> to that of <b>{@code from}</b> such that <b>{@code to.getClass() == from.getClass()}</b>.
      *
      * @param to   the object whose class pointer to change.
      * @param from the object from which to get the class pointer.
      * @param <T>  the desired new type.
+     *
      * @return <b>{@code to}</b>.
      */
-    public static <T> T staticCast(Object to, T from) {
+    public static <T> T reinterpret(Object to, T from) {
         if (longClassPointer) {
             Accessor.copyLong(to, from, classOffset);
         } else {
@@ -110,9 +113,10 @@ public class Classes {
      * @param object       the object whose class pointer to change.
      * @param classPointer the class pointer.
      * @param <T>          a convenience type parameter for casting.
+     *
      * @return <b>{@code to}</b>.
      */
-    public static <T> T staticCast(Object object, long classPointer) {
+    public static <T> T reinterpret(Object object, long classPointer) {
         if (longClassPointer) {
             Unsafe.putLong(object, classOffset, classPointer);
         } else {
@@ -122,27 +126,31 @@ public class Classes {
         return (T) object;
     }
 
-    public static long getClassPointer(Class<?> klass) {
-        return getClassPointer(Unsafe.allocateInstance(klass));
+    /**
+     * Get the <b>{@code Klass*}</b> from a {@link Class}.<br>
+     * <b>{@code klass}</b> must not be abstract.
+     *
+     * @param clas a class.
+     *
+     * @return the Klass*.
+     */
+    public static long klass(Class<?> clas) {
+        return klass(Unsafe.allocateInstance(clas));
     }
 
-    public static long getClassPointer(Object object) {
+    /**
+     * Get the <b>{@code Klass*}</b> of an object.
+     *
+     * @param object the object.
+     *
+     * @return its <b>{@code Klass*}</b>.
+     */
+    public static long klass(Object object) {
         return longClassPointer ? Unsafe.getLong(object, classOffset) : Unsafe.getInt(object, classOffset);
     }
 
     public static <T> T cast(Object object) {
         return (T) object;
-    }
-
-    public List<Class<?>> supertypes(Class<?> klass) {
-        List<Class<?>> supertypes = new ArrayList<>(Arrays.asList(klass.getInterfaces()));
-        Class<?> superclass = klass.getSuperclass();
-
-        if (superclass != null) {
-            supertypes.add(superclass);
-        }
-
-        return supertypes;
     }
 
     public static <T> Class<T> findLoadedClass(ClassLoader loader, String klass) {
@@ -153,11 +161,11 @@ public class Classes {
         }
     }
 
-    public static URL[] getURLs(ClassLoader classLoader) {
-        return getURLs(getClassPath(classLoader));
+    public static URL[] urls(ClassLoader classLoader) {
+        return urls(classPath(classLoader));
     }
 
-    public static URL[] getURLs(Object classPath) {
+    public static URL[] urls(Object classPath) {
         try {
             return (URL[]) URLClassLoader$getURLs.invoke(classPath);
         } catch (Throwable throwable) {
@@ -174,7 +182,7 @@ public class Classes {
     }
 
     public static void addURL(ClassLoader classLoader, URL... urls) {
-        final Object classPath = getClassPath(classLoader);
+        final Object classPath = classPath(classLoader);
 
         for (URL url : urls) {
             try {
@@ -187,7 +195,7 @@ public class Classes {
 
     public static void addURL(ClassLoader classLoader, URL url) {
         try {
-            URLClassPath$addURL.invoke(getClassPath(classLoader), url);
+            URLClassPath$addURL.invoke(classPath(classLoader), url);
         } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
@@ -211,11 +219,11 @@ public class Classes {
         }
     }
 
-    public static Object getClassPath(ClassLoader classLoader) {
-        return Accessor.getObject(classLoader, getClassPathField(classLoader.getClass()));
+    public static Object classPath(ClassLoader classLoader) {
+        return Accessor.getObject(classLoader, classPathField(classLoader.getClass()));
     }
 
-    public static Field getClassPathField(Class<?> loaderClass) {
+    public static Field classPathField(Class<?> loaderClass) {
         Class<?> klass = loaderClass;
 
         while (klass != Object.class) {
@@ -373,6 +381,73 @@ public class Classes {
         }
     }
 
+    public List<Class<?>> supertypes(Class<?> klass) {
+        List<Class<?>> supertypes = new ArrayList<>(Arrays.asList(klass.getInterfaces()));
+        klass = klass.getSuperclass();
+
+        if (klass != null) {
+            supertypes.add(klass);
+        }
+
+        return supertypes;
+    }
+
+    @Deprecated
+    public static Object getClassPath(ClassLoader classLoader) {
+        return classPath(classLoader);
+    }
+
+    @Deprecated
+    public static Field getClassPathField(Class<?> loaderClass) {
+        return classPathField(loaderClass);
+    }
+
+    @Deprecated
+    public static URL[] getURLs(ClassLoader classLoader) {
+        return urls(classLoader);
+    }
+
+    @Deprecated
+    public static URL[] getURLs(Object classPath) {
+        return urls(classPath);
+    }
+
+    @SafeVarargs
+    @Deprecated
+    public static <T> T staticCast(Object object, T... dummy) {
+        return reinterpret(object, dummy);
+    }
+
+    @Deprecated
+    public static <T> T staticCast(Object object, String klass) {
+        return reinterpret(object, klass);
+    }
+
+    @Deprecated
+    public static <T> T staticCast(Object object, Class<T> klass) {
+        return reinterpret(object, klass);
+    }
+
+    @Deprecated
+    public static <T> T staticCast(Object to, T from) {
+        return reinterpret(to, from);
+    }
+
+    @Deprecated
+    public static <T> T staticCast(Object object, long classPointer) {
+        return reinterpret(object, classPointer);
+    }
+
+    @Deprecated
+    public static long getClassPointer(Class<?> klass) {
+        return klass(klass);
+    }
+
+    @Deprecated
+    public static long getClassPointer(Object object) {
+        return klass(object);
+    }
+
     private static Class<?> tryLoad(String... classes) {
         for (String name : classes) {
             Class<?> klass = load(name);
@@ -395,21 +470,21 @@ public class Classes {
         URLClassPath = tryLoad("jdk.internal.loader.URLClassPath", "sun.misc.URLClassPath");
 
         try {
-            findLoadedClass = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "findLoadedClass", MethodType.methodType(Class.class, String.class));
+            findLoadedClass = Invoker.findVirtual(ClassLoader.class, "findLoadedClass", Class.class, String.class);
 
-            URLClassPath$addURL = Unsafe.trustedLookup.findVirtual(URLClassPath, "addURL", MethodType.methodType(void.class, URL.class));
-            URLClassLoader$addURL = Unsafe.trustedLookup.findVirtual(URLClassLoader.class, "addURL", MethodType.methodType(void.class, URL.class));
-            URLClassLoader$getURLs = Unsafe.trustedLookup.findVirtual(URLClassPath, "getURLs", MethodType.methodType(URL[].class));
+            URLClassPath$addURL = Invoker.findVirtual(URLClassPath, "addURL", void.class, URL.class);
+            URLClassLoader$addURL = Invoker.findVirtual(URLClassLoader.class, "addURL", void.class, URL.class);
+            URLClassLoader$getURLs = Invoker.findVirtual(URLClassPath, "getURLs", URL[].class);
 
-            defineClass0 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, byte[].class, int.class, int.class));
-            defineClass1 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class));
-            defineClass2 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class));
-            defineClass3 = Unsafe.trustedLookup.findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, ProtectionDomain.class));
-            defineClass4 = Unsafe.trustedLookup.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class));
-            defineClass5 = Unsafe.trustedLookup.findVirtual(SecureClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, ByteBuffer.class, CodeSource.class));
+            defineClass0 = Invoker.findVirtual(ClassLoader.class, "defineClass", Class.class, byte[].class, int.class, int.class);
+            defineClass1 = Invoker.findVirtual(ClassLoader.class, "defineClass", Class.class, String.class, byte[].class, int.class, int.class);
+            defineClass2 = Invoker.findVirtual(ClassLoader.class, "defineClass", Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class);
+            defineClass3 = Invoker.findVirtual(ClassLoader.class, "defineClass", Class.class, String.class, ByteBuffer.class, ProtectionDomain.class);
+            defineClass4 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", Class.class, String.class, byte[].class, int.class, int.class, CodeSource.class);
+            defineClass5 = Invoker.findVirtual(SecureClassLoader.class, "defineClass", Class.class, String.class, ByteBuffer.class, CodeSource.class);
 
-            final byte[] byteArray = new byte[0];
-            final short[] shortArray = new short[0];
+            byte[] byteArray = new byte[0];
+            short[] shortArray = new short[0];
 
             long offset = 0;
 
@@ -426,18 +501,19 @@ public class Classes {
         if (fieldOffset == 8) { // 32-bit JVM
             x64 = false;
             longClassPointer = false;
-        } else if (fieldOffset == 12) { // 64-bit JVM with compressed OOPs
+            addressFactor = 1;
+        } else if (fieldOffset == 12) { // 64-bit JVM with compressed oops
             x64 = true;
             longClassPointer = false;
+            addressFactor = 8;
         } else if (fieldOffset == 16) { // 64-bit JVM
             x64 = true;
             longClassPointer = true;
+            addressFactor = 1;
         } else {
             throw new Error("unsupported field offset; report to https://github.com/user11681/reflect/issues.");
         }
 
-        addressFactor = x64 ? 8 : 1;
-
-        systemClassPath = getClassPath(systemClassLoader);
+        systemClassPath = classPath(systemClassLoader);
     }
 }
