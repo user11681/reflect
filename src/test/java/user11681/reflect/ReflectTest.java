@@ -38,7 +38,7 @@ public class ReflectTest {
     }
 
     @Test
-    public void constantPool() throws Throwable {
+    public void constantPool() {
         Function<Integer, Integer> lambda = i -> i;
         ConstantPool pool = new ConstantPool(lambda.getClass());
         int size = pool.getSize();
@@ -133,20 +133,20 @@ public class ReflectTest {
 
     @Test
     public void staticCast() {
-        Integer a = Classes.staticCast(A.class, Integer.class);
+        Integer a = Classes.reinterpret(A.class, Integer.class);
 
         System.out.println(a);
         System.out.println(A.class.getClassLoader());
 
         Double dubble = 0D;
-        Long longg = Classes.staticCast(dubble, Long.class);
+        Long longg = Classes.reinterpret(dubble, Long.class);
 
         System.out.println(dubble);
         Accessor.putLong(longg, "value", 0xFFFFFFFFFFL);
         System.out.println(longg);
-        System.out.println(Classes.staticCast(longg, Double.class));
+        System.out.println(Classes.reinterpret(longg, Double.class));
 
-        Classes.staticCast(A.class, (Object) Class.class);
+        Classes.reinterpret(A.class, (Object) Class.class);
     }
 
     @Test
@@ -167,19 +167,19 @@ public class ReflectTest {
         Object object = Unsafe.allocateInstance(Object.class);
 
         System.out.println(object);
-        Classes.staticCast(object, ReflectTest.class);
+        Classes.reinterpret(object, ReflectTest.class);
         System.out.println(object);
 
         object = Unsafe.allocateInstance(ReflectTest.class);
 
         System.out.println(object);
-        Classes.staticCast(object, ReflectTest.class);
+        Classes.reinterpret(object, ReflectTest.class);
         System.out.println(object);
 
         object = Unsafe.allocateInstance(Object.class);
 
         System.out.println(object);
-        Classes.staticCast(object, new ReflectTest());
+        Classes.reinterpret(object, new ReflectTest());
         System.out.println(object);
     }
 
@@ -235,13 +235,14 @@ public class ReflectTest {
         System.out.println();
         System.out.println();
 
-        Classes.addURL(classPath, file.toURL());
+        Classes.addURL(classPath, file.toURI().toURL());
 
         for (URL url : Classes.urls(classPath)) {
             Logger.log(url);
         }
     }
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
     @Test
     void constructor() throws Throwable {
         class PrivateCtor {
@@ -260,13 +261,13 @@ public class ReflectTest {
     }
 
     @Test
-    void method() throws Throwable {
+    void method() {
         assert Constructors.constructor(false, Enumeration.class, "", 1, 4D) == null;
         assert Constructors.constructor(true, Enumeration.class, "", 1, 4D) != null;
     }
 
     @Test
-    void invoke() throws Throwable {
+    void invoke() {
         Runnable runnable = () -> {};
         Function<Integer, String> function = String::valueOf;
         IntFunction<Integer> consumer = Integer::valueOf;

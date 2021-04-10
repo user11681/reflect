@@ -1,15 +1,23 @@
 package user11681.reflect.asm;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import net.gudenau.lib.unsafe.Unsafe;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import user11681.reflect.Classes;
 import user11681.reflect.Reflect;
+import user11681.uncheck.Uncheck;
 
 public class ClassNode2 extends ClassNode implements BitField, Opcodes {
     public ClassLoader loader = Reflect.defaultClassLoader;
+    private ClassReader reader;
 
     public ClassNode2() {
         super(ASM9);
@@ -31,6 +39,38 @@ public class ClassNode2 extends ClassNode implements BitField, Opcodes {
         this();
 
         super.visit(version, access, name, signature, superName, interfaces);
+    }
+
+    public ClassNode2 reader(Path clas) {
+        return Uncheck.handle(() -> this.reader(Files.newInputStream(clas)));
+    }
+
+    public ClassNode2 reader(String clas) {
+        this.reader = Uncheck.handle(() -> new ClassReader(clas));
+
+        return this;
+    }
+
+    public ClassNode2 reader(ZipFile entry, ZipEntry clas) {
+        return Uncheck.handle(() -> this.reader(entry.getInputStream(clas)));
+    }
+
+    public ClassNode2 reader(InputStream clas) {
+        this.reader = Uncheck.handle(() -> new ClassReader(clas));
+
+        return this;
+    }
+
+    public ClassNode2 reader(byte[] clas) {
+        this.reader = new ClassReader(clas);
+
+        return this;
+    }
+
+    public ClassNode2 read(int flags) {
+        this.reader.accept(this, flags);
+
+        return this;
     }
 
     @Override

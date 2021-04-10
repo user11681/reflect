@@ -1,28 +1,36 @@
 plugins {
     id("maven-publish")
+    id("java-library")
 }
 
 group("user11681")
 version("1.7.0")
 
-allprojects {
-    plugins.apply("java-library")
-
-    repositories {
-        mavenCentral()
-
-        maven {url = "https://auoeke.jfrog.io/artifactory/maven"}
-    }
-
-    dependencies {
-        api("net.gudenau.lib:unsafe:latest.release")
-
-        compileOnly("org.jetbrains:annotations:latest.release")
-    }
-}
-
 sourceCompatibility = 8
 targetCompatibility = 8
+
+tasks[sourceSets.test.compileJavaTaskName].configure {
+    sourceCompatibility = JavaVersion.current()
+    targetCompatibility = JavaVersion.current()
+}
+
+repositories {
+    mavenCentral()
+
+    maven {url = "https://auoeke.jfrog.io/artifactory/maven"}
+}
+
+dependencies {
+    api("net.gudenau.lib:unsafe:latest.release")
+
+    compileOnly("org.jetbrains:annotations:latest.release")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:latest.release")
+    testImplementation("org.ow2.asm:asm:9.0")
+    testImplementation("org.ow2.asm:asm-tree:9.0")
+    testImplementation("org.openjdk.jol:jol-core:latest.release")
+    testImplementation("user11681:uncheck:latest.release")
+}
 
 java {
     withSourcesJar()
@@ -31,10 +39,6 @@ java {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId(project.group)
-            artifactId(project.name)
-            version(project.version)
-
             from(components.java)
         }
     }
@@ -43,11 +47,11 @@ publishing {
         mavenLocal()
 
         maven {
-            url = "https://auoeke.jfrog.io/artifactory/maven"
+            url = System.properties."wheel.repository"
 
             credentials {
-                username = System.env["ARTIFACTORY_USERNAME"]
-                password = System.env["ARTIFACTORY_PASSWORD"]
+                username = System.properties."wheel.username"
+                password = System.properties."wheel.password"
             }
         }
     }

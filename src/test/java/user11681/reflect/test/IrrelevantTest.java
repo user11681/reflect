@@ -2,15 +2,20 @@ package user11681.reflect.test;
 
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.Opcodes;
 import org.openjdk.jol.info.ClassData;
 import user11681.reflect.Classes;
 import user11681.reflect.Invoker;
 import user11681.reflect.ReflectTest;
+import user11681.reflect.asm.ClassNode2;
 import user11681.reflect.experimental.Classes2;
 import user11681.reflect.experimental.generics.Generics;
 import user11681.reflect.experimental.generics.TypeArgument;
@@ -46,8 +51,8 @@ public class IrrelevantTest {
 
     @Test
     public void multipleInheritance() {
-        long IntegerPointer = Classes.getClassPointer(Integer.class) & 0xFFFFFFFFL;
-        long StringPointer = Classes.getClassPointer(String.class) & 0xFFFFFFFFL;
+        long IntegerPointer = Classes.klass(Integer.class) & 0xFFFFFFFFL;
+        long StringPointer = Classes.klass(String.class) & 0xFFFFFFFFL;
 
         Unsafe.putAddress(IntegerPointer + 4 * 19, StringPointer);
 
@@ -78,7 +83,9 @@ public class IrrelevantTest {
 
     @Test
     void getObject() throws Throwable {
-        class C {int field = 374;}
+        class C {
+            final int field = 374;
+        }
 
         assert (Integer) Unsafe.getObject(new C(), Unsafe.objectFieldOffset(C.class.getDeclaredField("field"))) == 374;
     }
@@ -86,6 +93,19 @@ public class IrrelevantTest {
     @Test
     void allocateClass() throws Throwable {
         Unsafe.allocateInstance(Class.class);
+    }
+
+    @Test
+    void ensureJava8() throws Throwable {
+        JarFile artifact = new JarFile((Path.of(System.getProperty("user.dir")).getParent().resolve("build").resolve("libs").resolve("reflect-1.7.0.jar")).toFile());
+
+        artifact.stream().forEach((JarEntry entry) -> {
+            if (entry.getName().endsWith(".class")) {
+                ClassNode2 klass = new ClassNode2().reader(artifact, entry);
+
+                assert klass.version == Opcodes.V1_8;
+            }
+        });
     }
 
     static {

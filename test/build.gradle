@@ -1,9 +1,0 @@
-dependencies {
-    api(project(":"))
-
-    api("org.junit.jupiter:junit-jupiter:latest.release")
-    api("org.ow2.asm:asm:9.0")
-    api("org.ow2.asm:asm-tree:9.0")
-    api("org.openjdk.jol:jol-core:latest.release")
-    api("user11681:uncheck:latest.release")
-}

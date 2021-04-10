@@ -15,7 +15,7 @@ in the official launcher due to maintenance burden and bloat.
 
 I try to keep this library mostly stable, although occasionally (with prior notice) I may break things.
 
-reflect is hosted on Artifactory. It depends on [my fork](https://github.com/user11681/unsafe) of [unsafe](https://github.com/gudenau/java-unsafe).
+reflect is hosted on Artifactory. It depends on [my fork](https://github.com/user11681/unsafe) of [gudenau/java-unsafe](https://github.com/gudenau/java-unsafe).
 ```groovy
 repositories {
     maven {url = "https://auoeke.jfrog.io/artifactory/maven"}
