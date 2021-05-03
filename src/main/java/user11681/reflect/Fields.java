@@ -337,7 +337,7 @@ public class Fields {
      @deprecated by {@link #staticFields}
      */
     public static Field[] getStaticFields(Class<?> type) {
-        Field[] fields = oldInstanceFieldCache.get(type);
+        Field[] fields = oldStaticFieldCache.get(type);
 
         if (fields != null) {
             return fields;

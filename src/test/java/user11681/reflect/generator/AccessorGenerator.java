@@ -264,10 +264,7 @@ class AccessorGenerator extends TestGenerator {
 
                             if (type != Object.class) {
                                 Invocation put = unsafeMethod.copy().name(access + name(type) + suffix);
-
-                                if (access.put()) {
-                                    put.argument(block.variable("value").cast(type));
-                                }
+                                access.put(() -> put.argument(block.variable("value").cast(type)));
 
                                 if (i != 0) {
                                     ifStatement.otherwise(ifStatement = new If());
@@ -280,7 +277,6 @@ class AccessorGenerator extends TestGenerator {
                         }
 
                         unsafeMethod.name(access + "Object" + suffix);
-
                         access.put(ifStatement, if1 -> if1.otherwise(unsafeMethod.argument(block.variable("value")).statement())).otherwise(() -> block.newline().ret(unsafeMethod));
                     });
                 });
