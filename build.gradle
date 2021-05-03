@@ -4,7 +4,7 @@ plugins {
 }
 
 group("user11681")
-version("1.7.0")
+version("1.8.0")
 
 sourceCompatibility = 8
 targetCompatibility = 8
@@ -47,11 +47,11 @@ publishing {
         mavenLocal()
 
         maven {
-            url = System.properties."wheel.repository"
+            url = System.properties["maven.repository"]
 
             credentials {
-                username = System.properties."wheel.username"
-                password = System.properties."wheel.password"
+                username = System.properties["maven.username"]
+                password = System.properties["maven.password"]
             }
         }
     }

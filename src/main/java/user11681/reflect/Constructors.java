@@ -21,7 +21,7 @@ public class Constructors {
             return Unsafe.allocateInstance(klass);
         }
 
-        return Invoker.apply(Invoker.unreflectConstructor(constructor));
+        return Invoker.invoke(Invoker.unreflectConstructor(constructor));
     }
 
     public static <T> T construct(Class<T> klass, Object... arguments) {

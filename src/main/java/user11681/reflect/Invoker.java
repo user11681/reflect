@@ -1,14 +1,37 @@
 package user11681.reflect;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Invoker {
-    public static <T> T apply(MethodHandle handle, Object... arguments) {
+    public static Member member(MethodHandle handle) {
+        return MethodHandles.reflectAs(Member.class, handle);
+    }
+
+    public static Field field(MethodHandle handle) {
+        return MethodHandles.reflectAs(Field.class, handle);
+    }
+
+    public static Executable executable(MethodHandle handle) {
+        return MethodHandles.reflectAs(Executable.class, handle);
+    }
+
+    public static <T> Constructor<T> constructor(MethodHandle handle) {
+        return MethodHandles.reflectAs(Constructor.class, handle);
+    }
+
+    public static Method method(MethodHandle handle) {
+        return MethodHandles.reflectAs(Method.class, handle);
+    }
+
+    public static <T> T invoke(MethodHandle handle, Object... arguments) {
         try {
             return (T) handle.invokeWithArguments(arguments);
         } catch (Throwable throwable) {
@@ -16,12 +39,20 @@ public class Invoker {
         }
     }
 
+    /**
+     * @deprecated by {@link #invoke}.
+     */
+    @Deprecated
+    public static <T> T apply(MethodHandle handle, Object... arguments) {
+        return invoke(handle, arguments);
+    }
+
+    /**
+     * @deprecated by {@link #invoke}.
+     */
+    @Deprecated
     public static void run(MethodHandle handle, Object... arguments) {
-        try {
-            handle.invokeWithArguments(arguments);
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
+        invoke(handle, arguments);
     }
 
     public static MethodHandle bind(Object receiver, String name, MethodType type) {

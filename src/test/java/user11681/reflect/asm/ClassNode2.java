@@ -73,6 +73,10 @@ public class ClassNode2 extends ClassNode implements BitField, Opcodes {
         return this;
     }
 
+    public ClassNode2 read() {
+        return this.read(0);
+    }
+
     @Override
     public int flags() {
         return this.access;

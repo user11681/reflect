@@ -1,4 +1,4 @@
-package user11681.reflect.experimental;
+package user11681.reflect.experimental.instrumentation;
 
 import java.lang.instrument.Instrumentation;
 

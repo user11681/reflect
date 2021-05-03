@@ -1,92 +1,287 @@
 package user11681.reflect.generator;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import net.gudenau.lib.unsafe.Unsafe;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.annotation.Testable;
-import user11681.reflect.util.Logger;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import user11681.reflect.Fields;
+import user11681.reflect.generator.base.method.Body;
+import user11681.reflect.generator.base.method.ConcreteType;
+import user11681.reflect.generator.base.method.Expression;
+import user11681.reflect.generator.base.method.If;
+import user11681.reflect.generator.base.method.Invocation;
+import user11681.reflect.generator.base.method.TypeLiteral;
+import user11681.reflect.generator.base.type.ParameterizedType;
 
-@Testable
-class AccessorGenerator {
-    static final String[] fieldDiscriminators = {"String", "Field", "long"};
-    static final Map<String, String> discriminatorNames = wrap(new String[]{
-        "String", "Field", "long"
-    }, new String[]{
-        "field", "field", "offset"
-    });
-    static final Map<String, String> ownerTypes = wrap(new String[]{
-        "Object", "Class<?>"
-    }, new String[]{
-        "Unsafe.objectFieldOffset", "Unsafe.staticFieldOffset"
-    });
-    static final String[] suffixes = {"", "Volatile"};
-    static final Map<String, String> accessTypes = wrap(new String[]{
-        "get", "put"
-    }, new String[]{
-        "return ", ""
-    });
-    static final Map<String, String> types = wrap(
-        new String[]{
-            "int",
-            "Object",
-            "boolean",
-            "byte",
-            "short",
-            "char",
-            "long",
-            "float",
-            "double"
-        }, new String[]{
-            "int",
-            "<T> T",
-            "boolean",
-            "byte",
-            "short",
-            "char",
-            "long",
-            "float",
-            "double"
-        }
+@Execution(ExecutionMode.SAME_THREAD)
+class AccessorGenerator extends TestGenerator {
+    static final Class<?>[] fieldTypes = {Field.class, String.class};
+
+    static final Map<Class<?>, String> fieldDiscriminators = map(
+        String.class, "fieldName",
+        Field.class, "field",
+        long.class, "offset"
     );
 
-    static <K, V> HashMap<K, V> wrap(K[] keys, V[] values) {
-        final HashMap<K, V> map = new HashMap<>();
+    static final Map<Class<?>, String> ownerTypes = map(
+        Object.class, "objectFieldOffset",
+        Class.class, "staticFieldOffset"
+    );
 
-        for (int i = 0; i < keys.length; i++) {
-            map.put(keys[i], values[i]);
+    static final String[] suffixes = {"", "Volatile"};
+
+    static final Class<?>[] types = {
+        boolean.class,
+        byte.class,
+        char.class,
+        short.class,
+        int.class,
+        long.class,
+        float.class,
+        double.class,
+        Object.class
+    };
+
+    static final Map<Class<?>, Class<?>> typesWithNull = map(
+        boolean.class, boolean.class,
+        byte.class, byte.class,
+        char.class, char.class,
+        short.class, short.class,
+        int.class, int.class,
+        long.class, long.class,
+        float.class, float.class,
+        double.class, double.class,
+        Object.class, Object.class,
+        null, Object.class
+    );
+
+    public AccessorGenerator() {
+        super("user11681.reflect", "Accessor");
+
+        this.pub();
+    }
+
+    static <K, V> HashMap<K, V> map(Object... elements) {
+        HashMap<K, V> map = new LinkedHashMap<>();
+
+        assert (elements.length & 1) == 0;
+
+        for (int i = 0; i < elements.length; i += 2) {
+            map.put((K) elements[i], (V) elements[i + 1]);
         }
 
         return map;
     }
 
+    static String name(Class<?> type) {
+        if (type == null) {
+            return "";
+        }
+
+        String simpleName = type.getSimpleName();
+
+        return simpleName.substring(0, 1).toUpperCase() + simpleName.substring(1);
+    }
+
+    @Override
     @Test
-    void specifiedClassObject() {
+    protected void all() throws Throwable {
+        super.all();
+    }
+
+    @Test
+    void field() {
         for (String suffix : suffixes) {
-            for (String type : types.keySet()) {
-                for (String accessType : accessTypes.keySet()) {
-                    final String[] lines;
-                    final String methodName = accessType + capitalize(type) + suffix;
+            for (Class<?> type : typesWithNull.keySet()) {
+                Class<?> actualType = typesWithNull.get(type);
 
-                    if (accessType.equals("get")) {
-                        lines = new String[]{
-                            "",
-                            String.format("public static %s %s(Object object, Class<?> klass, String field) {", types.get(type), methodName),
-                            String.format("    %sUnsafe.%s(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)));", accessTypes.get(accessType) + (type.equals("Object") ? "(T) " : ""), methodName),
-                            "}"
-                        };
-                    } else {
-                        lines = new String[]{
-                            "",
-                            String.format("public static void %s(Object object, Class<?> klass, String field, %s value) {", methodName, type),
-                            String.format("    Unsafe.%s(object, Unsafe.objectFieldOffset(Fields.getField(klass, field)), value);", methodName),
-                            "}"
-                        };
-                    }
+                for (Access access : Access.values()) {
+                    this.method(method -> {
+                        method.pub().statik().name(access + name(type) + suffix).parameter(Field.class, "field");
 
-                    for (String line : lines) {
-                        Logger.log(line);
+                        access.get(() -> method.returnType(actualType));
+                        access.put(() -> method.parameter(actualType, "value"));
+
+                        method.body(body -> {
+                            Invocation unsafeMethod;
+                            Invocation offset = new Invocation(Unsafe.class, "staticFieldOffset", body.variable("field"));
+                            Invocation delcaringClass = body.variable("field").invoke("getDeclaringClass");
+
+                            unsafeMethod = type == null
+                                ? new Invocation(access.toString(), delcaringClass, body.variable("field").invoke("getType"), offset)
+                                : new Invocation(Unsafe.class, method.name(), delcaringClass, offset);
+
+                            access.put(() -> unsafeMethod.argument(body.variable("value")));
+
+                            body.ret(unsafeMethod);
+                        });
+                    });
+                }
+            }
+        }
+    }
+
+    @Test
+    void objectStringAndObjectField() {
+        for (String suffix : suffixes) {
+            for (Class<?> type : typesWithNull.keySet()) {
+                Class<?> actualType = typesWithNull.get(type);
+
+                for (Class<?> objectType : ownerTypes.keySet()) {
+                    for (Class<?> fieldType : fieldTypes) {
+                        if (objectType != Class.class || fieldType != Field.class) {
+                            for (Access access : Access.values()) {
+                                this.method(method -> {
+                                    method.pub().statik().name(access + name(type) + suffix);
+
+                                    access.get(() -> {
+                                        if (type == Object.class) {
+                                            method.anyReturnType();
+                                        } else method.returnType(actualType);
+                                    });
+
+                                    String objectName = objectType == Class.class ? "type" : "object";
+                                    method.parameter(objectType == Class.class ? ParameterizedType.wildcard(Class.class) : new ConcreteType(objectType), objectName)
+                                        .parameter(fieldType, "fieldName");
+
+                                    access.put(() -> method.parameter(actualType, "value"));
+
+                                    method.body(body -> {
+                                        Expression field = fieldType == Field.class ? body.variable("fieldName") : new Invocation(Fields.class, "getField",
+                                            body.variable(objectName),
+                                            body.variable("fieldName")
+                                        );
+
+                                        if (type == null && fieldType == String.class) {
+                                            body.variable(Field.class, "field", field).newline();
+                                            field = body.variable("field");
+                                        }
+
+                                        Invocation offset = new Invocation(Unsafe.class, objectType == Class.class ? "staticFieldOffset" : "objectFieldOffset", field);
+                                        Invocation unsafeMethod = type == null
+                                            ? new Invocation(access.toString(), body.variable(objectName), field.invoke("getType"), offset)
+                                            : new Invocation(Unsafe.class, method.name(), body.variable(objectName), offset);
+
+                                        access.put(() -> unsafeMethod.argument(body.variable("value")));
+
+                                        body.ret(unsafeMethod);
+                                    });
+                                });
+                            }
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    @Test
+    void objectClassStringAndObjectClassField() {
+        for (String suffix : suffixes) {
+            for (Class<?> type : typesWithNull.keySet()) {
+                Class<?> actualType = typesWithNull.get(type);
+
+                for (Class<?> fieldType : fieldTypes) {
+                    for (Access access : Access.values()) {
+                        this.method(method -> {
+                            method.pub().statik();
+
+                            access.get(() -> {
+                                if (type == Object.class) {
+                                    method.anyReturnType();
+                                } else method.returnType(actualType);
+                            });
+
+                            method.name(access + name(type) + suffix)
+                                .parameter(Object.class, "object")
+                                .parameter(ParameterizedType.wildcard(Class.class), "type")
+                                .parameter(fieldType, "fieldName");
+
+                            access.put(() -> method.parameter(actualType, "value"));
+
+                            method.body(body -> {
+                                Expression field = fieldType == Field.class ? body.variable("fieldName") : new Invocation(Fields.class, "getField",
+                                    body.variable("type"),
+                                    body.variable("fieldName")
+                                );
+
+                                if (type == null && fieldType == String.class) {
+                                    body.variable(Field.class, "field", field).newline();
+                                    field = body.variable("field");
+                                }
+
+                                Invocation offset = new Invocation(Unsafe.class, "objectFieldOffset", field);
+                                Invocation unsafeMethod = type == null
+                                    ? new Invocation(access.toString(), body.variable("object"), field.invoke("getType"), offset)
+                                    : new Invocation(Unsafe.class, method.name(), body.variable("object"), offset);
+
+                                if (access.put()) {
+                                    unsafeMethod.argument(body.variable("value"));
+                                }
+
+                                body.ret(unsafeMethod);
+                            });
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void getPut() {
+        for (String suffix : suffixes) {
+            for (Access access : Access.values()) {
+                this.method(method -> {
+                    method.pub().statik().name(access.toString() + suffix);
+
+                    if (access.get()) {
+                        method.returnType(Object.class);
+                    }
+
+                    method.parameter(Object.class, "object").parameter(ParameterizedType.wildcard(Class.class), "type").parameter(long.class, "offset");
+
+                    if (access.put()) {
+                        method.parameter(Object.class, "value");
+                    }
+
+                    method.body(body -> {
+                        If ifStatement = new If();
+                        Invocation unsafeMethod = new Invocation(Unsafe.class, body.variable("object"), body.variable("offset"));
+
+                        body.statement(ifStatement);
+
+                        for (int i = 0; i < types.length; i++) {
+                            Class<?> type = types[i];
+
+                            if (type != Object.class) {
+                                Invocation put = unsafeMethod.copy().name(access + name(type) + suffix);
+
+                                if (access.put()) {
+                                    put.argument(body.variable("value").cast(type));
+                                }
+
+                                if (i != 0) {
+                                    ifStatement.otherwise(ifStatement = new If());
+                                }
+
+                                Body then = new Body();
+
+                                ifStatement.same(body.variable("type"), new TypeLiteral(type)).then(access.put() ? then.statement(put) : then.ret(put));
+                            }
+                        }
+
+                        unsafeMethod.name(access + "Object" + suffix);
+                        access.put(() -> unsafeMethod.argument(body.variable("value")));
+
+                        body.newline().ret(unsafeMethod);
+                    });
+                });
             }
         }
     }
@@ -94,54 +289,75 @@ class AccessorGenerator {
     @Test
     void copy() {
         for (String suffix : suffixes) {
-            for (String type : types.keySet()) {
-                for (String ownerType : ownerTypes.keySet()) {
-                    final String genericType;
-                    final String parameterType;
+            for (Class<?> type : typesWithNull.keySet()) {
+                Class<?> actualType = typesWithNull.get(type);
 
-                    if (ownerType.equals("Object")) {
-                        parameterType = "T";
-                        genericType = "<T> ";
-                    } else {
-                        parameterType = ownerType;
-                        genericType = "";
-                    }
+                for (Class<?> ownerType : ownerTypes.keySet()) {
+                    for (Class<?> discriminator : fieldDiscriminators.keySet()) {
+                        if (type != null || discriminator != long.class) {
+                            String methodName = name(type) + suffix;
 
-                    for (String discriminator : fieldDiscriminators) {
-                        final String methodName = type.toUpperCase().charAt(0) + type.substring(1) + suffix;
-                        final String offset;
+                            this.method(method -> {
+                                method.pub().statik().name("copy" + methodName);
 
-                        switch (discriminator) {
-                            case "String":
-                                offset = ownerTypes.get(ownerType) + "(Fields.getField(to, field))";
-                                break;
-                            case "Field":
-                                offset = ownerTypes.get(ownerType) + "(field)";
-                                break;
-                            default:
-                                offset = "offset";
-                        }
+                                if (ownerType == Object.class) {
+                                    method.typeParameter("T").parameter("T", "to").parameter("T", "from");
+                                } else {
+                                    ParameterizedType classWildcard = ParameterizedType.wildcard(Class.class);
 
-                        String[] lines = {
-                            "",
-                            String.format("public static %svoid copy%s(%3$s to, %s from, %s %s) {", genericType, methodName, parameterType, discriminator, discriminatorNames.get(discriminator)),
-                            String.format("    Unsafe.put%s(to, offset, Unsafe.get%s(from, offset));", methodName, methodName),
-                            "}"
-                        };
+                                    method.parameter(classWildcard, "to").parameter(classWildcard, "from");
+                                }
 
-                        if (!discriminator.equals("long")) {
-                            lines = new String[]{
-                                lines[0],
-                                lines[1],
-                                String.format("    final long offset = %s;", offset),
-                                "",
-                                lines[2],
-                                lines[3]
-                            };
-                        }
+                                method.parameter(discriminator, fieldDiscriminators.get(discriminator)).body(body -> {
+                                    if (discriminator != long.class) {
+                                        Invocation offsetMethod = new Invocation(Unsafe.class, ownerType == Class.class ? "staticFieldOffset" : "objectFieldOffset");
 
-                        for (String line : lines) {
-                            Logger.log(line);
+                                        body.variable(variable -> {
+                                            variable.type(long.class).name("offset");
+
+                                            if (discriminator == String.class) {
+                                                Expression field = new Invocation(Fields.class, "getField",
+                                                    body.variable("to"),
+                                                    body.variable("fieldName")
+                                                );
+
+                                                if (type == null) {
+                                                    body.variable(Field.class, "field", field);
+                                                    field = body.variable("field");
+                                                }
+
+                                                variable.initialize(offsetMethod.copy().argument(field));
+                                            } else variable.initialize(offsetMethod.argument(body.variable("field")));
+                                        });
+
+                                        body.newline();
+                                    }
+
+                                    Invocation unsafeMethod;
+
+                                    if (type == null) {
+                                        unsafeMethod = new Invocation("put" + suffix,
+                                            body.variable("to"),
+                                            body.variable("field").invoke("getType"),
+                                            body.variable("offset"),
+                                            new Invocation("get" + suffix,
+                                                body.variable("from"),
+                                                body.variable("field").invoke("getType"),
+                                                body.variable("offset")
+                                            )
+                                        );
+                                    } else unsafeMethod = new Invocation(Unsafe.class, "put" + methodName,
+                                        body.variable("to"),
+                                        body.variable("offset"),
+                                        new Invocation(Unsafe.class, "get" + methodName,
+                                            body.variable("from"),
+                                            body.variable("offset")
+                                        )
+                                    );
+
+                                    body.statement(unsafeMethod);
+                                });
+                            });
                         }
                     }
                 }
@@ -150,31 +366,24 @@ class AccessorGenerator {
     }
 
     @Test
-    void objectString() {
-        for (String suffix : suffixes) {
-            for (String type : types.keySet()) {
-                final boolean object = type.equals("Object");
-
-                for (String accessType : accessTypes.keySet()) {
-                    final boolean put = accessType.equals("put");
-                    final String methodName = accessType + type.toUpperCase().charAt(0) + type.substring(1) + suffix;
-
-                    final String[] lines = {
-                        "",
-                        String.format("public static %s %s(Object object, String field" + (put ? ", " + type + " value" : "") + ") {", put ? "void" : object ? "<T> T" : type, methodName),
-                        String.format("    " + (put ? "" : "return " + (object ? "(T) " : "")) + "Unsafe.%s(object, Unsafe.objectFieldOffset(Fields.getField(object, field))" + (put ? ", value" : "") + ");", methodName),
-                        "}"
-                    };
-
-                    for (String line : lines) {
-                        Logger.log(line);
-                    }
-                }
-            }
+    void offset() {
+        for (String methodType : new String[]{"static", "object"}) {
+            this.method(method -> method.pub().statik().returnType(long.class).name(methodType + "FieldOffset")
+                .parameter(ParameterizedType.wildcard(Class.class), "type")
+                .parameter(String.class, "name")
+                .body(body -> body.ret(new Invocation(Unsafe.class, method.name(),
+                    new Invocation(Fields.class, "getField",
+                        body.variable("type"),
+                        body.variable("name")
+                    )
+                )))
+            );
         }
     }
 
-    static String capitalize(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    @Override
+    @AfterEach
+    protected void tearDown() {
+        super.tearDown();
     }
 }

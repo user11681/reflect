@@ -5,16 +5,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
-import user11681.reflect.experimental.Lists;
 import user11681.reflect.misc.A;
 import user11681.reflect.misc.C;
 import user11681.reflect.misc.Enumeration;
@@ -26,8 +25,6 @@ import user11681.uncheck.Uncheck;
 @SuppressWarnings("AssertWithSideEffects")
 @Testable
 public class ReflectTest {
-    private static final List<Object> dummy = Lists.wrap(new Object[]{0});
-
     @Test
     public void changeLoader() {
         Class<?> PackagePrivate = Classes.defineBootstrapClass(ReflectTest.class.getClassLoader(), "user11681/reflect/misc/PackagePrivate");
@@ -270,23 +267,73 @@ public class ReflectTest {
     void invoke() {
         Runnable runnable = () -> {};
         Function<Integer, String> function = String::valueOf;
-        IntFunction<Integer> consumer = Integer::valueOf;
+        IntFunction<Integer> intFunction = Integer::valueOf;
 
-        Invoker.run(Invoker.bind(runnable, "run", void.class));
+        Invoker.invoke(Invoker.bind(runnable, "run", void.class));
 
-        assert "123".equals(Invoker.apply(Invoker.bind(function, "apply", Object.class, Object.class), 123));
-        assert (Integer) Invoker.apply(Invoker.bind(consumer, "apply", Object.class, int.class), 57) == 57;
+        assert Invoker.invoke(Invoker.bind(runnable, "run", void.class)) == null;
+        assert "123".equals(Invoker.invoke(Invoker.bind(function, "apply", Object.class, Object.class), 123));
+        assert (Integer) Invoker.invoke(Invoker.bind(intFunction, "apply", Object.class, int.class), 57) == 57;
     }
 
-    public void logFields(Object object) {
+    @Test
+    void member() throws Throwable {
+        MethodHandle handle = Invoker.findGetter(Integer.class, "value", int.class);
+        Member member = Fields.getField(Integer.class, "value");
+
+        assert Invoker.field(handle).equals(member);
+        assert Invoker.member(handle).equals(member);
+
+        handle = Invoker.findConstructor(String.class, char[].class);
+        member = Constructors.constructor(String.class, char[].class);
+
+        assert Invoker.member(handle).equals(member);
+        assert Invoker.executable(handle).equals(member);
+        assert Invoker.constructor(handle).equals(member);
+
+        handle = Invoker.findVirtual(Object.class, "toString", String.class);
+        member = Methods.getMethod(Object.class, "toString");
+
+        assert Invoker.member(handle).equals(member);
+        assert Invoker.executable(handle).equals(member);
+        assert Invoker.method(handle).equals(member);
+
+        handle = Invoker.findSpecial(String.class, "indexOfNonWhitespace", int.class);
+        member = Methods.getMethod(String.class, "indexOfNonWhitespace");
+
+        assert Invoker.member(handle).equals(member);
+        assert Invoker.executable(handle).equals(member);
+        assert Invoker.method(handle).equals(member);
+
+        handle = Invoker.findStatic(String.class, "valueOf", String.class, boolean.class);
+        member = Methods.getMethod(String.class, "valueOf", boolean.class);
+
+        assert Invoker.member(handle).equals(member);
+        assert Invoker.executable(handle).equals(member);
+        assert Invoker.method(handle).equals(member);
+
+        handle = Invoker.unreflect((Method) member);
+
+        assert Invoker.member(handle).equals(member);
+        assert Invoker.executable(handle).equals(member);
+        assert Invoker.method(handle).equals(member);
+    }
+
+    static void logFields(Object object) {
         Uncheck.handle(() -> {
             for (Field field : Fields.getInstanceFields(object.getClass())) {
-                System.out.printf("%s: %s\n", field, field.get(object));
+                System.out.printf("%s: %s\n", field, Accessor.get(object, field));
             }
         });
     }
 
-    static {
-        System.setProperty("jol.tryWithSudo", "true");
+    @Test
+    void accessor() {
+        assert Accessor.getIntVolatile(0, "value") == 0 && Accessor.getInt(0, "value") == 0;
+
+        class A {final byte end = 123;}
+
+        assert Accessor.get(new A(), "end").equals((byte) 123);
+        assert Accessor.getVolatile(new A(), "end").equals((byte) 123);
     }
 }

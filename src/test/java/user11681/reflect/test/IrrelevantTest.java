@@ -2,6 +2,7 @@ package user11681.reflect.test;
 
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
@@ -23,6 +24,7 @@ import user11681.reflect.generics.GenericTypeAware;
 import user11681.reflect.generics.GenericTypeAwareTest;
 import user11681.reflect.util.Logger;
 import user11681.reflect.util.Util;
+import user11681.uncheck.ThrowingFunction;
 
 public class IrrelevantTest {
     public static <T, R> R var(T object, Function<T, R> function) {
@@ -97,15 +99,17 @@ public class IrrelevantTest {
 
     @Test
     void ensureJava8() throws Throwable {
-        JarFile artifact = new JarFile((Path.of(System.getProperty("user.dir")).getParent().resolve("build").resolve("libs").resolve("reflect-1.7.0.jar")).toFile());
+         Files.list(Path.of(System.getProperty("user.dir")).getParent().resolve("build").resolve("libs"))
+            .filter((Path jar) -> jar.getFileName().toString().matches("reflect-\\d+\\.\\d+\\.\\d+\\.jar"))
+            .map((ThrowingFunction<Path, JarFile>) (Path jar) -> new JarFile(jar.toFile()))
+            .forEach((JarFile artifact) -> {
+                assert artifact.stream()
+                    .filter((JarEntry entry) -> entry.getName().endsWith(".class"))
+                    .map((JarEntry entry) -> new ClassNode2().reader(artifact, entry).read())
+                    .allMatch((ClassNode2 klass) -> klass.version == Opcodes.V1_8);
+            });
 
-        artifact.stream().forEach((JarEntry entry) -> {
-            if (entry.getName().endsWith(".class")) {
-                ClassNode2 klass = new ClassNode2().reader(artifact, entry);
-
-                assert klass.version == Opcodes.V1_8;
-            }
-        });
+        throw new AssertionError("class version");
     }
 
     static {
@@ -116,5 +120,7 @@ public class IrrelevantTest {
             Object.field0 = "new0";
             Object.field1 = "new1";
         });
+
+        System.setProperty("jol.tryWithSudo", "true");
     }
 }

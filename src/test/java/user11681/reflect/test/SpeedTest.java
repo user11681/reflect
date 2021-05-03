@@ -11,8 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
@@ -31,15 +29,14 @@ import user11681.reflect.util.Util;
 import user11681.uncheck.ThrowingRunnable;
 import user11681.uncheck.Uncheck;
 
-@SuppressWarnings("UnusedReturnValue")
+@SuppressWarnings("ALL")
 public class SpeedTest {
     static final int iterations = 1000;
-    static final int tests = 10;
+    static final int tests = 1;
     static Runnable runnable0;
     static Runnable runnable1;
 
-    @Test
-    static double timeN(ThrowingRunnable test) {
+    static double mean(ThrowingRunnable test) {
         return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
@@ -55,8 +52,8 @@ public class SpeedTest {
         });
     }
 
-    static double timeN(String label, ThrowingRunnable test) {
-        return Uncheck.handle(() ->  {
+    static double mean(String label, ThrowingRunnable test) {
+        return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
             for (int i = 0; i < iterations; i++) {
@@ -71,7 +68,7 @@ public class SpeedTest {
         });
     }
 
-    static long time(ThrowingRunnable test) {
+    static double time(boolean loud, ThrowingRunnable test) {
         return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
@@ -79,15 +76,21 @@ public class SpeedTest {
 
             time = System.nanoTime() - time;
 
-            Logger.log(time);
+            if (loud) {
+                Logger.log(time);
+            }
 
             return time;
         });
     }
 
-    static long time(String label, ThrowingRunnable test) {
+    static double time(ThrowingRunnable test) {
+        return time(true, test);
+    }
+
+    static double time(String label, ThrowingRunnable test) {
         return Uncheck.handle(() -> {
-            long time = System.nanoTime();
+            double time = System.nanoTime();
 
             test.run();
 
@@ -97,6 +100,38 @@ public class SpeedTest {
 
             return time;
         });
+    }
+
+    static double total(boolean loud, String label, ThrowingRunnable test) {
+        return Uncheck.handle(() -> {
+            long time = System.nanoTime();
+
+            for (int i = 0; i < iterations; i++) {
+                test.run();
+            }
+
+            time = System.nanoTime() - time;
+
+            if (loud) {
+                if (label == null) {
+                    Logger.log(time);
+                } else Logger.log("%s: %s", label, time);
+            }
+
+            return time;
+        });
+    }
+
+    static double total(ThrowingRunnable test) {
+        return total(true, null, test);
+    }
+
+    static double total(String label, ThrowingRunnable test) {
+        return total(true, label, test);
+    }
+
+    static double total(boolean loud, ThrowingRunnable test) {
+        return total(loud, null, test);
     }
 
     @Test
@@ -157,17 +192,17 @@ public class SpeedTest {
         Integer[] array = new Integer[100];
         Arrays.fill(array, 0, array.length, 29);
 
-        timeN("ArrayList constructor", () -> new ArrayList<>(Arrays.asList(array)));
-        timeN("Unsafe", () -> Lists.wrap(new ArrayList<>(), array, 100));
+        mean("ArrayList constructor", () -> new ArrayList<>(Arrays.asList(array)));
+        mean("Unsafe", () -> Lists.wrap(new ArrayList<>(), array, 100));
 
-        timeN("ArrayList addAll", () -> new ArrayList<>().addAll(Arrays.asList(array)));
-        timeN("Unsafe", () -> Lists.addAll(new ArrayList<>(), array));
+        mean("ArrayList addAll", () -> new ArrayList<>().addAll(Arrays.asList(array)));
+        mean("Unsafe", () -> Lists.addAll(new ArrayList<>(), array));
     }
 
     @Test
     void instantiation() {
-        timeN("constructor", () -> new ArrayList<>());
-        timeN("Unsafe", () -> Unsafe.allocateInstance(ArrayList.class));
+        mean("constructor", () -> new ArrayList<>());
+        mean("Unsafe", () -> Unsafe.allocateInstance(ArrayList.class));
     }
 
     @Test
@@ -176,16 +211,16 @@ public class SpeedTest {
 
         Util.repeat(handle::invokeExact);
 
-        timeN("normal", handle::invokeExact);
-        timeN("fixed arity", handle.asFixedArity()::invokeExact);
+        mean("normal", handle::invokeExact);
+        mean("fixed arity", handle.asFixedArity()::invokeExact);
     }
 
     @Test
     void clon() {
         A a = new A();
 
-        timeN("clone", a::clone);
-        timeN("copy <init>", () -> new A(a));
+        mean("clone", a::clone);
+        mean("copy <init>", () -> new A(a));
     }
 
     @Test
@@ -195,32 +230,32 @@ public class SpeedTest {
         MethodHandle methodHandle = Invoker.findStatic(A.class, "privateMethod", String.class);
         MethodHandle unreflected = Invoker.unreflect(method);
 
-        timeN("Method 0", () -> Methods.getMethod(A.class, "privateMethod2", int.class));
+        mean("Method 0", () -> Methods.getMethod(A.class, "privateMethod2", int.class));
 
-        timeN("Method 1", () -> Methods.getMethod(A.class, "privateMethod"));
+        mean("Method 1", () -> Methods.getMethod(A.class, "privateMethod"));
 
-        timeN("Method 2", () -> {
+        mean("Method 2", () -> {
             Method method1 = A.class.getDeclaredMethod("privateMethod");
 
             method.setAccessible(true);
         });
 
-        timeN("MethodHandle unreflection", () -> Invoker.unreflect(declaredMethod));
+        mean("MethodHandle unreflection", () -> Invoker.unreflect(declaredMethod));
 
-        timeN("MethodHandle", () -> Invoker.findStatic(A.class, "privateMethod", String.class));
+        mean("MethodHandle", () -> Invoker.findStatic(A.class, "privateMethod", String.class));
     }
 
     @Test
     public void newInvokerUnreflect() {
         //        timeN("new", () -> Invoker.unreflect2(A.class, "privateMethod"));
 
-        timeN("old", () -> Invoker.unreflect(A.class, "privateMethod"));
+        mean("old", () -> Invoker.unreflect(A.class, "privateMethod"));
     }
 
     @Test
     public void method() {
-        timeN(() -> Methods.getMethods(TestObject.class));
-        timeN(ReflectTest.class::getDeclaredMethods);
+        mean(() -> Methods.getMethods(TestObject.class));
+        mean(ReflectTest.class::getDeclaredMethods);
     }
 
     @SuppressWarnings("Convert2Lambda")
@@ -236,8 +271,8 @@ public class SpeedTest {
 
     @Test
     public void cast() {
-        timeN("checkcast", () -> {ReflectTest test = Util.nul();});
-        timeN("Class#cast", () -> {ReflectTest test = ReflectTest.class.cast(Util.nul());});
+        mean("checkcast", () -> {ReflectTest test = Util.nul();});
+        mean("Class#cast", () -> {ReflectTest test = ReflectTest.class.cast(Util.nul());});
     }
 
     @Test
@@ -247,23 +282,22 @@ public class SpeedTest {
 
         Util.repeat(10000, () -> handle.invoke("", 1));
 
-        timeN("MethodHandle", () -> handle.invoke("", 1));
-        timeN("NativeConstructorAccessorImpl", () -> newInstance0.invoke(new Object[]{"", 1}));
+        mean("MethodHandle", () -> handle.invoke("", 1));
+        mean("NativeConstructorAccessorImpl", () -> newInstance0.invoke(new Object[]{"", 1}));
+    }
+
+    @Test
+    void stack() {
+
     }
 
     static {
-        long time = time(() -> Classes.load(true, "user11681.reflect.Reflect"));
+        double time = time(false, Reflect.class::getProtectionDomain);
 
         try (Stream<Path> classStream = Files.list(Paths.get(Reflect.class.getProtectionDomain().getCodeSource().getLocation().toURI()).resolve("user11681/reflect"))) {
-            List<Path> classes = classStream.collect(Collectors.toList());
+            time += classStream.map((Path klass) -> time(false, () -> Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", "")))).reduce(0D, Double::sum);
 
-            time += time(() -> {
-                for (Path klass : classes) {
-                    Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", ""));
-                }
-            });
-
-            Logger.log("initialized in %s ms", time / 1000000D);
+            Logger.log("initialized in %s ms%n", time / 1000000D);
         } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
