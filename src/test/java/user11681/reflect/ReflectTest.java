@@ -184,7 +184,7 @@ public class ReflectTest {
 
     @Test
     public void testCopy() {
-        ArrayList<Field> fields = Fields.instanceFields(ReflectTest.class);
+        List<Field> fields = Fields.instanceFields(ReflectTest.class);
         TestObject one = new TestObject();
         TestObject two = new TestObject();
 
