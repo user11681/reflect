@@ -17,25 +17,25 @@ public class Lists {
     }
 
     public static <T, U extends ArrayList<T>> U wrap(U list, T[] array) {
-        elementData.put(list, array);
-        size.put(list, array.length);
+        elementData.putObject(list, array);
+        size.putObject(list, array.length);
 
         return list;
     }
 
     public static <T, U extends ArrayList<T>> U wrap(U list, T[] array, int listSize) {
-        elementData.put(list, array);
-        size.put(list, listSize);
+        elementData.putObject(list, array);
+        size.putObject(list, listSize);
 
         return list;
     }
 
     public static <T> void addAll(ArrayList<T> list, T[] elements) {
-        final int length = elements.length;
-        final T[] original = elementData.get(list);
-        final T[] newArray = Arrays.copyOf(original, original.length + length);
+        int length = elements.length;
+        T[] original = elementData.getObject(list);
+        T[] newArray = Arrays.copyOf(original, original.length + length);
 
-        elementData.put(list, newArray);
-        size.put(list, list.size() + length);
+        elementData.putObject(list, newArray);
+        size.putObject(list, list.size() + length);
     }
 }

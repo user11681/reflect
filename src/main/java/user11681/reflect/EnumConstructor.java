@@ -81,13 +81,13 @@ public class EnumConstructor<E extends Enum<E>> {
 
     public static <E extends Enum<E>> E add(Class<E> enumClass, E enumConstant) {
         Pointer enumArrayPointer = getEnumArray(enumClass);
-        Object[] values = enumArrayPointer.get();
+        Object[] values = enumArrayPointer.getObject();
         Object[] newValues = Arrays.copyOf(values, values.length + 1);
         newValues[values.length] = enumConstant;
 
-        enumArrayPointer.put(newValues);
-        getEnumConstants(enumClass).put(newValues);
-        getEnumConstantDirectory(enumClass).put(null);
+        enumArrayPointer.putObject(newValues);
+        getEnumConstants(enumClass).putObject(newValues);
+        getEnumConstantDirectory(enumClass).putObject(null);
 
         return enumConstant;
     }
@@ -159,7 +159,7 @@ public class EnumConstructor<E extends Enum<E>> {
 
         pointer = new Pointer().bind(enumClass);
 
-        Field[] fields = Fields.getRawFields(enumClass);
+        Field[] fields = Fields.rawFields(enumClass);
 
         for (Field field : fields) {
             if (isArrayField(field)) {

@@ -266,7 +266,7 @@ public class Invoker {
 
     public static MethodHandle unreflectGetter(Class<?> klass, String name) {
         try {
-            return Unsafe.trustedLookup.unreflectGetter(Fields.getField(klass, name));
+            return Unsafe.trustedLookup.unreflectGetter(Fields.field(klass, name));
         } catch (IllegalAccessException exception) {
             throw Unsafe.throwException(exception);
         }
@@ -282,7 +282,7 @@ public class Invoker {
 
     public static MethodHandle unreflectSetter(Class<?> klass, String name) {
         try {
-            return Unsafe.trustedLookup.unreflectSetter(Fields.getField(klass, name));
+            return Unsafe.trustedLookup.unreflectSetter(Fields.field(klass, name));
         } catch (IllegalAccessException exception) {
             throw Unsafe.throwException(exception);
         }

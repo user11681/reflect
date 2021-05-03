@@ -227,7 +227,7 @@ public class Classes {
         Class<?> klass = loaderClass;
 
         while (klass != Object.class) {
-            for (Field field : Fields.getFields(klass)) {
+            for (Field field : Fields.fields(klass)) {
                 if (URLClassPath.isAssignableFrom(field.getType())) {
                     return field;
                 }

@@ -356,5 +356,7 @@ public class ReflectTest {
         assert "hjk".equals(clone.thing);
         assert clone.object == null;
         assert clone.things instanceof ArrayList<Object> things && things.isEmpty();
+
+        Logger.log(Arrays.toString(Accessor.clone(new Object[]{1, 2, 3})));
     }
 }

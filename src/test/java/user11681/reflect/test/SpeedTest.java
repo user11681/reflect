@@ -173,10 +173,10 @@ public class SpeedTest {
 
     @Test
     void reflectField() {
-        Util.repeat(() -> Fields.getRawFields(TestObject.class));
+        Util.repeat(() -> Fields.rawFields(TestObject.class));
 
-        time("cached", () -> Util.repeat(() -> Fields.getFields(TestObject.class)));
-        time("raw", () -> Util.repeat(() -> Fields.getRawFields(TestObject.class)));
+        time("cached", () -> Util.repeat(() -> Fields.fields(TestObject.class)));
+        time("raw", () -> Util.repeat(() -> Fields.rawFields(TestObject.class)));
     }
 
     @Test
@@ -280,16 +280,6 @@ public class SpeedTest {
 
     @Test
     void field() {
-        Fields.rawFields(String.class);
-
-        long total0 = mean("rawFields 0", () -> Fields.rawFields(String.class))
-            + mean("rawFields 1", () -> Fields.rawFields(String.class));
-
-        long total1 = mean("fields uncached", () -> Fields.fields(String.class))
-            + mean("fields cached", () -> Fields.fields(String.class));
-
-        Logger.log("total raw: %s", total0);
-        Logger.log("total cache: %s", total1);
     }
 
     static {

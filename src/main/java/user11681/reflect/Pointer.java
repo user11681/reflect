@@ -30,13 +30,13 @@ public class Pointer implements Cloneable {
 
     public Pointer staticField(Class<?> klass, String name) {
         this.object = klass;
-        this.offset = Unsafe.staticFieldOffset(Fields.getField(klass, name));
+        this.offset = Unsafe.staticFieldOffset(Fields.field(klass, name));
 
         return this;
     }
 
     public Pointer staticField(String name) {
-        this.offset = Unsafe.staticFieldOffset(Fields.getField((Class<?>) this.object, name));
+        this.offset = Unsafe.staticFieldOffset(Fields.field((Class<?>) this.object, name));
 
         return this;
     }
@@ -49,13 +49,13 @@ public class Pointer implements Cloneable {
     }
 
     public Pointer instanceField(Class<?> klass, String name) {
-        this.offset = Unsafe.objectFieldOffset(Fields.getField(klass, name));
+        this.offset = Unsafe.objectFieldOffset(Fields.field(klass, name));
 
         return this;
     }
 
     public Pointer instanceField(String name) {
-        this.offset = Unsafe.objectFieldOffset(Fields.getField(this.object, name));
+        this.offset = Unsafe.objectFieldOffset(Fields.field(this.object, name));
 
         return this;
     }
@@ -66,19 +66,39 @@ public class Pointer implements Cloneable {
         return this;
     }
 
+    /** @deprecated by {@link #getObject()} */
     public <T> T get() {
-        return (T) Unsafe.getObject(this.object, this.offset);
+        return Unsafe.getObject(this.object, this.offset);
     }
 
+    /** @deprecated by {@link #getObject(Object)} */
     public <T> T get(Object object) {
-        return (T) Unsafe.getObject(object, this.offset);
+        return Unsafe.getObject(object, this.offset);
     }
 
+    /** @deprecated by {@link #putObject(Object, Object)} */
     public void put(Object object, Object value) {
         Unsafe.putObject(object, this.offset, value);
     }
 
+    /** @deprecated by {@link #putObject(Object)} */
     public void put(Object value) {
+        Unsafe.putObject(this.object, this.offset, value);
+    }
+
+    public <T> T getObject() {
+        return Unsafe.getObject(this.object, this.offset);
+    }
+
+    public <T> T getObject(Object object) {
+        return Unsafe.getObject(object, this.offset);
+    }
+
+    public void putObject(Object object, Object value) {
+        Unsafe.putObject(object, this.offset, value);
+    }
+
+    public void putObject(Object value) {
         Unsafe.putObject(this.object, this.offset, value);
     }
 

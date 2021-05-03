@@ -64,14 +64,14 @@ public class Fields {
     }
 
     public static Field field(Class<?> type, String name) {
-        String key = type.getName() + '.' + name;
+        String key = type.getName() + '@' + name;
         Field field = nameToField.get(key);
 
         if (field != null) {
             return field;
         }
 
-        getFields(type);
+        fields(type);
 
         return nameToField.get(key);
     }
@@ -141,8 +141,8 @@ public class Fields {
 
         fields = new ArrayList<>();
 
-        for (Field field : getFields(type)) {
-            if (!Modifier.isStatic(field.getModifiers())) {
+        for (Field field : fields(type)) {
+            if (Modifier.isStatic(field.getModifiers())) {
                 fields.add(field);
             }
         }
@@ -165,7 +165,7 @@ public class Fields {
 
         fields = new ArrayList<>();
 
-        for (Field field : getFields(type)) {
+        for (Field field : fields(type)) {
             if (!Modifier.isStatic(field.getModifiers())) {
                 fields.add(field);
             }
@@ -184,7 +184,7 @@ public class Fields {
             cache.put(klass, fields);
 
             for (Field field : fields) {
-                nameToField.put(klass.getName() + '.' + field.getName(), field);
+                nameToField.put(klass.getName() + '@' + field.getName(), field);
             }
         }
 
@@ -227,15 +227,15 @@ public class Fields {
      * @deprecated by {@link #field(Class, String)}
      */
     public static Field getField(Class<?> klass, String name) {
-        Field field = nameToField.get(klass.getName() + '.' + name);
+        Field field = nameToField.get(klass.getName() + '@' + name);
 
         if (field != null) {
             return field;
         }
 
-        getFields(klass);
+        fields(klass);
 
-        return nameToField.get(klass.getName() + '.' + name);
+        return nameToField.get(klass.getName() + '@' + name);
     }
 
     /**
@@ -300,7 +300,7 @@ public class Fields {
      * @deprecated by {@link #rawField(Class, String)}
      */
     public static Field getRawField(Class<?> klass, String name) {
-        for (Field field : getRawFields(klass)) {
+        for (Field field : rawFields(klass)) {
             if (field.getName().equals(name)) {
                 return field;
             }
@@ -310,7 +310,7 @@ public class Fields {
     }
 
     /**
-     @deprecated by {@link #instanceFields}
+     * @deprecated by {@link #instanceFields}
      */
     public static Field[] getInstanceFields(Class<?> type) {
         Field[] fields = oldInstanceFieldCache.get(type);
@@ -321,7 +321,7 @@ public class Fields {
 
         List<Field> fieldList = new ArrayList<>();
 
-        for (Field field : getFields(type)) {
+        for (Field field : fields(type)) {
             if ((field.getModifiers() & Modifier.STATIC) == 0) {
                 fieldList.add(field);
             }
@@ -334,7 +334,7 @@ public class Fields {
     }
 
     /**
-     @deprecated by {@link #staticFields}
+     * @deprecated by {@link #staticFields}
      */
     public static Field[] getStaticFields(Class<?> type) {
         Field[] fields = oldStaticFieldCache.get(type);
@@ -345,7 +345,7 @@ public class Fields {
 
         List<Field> fieldList = new ArrayList<>();
 
-        for (Field field : getFields(type)) {
+        for (Field field : fields(type)) {
             if ((field.getModifiers() & Modifier.STATIC) != 0) {
                 fieldList.add(field);
             }
@@ -359,15 +359,15 @@ public class Fields {
     }
 
     /**
-     @deprecated by {@link #all}
+     * @deprecated by {@link #all}
      */
     public static ArrayList<Field> getAllFields(Class<?> klass) {
-        final ArrayList<Field> fields = new ArrayList<>(Arrays.asList(getFields(klass)));
+        final ArrayList<Field> fields = new ArrayList<>(Arrays.asList(fields(klass)));
 
         klass = klass.getSuperclass();
 
         while (klass != null) {
-            fields.addAll(new ArrayList<>(Arrays.asList(getFields(klass))));
+            fields.addAll(Arrays.asList(fields(klass)));
 
             klass = klass.getSuperclass();
         }
@@ -376,17 +376,17 @@ public class Fields {
     }
 
     /**
-     @deprecated by {@link #fields}
+     * @deprecated by {@link #fields}
      */
     public static Field[] getFields(Class<?> klass) {
         Field[] fields = cache.get(klass);
 
         if (fields == null) {
-            fields = getRawFields(klass);
+            fields = rawFields(klass);
             cache.put(klass, fields);
 
             for (Field field : fields) {
-                nameToField.put(klass.getName() + '.' + field.getName(), field);
+                nameToField.put(klass.getName() + '@' + field.getName(), field);
             }
         }
 
@@ -425,7 +425,7 @@ public class Fields {
 
             long offset = -1;
 
-            for (Field field : getRawFields(Field.class)) {
+            for (Field field : rawFields(Field.class)) {
                 if (field.getName().equals("modifiers")) {
                     offset = Unsafe.objectFieldOffset(field);
 
@@ -435,7 +435,7 @@ public class Fields {
 
             modifiersOffset = offset;
 
-            for (Field field : getRawFields(AccessibleObject.class)) {
+            for (Field field : rawFields(AccessibleObject.class)) {
                 if (field.getName().equals("override")) {
                     offset = Unsafe.objectFieldOffset(field);
 
@@ -445,8 +445,8 @@ public class Fields {
 
             overrideOffset = offset;
 
-            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "fieldFilterMap")), new HashMap<>());
-            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(getField(Classes.Reflection, "methodFilterMap")), new HashMap<>());
+            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(field(Classes.Reflection, "fieldFilterMap")), new HashMap<>());
+            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(field(Classes.Reflection, "methodFilterMap")), new HashMap<>());
         } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
