@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
+import user11681.reflect.Accessor;
 import user11681.reflect.Classes;
 import user11681.reflect.Fields;
 import user11681.reflect.Invoker;
@@ -213,6 +214,8 @@ public class SpeedTest {
 
         mean("clone", a::clone);
         mean("copy <init>", () -> new A(a));
+        mean("copy", a::copy);
+        mean("Accessor.clone", () -> Accessor.clone(a));
     }
 
     @Test
@@ -276,10 +279,6 @@ public class SpeedTest {
 
         mean("MethodHandle", () -> handle.invoke("", 1));
         mean("NativeConstructorAccessorImpl", () -> newInstance0.invoke(new Object[]{"", 1}));
-    }
-
-    @Test
-    void field() {
     }
 
     static {

@@ -189,7 +189,7 @@ public class EnumConstructor<E extends Enum<E>> {
     }
 
     @Deprecated // for removal
-    public /* not static? */ Object[] joinArguments(int ordinal, String name, Object... others) {
+    public /* not static? 🤔 */ Object[] joinArguments(int ordinal, String name, Object... others) {
         int length = others.length;
         Object[] arguments = new Object[length + 2];
         arguments[0] = name;

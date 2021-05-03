@@ -5,9 +5,9 @@ import java.lang.invoke.MethodHandle;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class JavaLangAccess {
-    public static final Object javaLangAccess;
+    public static final Object javaLangAccess = Invoker.invoke(Invoker.findStatic(Classes.SharedSecrets, "getJavaLangAccess", Classes.JavaLangAccess));
 
-    private static final MethodHandle getConstantPool;
+    private static final MethodHandle getConstantPool = Invoker.bind(javaLangAccess, "getConstantPool", Classes.ConstantPool, Class.class);
 
     public static Object getConstantPool(Class<?> klass) {
         try {
@@ -15,15 +15,5 @@ public class JavaLangAccess {
         } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }
-    }
-
-    static {
-        try {
-            javaLangAccess = Invoker.findStatic(Classes.SharedSecrets, "getJavaLangAccess", Classes.JavaLangAccess).invoke();
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-
-        getConstantPool = Invoker.bind(javaLangAccess, "getConstantPool", Classes.ConstantPool, Class.class);
     }
 }

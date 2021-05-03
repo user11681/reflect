@@ -9,11 +9,6 @@ public class Types {
         return primitive(klass) != null;
     }
 
-    @Deprecated // use primitive
-    public static Class<?> getPrimitive(Class<?> klass) {
-        return primitive(klass);
-    }
-
     public static Class<?> primitive(Class<?> klass) {
         if (klass == Void.class) {
             return void.class;
@@ -60,5 +55,10 @@ public class Types {
         }
 
         return null;
+    }
+
+    /** @deprecated by {@link #primitive} */
+    public static Class<?> getPrimitive(Class<?> klass) {
+        return primitive(klass);
     }
 }
