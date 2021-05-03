@@ -116,12 +116,12 @@ public class Fields {
         return notFound;
     }
 
-    public static ArrayList<Field> all(Object object) {
+    public static List<Field> all(Object object) {
         return all(object.getClass());
     }
 
-    public static ArrayList<Field> all(Class<?> type) {
-        ArrayList<Field> fields = new ArrayList<>();
+    public static List<Field> all(Class<?> type) {
+        List<Field> fields = new ArrayList<>();
 
         while (type != Object.class) {
             Collections.addAll(fields, fields(type));
@@ -132,7 +132,7 @@ public class Fields {
         return fields;
     }
 
-    public static ArrayList<Field> staticFields(Class<?> type) {
+    public static List<Field> staticFields(Class<?> type) {
         ArrayList<Field> fields = staticFieldCache.get(type);
 
         if (fields != null) {
@@ -152,11 +152,11 @@ public class Fields {
         return fields;
     }
 
-    public static ArrayList<Field> instanceFields(Object object) {
+    public static List<Field> instanceFields(Object object) {
         return instanceFields(object.getClass());
     }
 
-    public static ArrayList<Field> instanceFields(Class<?> type) {
+    public static List<Field> instanceFields(Class<?> type) {
         ArrayList<Field> fields = instanceFieldCache.get(type);
 
         if (fields != null) {
@@ -191,12 +191,12 @@ public class Fields {
         return fields;
     }
 
-    public static ArrayList<Field> allInstanceFields(Object object) {
+    public static List<Field> allInstanceFields(Object object) {
         return allInstanceFields(object.getClass());
     }
 
-    public static ArrayList<Field> allInstanceFields(Class<?> type) {
-        ArrayList<Field> fields = new ArrayList<>();
+    public static List<Field> allInstanceFields(Class<?> type) {
+        List<Field> fields = new ArrayList<>();
 
         while (type != Object.class) {
             fields.addAll(instanceFields(type));
@@ -207,12 +207,12 @@ public class Fields {
         return fields;
     }
 
-    public static ArrayList<Field> allStaticFields(Object object) {
+    public static List<Field> allStaticFields(Object object) {
         return allStaticFields(object.getClass());
     }
 
-    public static ArrayList<Field> allStaticFields(Class<?> type) {
-        ArrayList<Field> fields = new ArrayList<>();
+    public static List<Field> allStaticFields(Class<?> type) {
+        List<Field> fields = new ArrayList<>();
 
         while (type != Object.class) {
             fields.addAll(staticFields(type));
@@ -361,8 +361,8 @@ public class Fields {
     /**
      * @deprecated by {@link #all}
      */
-    public static ArrayList<Field> getAllFields(Class<?> klass) {
-        final ArrayList<Field> fields = new ArrayList<>(Arrays.asList(fields(klass)));
+    public static List<Field> getAllFields(Class<?> klass) {
+        final List<Field> fields = new ArrayList<>(Arrays.asList(fields(klass)));
 
         klass = klass.getSuperclass();
 

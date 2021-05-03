@@ -242,7 +242,7 @@ public class SpeedTest {
 
     @Test
     public void newInvokerUnreflect() {
-        //        timeN("new", () -> Invoker.unreflect2(A.class, "privateMethod"));
+        // timeN("new", () -> Invoker.unreflect2(A.class, "privateMethod"));
 
         mean("old", () -> Invoker.unreflect(A.class, "privateMethod"));
     }
