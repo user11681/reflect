@@ -2,8 +2,8 @@ package user11681.reflect.generator.base;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import user11681.reflect.generator.base.method.ConcreteType;
-import user11681.reflect.generator.base.method.Expression;
+import user11681.reflect.generator.base.type.ConcreteType;
+import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.type.Type;
 
 public class FieldGenerator extends MemberGenerator<FieldGenerator> {

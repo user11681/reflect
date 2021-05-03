@@ -3,7 +3,6 @@ package user11681.reflect.generator.base.type;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import user11681.reflect.generator.base.method.ConcreteType;
 
 public record ParameterizedType(ConcreteType type, TypeArgument... typeArguments) implements Type {
     public ParameterizedType {

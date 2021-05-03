@@ -1,5 +1,6 @@
-package user11681.reflect.generator.base.method;
+package user11681.reflect.generator.base.method.statement;
 
+import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.method.operator.Equality;
 
 public class If implements Statement {
@@ -15,6 +16,10 @@ public class If implements Statement {
 
     public If same(Expression left, Expression right) {
         return this.condition(new Equality(left, right));
+    }
+
+    public If nul(Expression expression) {
+        return this.condition(Equality.nul(expression));
     }
 
     public If then(Statement statement) {

@@ -11,9 +11,9 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import user11681.reflect.Invoker;
-import user11681.reflect.generator.base.method.Body;
-import user11681.reflect.generator.base.method.ConcreteType;
-import user11681.reflect.generator.base.method.MethodBody;
+import user11681.reflect.generator.base.method.Block;
+import user11681.reflect.generator.base.type.ConcreteType;
+import user11681.reflect.generator.base.method.MethodBlock;
 import user11681.reflect.generator.base.method.Variable;
 import user11681.reflect.generator.base.type.BoundType;
 import user11681.reflect.generator.base.type.Type;
@@ -24,7 +24,7 @@ public class MethodGenerator extends MemberGenerator<MethodGenerator> {
     protected final Map<String, Variable> parameters = new LinkedHashMap<>();
 
     protected Type returnType = new ConcreteType(void.class);
-    protected Body body;
+    protected Block block;
 
     public MethodGenerator typeParameter(String name) {
         return this.typeParameter(name, null);
@@ -110,9 +110,9 @@ public class MethodGenerator extends MemberGenerator<MethodGenerator> {
         return this.returnType(type.returnType()).parameter(type.parameterArray());
     }
 
-    public MethodGenerator body(Consumer<Body> generator) {
-        Body body = this.body == null ? this.body = new MethodBody(this) : this.body;
-        generator.accept(body);
+    public MethodGenerator body(Consumer<Block> generator) {
+        Block block = this.block == null ? this.block = new MethodBlock(this) : this.block;
+        generator.accept(block);
 
         return this;
     }
@@ -136,7 +136,7 @@ public class MethodGenerator extends MemberGenerator<MethodGenerator> {
         string.append(this.returnType.simpleName())
             .append(' ').append(this.name)
             .append(this.parameters.values().stream().map(Variable::declaration).collect(Collectors.joining(", ", "(", ") ")))
-            .append(this.body.toString());
+            .append(this.block.toString());
 
         return string.toString();
     }

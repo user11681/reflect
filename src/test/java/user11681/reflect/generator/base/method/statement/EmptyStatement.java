@@ -1,4 +1,4 @@
-package user11681.reflect.generator.base.method;
+package user11681.reflect.generator.base.method.statement;
 
 import java.util.stream.Stream;
 

@@ -1,5 +1,8 @@
 package user11681.reflect.generator.base.method;
 
+import user11681.reflect.generator.base.method.expression.Expression;
+import user11681.reflect.generator.base.method.statement.Statement;
+import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.Type;
 
 public class VariableDeclaration implements Statement {

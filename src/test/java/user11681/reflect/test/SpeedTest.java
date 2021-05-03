@@ -31,12 +31,20 @@ import user11681.uncheck.Uncheck;
 
 @SuppressWarnings("ALL")
 public class SpeedTest {
-    static final int iterations = 1000;
+    static final int iterations = 3;
     static final int tests = 1;
     static Runnable runnable0;
     static Runnable runnable1;
 
-    static double mean(ThrowingRunnable test) {
+    static long mean(ThrowingRunnable test) {
+        return mean(true, null, test);
+    }
+
+    static long mean(String label, ThrowingRunnable test) {
+        return mean(true, label, test);
+    }
+
+    static long mean(boolean loud, String label, ThrowingRunnable test) {
         return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
@@ -44,31 +52,31 @@ public class SpeedTest {
                 test.run();
             }
 
-            double duration = (double) (System.nanoTime() - time) / iterations;
+            long duration = Math.round((double) (System.nanoTime() - time) / iterations);
 
-            Logger.log(duration);
-
-            return duration;
-        });
-    }
-
-    static double mean(String label, ThrowingRunnable test) {
-        return Uncheck.handle(() -> {
-            long time = System.nanoTime();
-
-            for (int i = 0; i < iterations; i++) {
-                test.run();
+            if (loud) {
+                if (label == null) {
+                    Logger.log(duration);
+                } else Logger.log("%s: %s", label, duration);
             }
 
-            double duration = (double) (System.nanoTime() - time) / iterations;
-
-            Logger.log("%s: %s", label, duration);
-
             return duration;
         });
     }
 
-    static double time(boolean loud, ThrowingRunnable test) {
+    static long time(ThrowingRunnable test) {
+        return time(true, null, test);
+    }
+
+    static long time(String label, ThrowingRunnable test) {
+        return time(true, label, test);
+    }
+
+    static long time(boolean loud, ThrowingRunnable test) {
+        return time(loud, null, test);
+    }
+
+    static long time(boolean loud, String label, ThrowingRunnable test) {
         return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
@@ -77,32 +85,28 @@ public class SpeedTest {
             time = System.nanoTime() - time;
 
             if (loud) {
-                Logger.log(time);
+                if (label == null) {
+                    Logger.log(time);
+                } else Logger.log("%s: %s", label, time);
             }
 
             return time;
         });
     }
 
-    static double time(ThrowingRunnable test) {
-        return time(true, test);
+    static long total(ThrowingRunnable test) {
+        return total(true, null, test);
     }
 
-    static double time(String label, ThrowingRunnable test) {
-        return Uncheck.handle(() -> {
-            double time = System.nanoTime();
-
-            test.run();
-
-            time = System.nanoTime() - time;
-
-            Logger.log("%s: %s", label, time);
-
-            return time;
-        });
+    static long total(String label, ThrowingRunnable test) {
+        return total(true, label, test);
     }
 
-    static double total(boolean loud, String label, ThrowingRunnable test) {
+    static long total(boolean loud, ThrowingRunnable test) {
+        return total(loud, null, test);
+    }
+
+    static long total(boolean loud, String label, ThrowingRunnable test) {
         return Uncheck.handle(() -> {
             long time = System.nanoTime();
 
@@ -120,18 +124,6 @@ public class SpeedTest {
 
             return time;
         });
-    }
-
-    static double total(ThrowingRunnable test) {
-        return total(true, null, test);
-    }
-
-    static double total(String label, ThrowingRunnable test) {
-        return total(true, label, test);
-    }
-
-    static double total(boolean loud, ThrowingRunnable test) {
-        return total(loud, null, test);
     }
 
     @Test
@@ -287,15 +279,24 @@ public class SpeedTest {
     }
 
     @Test
-    void stack() {
+    void field() {
+        Fields.rawFields(String.class);
 
+        long total0 = mean("rawFields 0", () -> Fields.rawFields(String.class))
+            + mean("rawFields 1", () -> Fields.rawFields(String.class));
+
+        long total1 = mean("fields uncached", () -> Fields.fields(String.class))
+            + mean("fields cached", () -> Fields.fields(String.class));
+
+        Logger.log("total raw: %s", total0);
+        Logger.log("total cache: %s", total1);
     }
 
     static {
         double time = time(false, Reflect.class::getProtectionDomain);
 
         try (Stream<Path> classStream = Files.list(Paths.get(Reflect.class.getProtectionDomain().getCodeSource().getLocation().toURI()).resolve("user11681/reflect"))) {
-            time += classStream.map((Path klass) -> time(false, () -> Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", "")))).reduce(0D, Double::sum);
+            time += classStream.map((Path klass) -> time(false, () -> Class.forName("user11681.reflect." + klass.getFileName().toString().replace(".class", "")))).reduce(0L, Long::sum);
 
             Logger.log("initialized in %s ms%n", time / 1000000D);
         } catch (Throwable throwable) {

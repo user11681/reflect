@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import user11681.reflect.Classes;
 import user11681.reflect.Invoker;
 import user11681.reflect.Methods;
-import user11681.reflect.generator.base.method.Invocation;
+import user11681.reflect.generator.base.method.expression.Invocation;
 
 public class UnsafeGenerator extends TestGenerator {
     public UnsafeGenerator() {

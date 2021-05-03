@@ -1,7 +1,6 @@
-package user11681.reflect.generator.base.method;
+package user11681.reflect.generator.base.type;
 
 import java.util.Objects;
-import user11681.reflect.generator.base.type.Type;
 
 public record ConcreteType(Class<?> type) implements Type {
     public static final ConcreteType voidType = new ConcreteType(void.class);

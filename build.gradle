@@ -4,7 +4,7 @@ plugins {
 }
 
 group("user11681")
-version("1.8.0")
+version("1.9.0")
 
 sourceCompatibility = 8
 targetCompatibility = 8

@@ -33,7 +33,7 @@ public class Reflect {
 
     public static void disableSecurity() {
         if (!securityDisabled) {
-            final Field security = Fields.getRawField(System.class, "security");
+            final Field security = Fields.rawField(System.class, "security");
 
             if (Modifier.isVolatile(security.getModifiers())) {
                 Unsafe.putObject(System.class, Unsafe.staticFieldOffset(security), null);

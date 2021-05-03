@@ -1,6 +1,9 @@
 package user11681.reflect.generator.base.method;
 
 import java.util.Objects;
+import user11681.reflect.generator.base.method.expression.Expression;
+import user11681.reflect.generator.base.method.expression.LoadVariable;
+import user11681.reflect.generator.base.method.expression.StoreVariable;
 import user11681.reflect.generator.base.type.Type;
 
 public record Variable(Type type, String name) implements Expression {

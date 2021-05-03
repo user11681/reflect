@@ -9,13 +9,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import user11681.reflect.Accessor;
 import user11681.reflect.Fields;
-import user11681.reflect.generator.base.method.Body;
-import user11681.reflect.generator.base.method.ConcreteType;
-import user11681.reflect.generator.base.method.Expression;
-import user11681.reflect.generator.base.method.If;
-import user11681.reflect.generator.base.method.Invocation;
-import user11681.reflect.generator.base.method.TypeLiteral;
+import user11681.reflect.generator.base.method.Block;
+import user11681.reflect.generator.base.method.expression.Expression;
+import user11681.reflect.generator.base.method.expression.Invocation;
+import user11681.reflect.generator.base.method.expression.NullLiteral;
+import user11681.reflect.generator.base.method.expression.TypeLiteral;
+import user11681.reflect.generator.base.method.statement.EnhancedFor;
+import user11681.reflect.generator.base.method.statement.If;
+import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.ParameterizedType;
 
 @Execution(ExecutionMode.SAME_THREAD)
@@ -107,18 +110,18 @@ class AccessorGenerator extends TestGenerator {
                         access.get(() -> method.returnType(actualType));
                         access.put(() -> method.parameter(actualType, "value"));
 
-                        method.body(body -> {
+                        method.body(block -> {
                             Invocation unsafeMethod;
-                            Invocation offset = new Invocation(Unsafe.class, "staticFieldOffset", body.variable("field"));
-                            Invocation delcaringClass = body.variable("field").invoke("getDeclaringClass");
+                            Invocation offset = new Invocation(Unsafe.class, "staticFieldOffset", block.variable("field"));
+                            Invocation delcaringClass = block.variable("field").invoke("getDeclaringClass");
 
                             unsafeMethod = type == null
-                                ? new Invocation(access.toString(), delcaringClass, body.variable("field").invoke("getType"), offset)
+                                ? new Invocation(access.toString(), delcaringClass, block.variable("field").invoke("getType"), offset)
                                 : new Invocation(Unsafe.class, method.name(), delcaringClass, offset);
 
-                            access.put(() -> unsafeMethod.argument(body.variable("value")));
+                            access.put(() -> unsafeMethod.argument(block.variable("value")));
 
-                            body.ret(unsafeMethod);
+                            block.ret(unsafeMethod);
                         });
                     });
                 }
@@ -151,25 +154,25 @@ class AccessorGenerator extends TestGenerator {
 
                                     access.put(() -> method.parameter(actualType, "value"));
 
-                                    method.body(body -> {
-                                        Expression field = fieldType == Field.class ? body.variable("fieldName") : new Invocation(Fields.class, "getField",
-                                            body.variable(objectName),
-                                            body.variable("fieldName")
+                                    method.body(block -> {
+                                        Expression field = fieldType == Field.class ? block.variable("fieldName") : new Invocation(Fields.class, "field",
+                                            block.variable(objectName),
+                                            block.variable("fieldName")
                                         );
 
                                         if (type == null && fieldType == String.class) {
-                                            body.variable(Field.class, "field", field).newline();
-                                            field = body.variable("field");
+                                            block.variable(Field.class, "field", field).newline();
+                                            field = block.variable("field");
                                         }
 
                                         Invocation offset = new Invocation(Unsafe.class, objectType == Class.class ? "staticFieldOffset" : "objectFieldOffset", field);
                                         Invocation unsafeMethod = type == null
-                                            ? new Invocation(access.toString(), body.variable(objectName), field.invoke("getType"), offset)
-                                            : new Invocation(Unsafe.class, method.name(), body.variable(objectName), offset);
+                                            ? new Invocation(access.toString(), block.variable(objectName), field.invoke("getType"), offset)
+                                            : new Invocation(Unsafe.class, method.name(), block.variable(objectName), offset);
 
-                                        access.put(() -> unsafeMethod.argument(body.variable("value")));
+                                        access.put(() -> unsafeMethod.argument(block.variable("value")));
 
-                                        body.ret(unsafeMethod);
+                                        block.ret(unsafeMethod);
                                     });
                                 });
                             }
@@ -204,27 +207,27 @@ class AccessorGenerator extends TestGenerator {
 
                             access.put(() -> method.parameter(actualType, "value"));
 
-                            method.body(body -> {
-                                Expression field = fieldType == Field.class ? body.variable("fieldName") : new Invocation(Fields.class, "getField",
-                                    body.variable("type"),
-                                    body.variable("fieldName")
+                            method.body(block -> {
+                                Expression field = fieldType == Field.class ? block.variable("fieldName") : new Invocation(Fields.class, "field",
+                                    block.variable("type"),
+                                    block.variable("fieldName")
                                 );
 
                                 if (type == null && fieldType == String.class) {
-                                    body.variable(Field.class, "field", field).newline();
-                                    field = body.variable("field");
+                                    block.variable(Field.class, "field", field).newline();
+                                    field = block.variable("field");
                                 }
 
                                 Invocation offset = new Invocation(Unsafe.class, "objectFieldOffset", field);
                                 Invocation unsafeMethod = type == null
-                                    ? new Invocation(access.toString(), body.variable("object"), field.invoke("getType"), offset)
-                                    : new Invocation(Unsafe.class, method.name(), body.variable("object"), offset);
+                                    ? new Invocation(access.toString(), block.variable("object"), field.invoke("getType"), offset)
+                                    : new Invocation(Unsafe.class, method.name(), block.variable("object"), offset);
 
                                 if (access.put()) {
-                                    unsafeMethod.argument(body.variable("value"));
+                                    unsafeMethod.argument(block.variable("value"));
                                 }
 
-                                body.ret(unsafeMethod);
+                                block.ret(unsafeMethod);
                             });
                         });
                     }
@@ -250,11 +253,11 @@ class AccessorGenerator extends TestGenerator {
                         method.parameter(Object.class, "value");
                     }
 
-                    method.body(body -> {
+                    method.body(block -> {
                         If ifStatement = new If();
-                        Invocation unsafeMethod = new Invocation(Unsafe.class, body.variable("object"), body.variable("offset"));
+                        Invocation unsafeMethod = new Invocation(Unsafe.class, block.variable("object"), block.variable("offset"));
 
-                        body.statement(ifStatement);
+                        block.statement(ifStatement);
 
                         for (int i = 0; i < types.length; i++) {
                             Class<?> type = types[i];
@@ -263,23 +266,22 @@ class AccessorGenerator extends TestGenerator {
                                 Invocation put = unsafeMethod.copy().name(access + name(type) + suffix);
 
                                 if (access.put()) {
-                                    put.argument(body.variable("value").cast(type));
+                                    put.argument(block.variable("value").cast(type));
                                 }
 
                                 if (i != 0) {
                                     ifStatement.otherwise(ifStatement = new If());
                                 }
 
-                                Body then = new Body();
+                                Block then = new Block();
 
-                                ifStatement.same(body.variable("type"), new TypeLiteral(type)).then(access.put() ? then.statement(put) : then.ret(put));
+                                ifStatement.same(block.variable("type"), new TypeLiteral(type)).then(access.put() ? then.statement(put) : then.ret(put));
                             }
                         }
 
                         unsafeMethod.name(access + "Object" + suffix);
-                        access.put(() -> unsafeMethod.argument(body.variable("value")));
 
-                        body.newline().ret(unsafeMethod);
+                        access.put(ifStatement, if1 -> if1.otherwise(unsafeMethod.argument(block.variable("value")).statement())).otherwise(() -> block.newline().ret(unsafeMethod));
                     });
                 });
             }
@@ -308,54 +310,54 @@ class AccessorGenerator extends TestGenerator {
                                     method.parameter(classWildcard, "to").parameter(classWildcard, "from");
                                 }
 
-                                method.parameter(discriminator, fieldDiscriminators.get(discriminator)).body(body -> {
+                                method.parameter(discriminator, fieldDiscriminators.get(discriminator)).body(block -> {
                                     if (discriminator != long.class) {
                                         Invocation offsetMethod = new Invocation(Unsafe.class, ownerType == Class.class ? "staticFieldOffset" : "objectFieldOffset");
 
-                                        body.variable(variable -> {
+                                        block.variable(variable -> {
                                             variable.type(long.class).name("offset");
 
                                             if (discriminator == String.class) {
-                                                Expression field = new Invocation(Fields.class, "getField",
-                                                    body.variable("to"),
-                                                    body.variable("fieldName")
+                                                Expression field = new Invocation(Fields.class, "field",
+                                                    block.variable("to"),
+                                                    block.variable("fieldName")
                                                 );
 
                                                 if (type == null) {
-                                                    body.variable(Field.class, "field", field);
-                                                    field = body.variable("field");
+                                                    block.variable(Field.class, "field", field);
+                                                    field = block.variable("field");
                                                 }
 
                                                 variable.initialize(offsetMethod.copy().argument(field));
-                                            } else variable.initialize(offsetMethod.argument(body.variable("field")));
+                                            } else variable.initialize(offsetMethod.argument(block.variable("field")));
                                         });
 
-                                        body.newline();
+                                        block.newline();
                                     }
 
                                     Invocation unsafeMethod;
 
                                     if (type == null) {
                                         unsafeMethod = new Invocation("put" + suffix,
-                                            body.variable("to"),
-                                            body.variable("field").invoke("getType"),
-                                            body.variable("offset"),
+                                            block.variable("to"),
+                                            block.variable("field").invoke("getType"),
+                                            block.variable("offset"),
                                             new Invocation("get" + suffix,
-                                                body.variable("from"),
-                                                body.variable("field").invoke("getType"),
-                                                body.variable("offset")
+                                                block.variable("from"),
+                                                block.variable("field").invoke("getType"),
+                                                block.variable("offset")
                                             )
                                         );
                                     } else unsafeMethod = new Invocation(Unsafe.class, "put" + methodName,
-                                        body.variable("to"),
-                                        body.variable("offset"),
+                                        block.variable("to"),
+                                        block.variable("offset"),
                                         new Invocation(Unsafe.class, "get" + methodName,
-                                            body.variable("from"),
-                                            body.variable("offset")
+                                            block.variable("from"),
+                                            block.variable("offset")
                                         )
                                     );
 
-                                    body.statement(unsafeMethod);
+                                    block.statement(unsafeMethod);
                                 });
                             });
                         }
@@ -366,15 +368,36 @@ class AccessorGenerator extends TestGenerator {
     }
 
     @Test
+    void cone() {
+        this.method(method -> method.pub().statik()
+            .name("clone")
+            .typeParameter("T")
+            .returnType("T")
+            .parameter("T", "object")
+            .body(block -> block.statement(new If().nul(block.variable("object")).then(new Block().ret(NullLiteral.instance)))
+                .newline()
+                .variable(method.typeArgument("T"), "clone", new Invocation(Unsafe.class, "allocateInstance", block.variable("object").invoke("getClass")).cast(method.typeArgument("T")))
+                .newline()
+                .statement(new EnhancedFor()
+                    .variable(Field.class, "field")
+                    .iterable(new Invocation(Fields.class, "allInstanceFields", block.variable("object")))
+                    .action(field -> new Block().statement(new Invocation(Accessor.class, "copy", block.variable("clone"), block.variable("object"), field))))
+                .newline()
+                .ret(block.variable("clone"))
+            )
+        );
+    }
+
+    @Test
     void offset() {
         for (String methodType : new String[]{"static", "object"}) {
             this.method(method -> method.pub().statik().returnType(long.class).name(methodType + "FieldOffset")
                 .parameter(ParameterizedType.wildcard(Class.class), "type")
                 .parameter(String.class, "name")
-                .body(body -> body.ret(new Invocation(Unsafe.class, method.name(),
-                    new Invocation(Fields.class, "getField",
-                        body.variable("type"),
-                        body.variable("name")
+                .body(block -> block.ret(new Invocation(Unsafe.class, method.name(),
+                    new Invocation(Fields.class, "field",
+                        block.variable("type"),
+                        block.variable("name")
                     )
                 )))
             );

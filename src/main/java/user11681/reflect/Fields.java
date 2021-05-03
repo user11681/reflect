@@ -8,7 +8,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import net.gudenau.lib.unsafe.Unsafe;
 
@@ -18,34 +20,214 @@ public class Fields {
 
     private static final MethodHandle getDeclaredFields;
 
-    private static final HashMap<Class<?>, Field[]> fieldCache = new HashMap<>();
-    private static final HashMap<Class<?>, Field[]> staticFieldCache = new HashMap<>();
-    private static final HashMap<Class<?>, Field[]> instanceFieldCache = new HashMap<>();
+    private static final IdentityHashMap<Class<?>, Field[]> cache = new IdentityHashMap<>();
+    private static final IdentityHashMap<Class<?>, ArrayList<Field>> staticFieldCache = new IdentityHashMap<>();
+    private static final IdentityHashMap<Class<?>, ArrayList<Field>> instanceFieldCache = new IdentityHashMap<>();
     private static final HashMap<String, Field> nameToField = new HashMap<>();
 
-    private static final Field NOT_FOUND = null;
+    @Deprecated
+    private static final IdentityHashMap<Class<?>, Field[]> oldStaticFieldCache = new IdentityHashMap<>();
 
-    public static Field getField(Object object, String name) {
-        Class<?> klass = object.getClass();
-        Field field;
+    @Deprecated
+    private static final IdentityHashMap<Class<?>, Field[]> oldInstanceFieldCache = new IdentityHashMap<>();
 
-        while (klass != null) {
-            if ((field = getField(klass, name)) != null) {
-                return field;
+    private static final Field notFound = null;
+
+    public static Field anyField(Object object, String name) {
+        return anyField(object.getClass(), name);
+    }
+
+    public static Field anyField(String klass, String name) {
+        return anyField(Classes.load(klass), name);
+    }
+
+    public static Field field(Object object, String name) {
+        return field(object.getClass(), name);
+    }
+
+    public static Field field(String klass, String name) {
+        return field(Classes.load(klass), name);
+    }
+
+    public static Field anyField(Class<?> type, String name) {
+        Field currentField;
+
+        while (type != Object.class) {
+            if ((currentField = field(type, name)) != null) {
+                return currentField;
             }
 
-            klass = klass.getSuperclass();
+            type = type.getSuperclass();
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
-    public static Field getField(String klass, String name) {
-        return getField(Classes.load(klass), name);
+    public static Field field(Class<?> type, String name) {
+        String key = type.getName() + '.' + name;
+        Field field = nameToField.get(key);
+
+        if (field != null) {
+            return field;
+        }
+
+        getFields(type);
+
+        return nameToField.get(key);
     }
 
+    public static Field anyRawField(Object object, String name) {
+        return anyRawField(object.getClass(), name);
+    }
+
+    public static Field anyRawField(String klass, String name) {
+        return anyRawField(Classes.load(klass), name);
+    }
+
+    public static Field anyRawField(Class<?> type, String name) {
+        Field currentField;
+
+        while (type != Object.class) {
+            if ((currentField = rawField(type, name)) != null) {
+                return currentField;
+            }
+
+            type = type.getSuperclass();
+        }
+
+        return notFound;
+    }
+
+    public static Field rawField(Object object, String name) {
+        return rawField(object.getClass(), name);
+    }
+
+    public static Field rawField(String klass, String name) {
+        return rawField(Classes.load(klass), name);
+    }
+
+    public static Field rawField(Class<?> klass, String name) {
+        for (Field field : rawFields(klass)) {
+            if (field.getName().equals(name)) {
+                return field;
+            }
+        }
+
+        return notFound;
+    }
+
+    public static ArrayList<Field> all(Object object) {
+        return all(object.getClass());
+    }
+
+    public static ArrayList<Field> all(Class<?> type) {
+        ArrayList<Field> fields = new ArrayList<>();
+
+        while (type != Object.class) {
+            Collections.addAll(fields, fields(type));
+
+            type = type.getSuperclass();
+        }
+
+        return fields;
+    }
+
+    public static ArrayList<Field> staticFields(Class<?> type) {
+        ArrayList<Field> fields = staticFieldCache.get(type);
+
+        if (fields != null) {
+            return fields;
+        }
+
+        fields = new ArrayList<>();
+
+        for (Field field : getFields(type)) {
+            if (!Modifier.isStatic(field.getModifiers())) {
+                fields.add(field);
+            }
+        }
+
+        staticFieldCache.put(type, fields);
+
+        return fields;
+    }
+
+    public static ArrayList<Field> instanceFields(Object object) {
+        return instanceFields(object.getClass());
+    }
+
+    public static ArrayList<Field> instanceFields(Class<?> type) {
+        ArrayList<Field> fields = instanceFieldCache.get(type);
+
+        if (fields != null) {
+            return fields;
+        }
+
+        fields = new ArrayList<>();
+
+        for (Field field : getFields(type)) {
+            if (!Modifier.isStatic(field.getModifiers())) {
+                fields.add(field);
+            }
+        }
+
+        instanceFieldCache.put(type, fields);
+
+        return fields;
+    }
+
+    public static Field[] fields(Class<?> klass) {
+        Field[] fields = cache.get(klass);
+
+        if (fields == null) {
+            fields = rawFields(klass);
+            cache.put(klass, fields);
+
+            for (Field field : fields) {
+                nameToField.put(klass.getName() + '.' + field.getName(), field);
+            }
+        }
+
+        return fields;
+    }
+
+    public static ArrayList<Field> allInstanceFields(Object object) {
+        return allInstanceFields(object.getClass());
+    }
+
+    public static ArrayList<Field> allInstanceFields(Class<?> type) {
+        ArrayList<Field> fields = new ArrayList<>();
+
+        while (type != Object.class) {
+            fields.addAll(instanceFields(type));
+
+            type = type.getSuperclass();
+        }
+
+        return fields;
+    }
+
+    public static ArrayList<Field> allStaticFields(Object object) {
+        return allStaticFields(object.getClass());
+    }
+
+    public static ArrayList<Field> allStaticFields(Class<?> type) {
+        ArrayList<Field> fields = new ArrayList<>();
+
+        while (type != Object.class) {
+            fields.addAll(staticFields(type));
+
+            type = type.getSuperclass();
+        }
+
+        return fields;
+    }
+
+    /**
+     * @deprecated by {@link #field(Class, String)}
+     */
     public static Field getField(Class<?> klass, String name) {
-        final Field field = nameToField.get(klass.getName() + '.' + name);
+        Field field = nameToField.get(klass.getName() + '.' + name);
 
         if (field != null) {
             return field;
@@ -56,11 +238,14 @@ public class Fields {
         return nameToField.get(klass.getName() + '.' + name);
     }
 
+    /**
+     * @deprecated by {@link #rawField(Object, String)}
+     */
     public static Field getRawField(Object object, String name) {
         Class<?> klass = object.getClass();
         Field field;
 
-        while (klass != null) {
+        while (klass != Object.class) {
             if ((field = getRawField(klass, name)) != null) {
                 return field;
             }
@@ -68,13 +253,52 @@ public class Fields {
             klass = klass.getSuperclass();
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
+    public static Field[] rawFields(Class<?> klass) {
+        try {
+            return (Field[]) getDeclaredFields.invokeExact(klass);
+        } catch (Throwable throwable) {
+            throw Unsafe.throwException(throwable);
+        }
+    }
+
+    /**
+     * @deprecated by {@link #field(Object, String)}
+     */
+    public static Field getField(Object object, String name) {
+        Class<?> klass = object.getClass();
+        Field field;
+
+        while (klass != Object.class) {
+            if ((field = getField(klass, name)) != null) {
+                return field;
+            }
+
+            klass = klass.getSuperclass();
+        }
+
+        return notFound;
+    }
+
+    /**
+     * @deprecated by {@link #field(String, String)}
+     */
+    public static Field getField(String klass, String name) {
+        return getField(Classes.load(klass), name);
+    }
+
+    /**
+     * @deprecated by {@link #rawField(String, String)}
+     */
     public static Field getRawField(String klass, String name) {
         return getRawField(Classes.load(klass), name);
     }
 
+    /**
+     * @deprecated by {@link #rawField(Class, String)}
+     */
     public static Field getRawField(Class<?> klass, String name) {
         for (Field field : getRawFields(klass)) {
             if (field.getName().equals(name)) {
@@ -82,69 +306,61 @@ public class Fields {
             }
         }
 
-        return NOT_FOUND;
+        return notFound;
     }
 
-    public static Field[] getInstanceFields(Class<?> klass) {
-        Field[] fields = instanceFieldCache.get(klass);
+    /**
+     @deprecated by {@link #instanceFields}
+     */
+    public static Field[] getInstanceFields(Class<?> type) {
+        Field[] fields = oldInstanceFieldCache.get(type);
 
         if (fields != null) {
             return fields;
         }
 
-        fields = getFields(klass);
+        List<Field> fieldList = new ArrayList<>();
 
-        final List<Integer> instanceIndexes = new ArrayList<>();
-
-        for (int i = 0, length = fields.length; i < length; i++) {
-            if ((fields[i].getModifiers() & Modifier.STATIC) == 0) {
-                instanceIndexes.add(i);
+        for (Field field : getFields(type)) {
+            if ((field.getModifiers() & Modifier.STATIC) == 0) {
+                fieldList.add(field);
             }
         }
 
-        final int instanceFieldCount = instanceIndexes.size();
-        final Field[] instanceFields = new Field[instanceFieldCount];
-        int size = 0;
+        fields = fieldList.toArray(new Field[0]);
+        oldInstanceFieldCache.put(type, fields);
 
-        for (int i = 0; i < instanceFieldCount; i++) {
-            instanceFields[size++] = fields[instanceIndexes.get(i)];
-        }
-
-        instanceFieldCache.put(klass, instanceFields);
-
-        return instanceFields;
+        return fields;
     }
 
-    public static Field[] getStaticFields(Class<?> klass) {
-        Field[] fields = staticFieldCache.get(klass);
+    /**
+     @deprecated by {@link #staticFields}
+     */
+    public static Field[] getStaticFields(Class<?> type) {
+        Field[] fields = oldInstanceFieldCache.get(type);
 
         if (fields != null) {
             return fields;
         }
 
-        fields = getFields(klass);
+        List<Field> fieldList = new ArrayList<>();
 
-        final List<Integer> staticIndexes = new ArrayList<>();
-
-        for (int i = 0, length = fields.length; i < length; i++) {
-            if ((fields[i].getModifiers() & Modifier.STATIC) != 0) {
-                staticIndexes.add(i);
+        for (Field field : getFields(type)) {
+            if ((field.getModifiers() & Modifier.STATIC) != 0) {
+                fieldList.add(field);
             }
         }
 
-        final int staticFieldCount = staticIndexes.size();
-        final Field[] staticFields = new Field[staticFieldCount];
-        int size = 0;
+        fields = fieldList.toArray(new Field[0]);
+        oldStaticFieldCache.put(type, fields);
 
-        for (int i = 0; i < staticFieldCount; i++) {
-            staticFields[size++] = fields[staticIndexes.get(i)];
-        }
+        return fields;
 
-        staticFieldCache.put(klass, staticFields);
-
-        return staticFields;
     }
 
+    /**
+     @deprecated by {@link #all}
+     */
     public static ArrayList<Field> getAllFields(Class<?> klass) {
         final ArrayList<Field> fields = new ArrayList<>(Arrays.asList(getFields(klass)));
 
@@ -159,12 +375,15 @@ public class Fields {
         return fields;
     }
 
+    /**
+     @deprecated by {@link #fields}
+     */
     public static Field[] getFields(Class<?> klass) {
-        Field[] fields = fieldCache.get(klass);
+        Field[] fields = cache.get(klass);
 
         if (fields == null) {
             fields = getRawFields(klass);
-            fieldCache.put(klass, fields);
+            cache.put(klass, fields);
 
             for (Field field : fields) {
                 nameToField.put(klass.getName() + '.' + field.getName(), field);
@@ -174,6 +393,9 @@ public class Fields {
         return fields;
     }
 
+    /**
+     * @deprecated by {@link #rawFields}
+     */
     public static Field[] getRawFields(Class<?> klass) {
         try {
             return (Field[]) getDeclaredFields.invokeExact(klass);

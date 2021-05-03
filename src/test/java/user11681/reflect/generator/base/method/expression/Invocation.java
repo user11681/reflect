@@ -1,12 +1,15 @@
-package user11681.reflect.generator.base.method;
+package user11681.reflect.generator.base.method.expression;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import user11681.reflect.experimental.Copyable;
+import user11681.reflect.generator.base.method.statement.InvocationStatement;
+import user11681.reflect.generator.base.method.statement.Statement;
+import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.Type;
 
-public class Invocation implements ExpressionStatement, Copyable<Invocation> {
+public class Invocation implements StatementExpression, Copyable<Invocation> {
     protected boolean instance;
     protected Expression object;
     protected Type type;

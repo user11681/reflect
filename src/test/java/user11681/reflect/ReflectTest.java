@@ -8,7 +8,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import net.gudenau.lib.unsafe.Unsafe;
@@ -22,7 +24,7 @@ import user11681.reflect.util.Logger;
 import user11681.reflect.util.Util;
 import user11681.uncheck.Uncheck;
 
-@SuppressWarnings("AssertWithSideEffects")
+@SuppressWarnings({"AssertWithSideEffects", "FieldMayBeFinal"})
 @Testable
 public class ReflectTest {
     @Test
@@ -154,7 +156,7 @@ public class ReflectTest {
 
     @Test
     public void allFields() {
-        for (Field field : Fields.getAllFields(C.class)) {
+        for (Field field : Fields.all(C.class)) {
             Logger.log(field);
         }
     }
@@ -182,7 +184,7 @@ public class ReflectTest {
 
     @Test
     public void testCopy() {
-        Field[] fields = Fields.getInstanceFields(ReflectTest.class);
+        ArrayList<Field> fields = Fields.instanceFields(ReflectTest.class);
         TestObject one = new TestObject();
         TestObject two = new TestObject();
 
@@ -279,7 +281,7 @@ public class ReflectTest {
     @Test
     void member() throws Throwable {
         MethodHandle handle = Invoker.findGetter(Integer.class, "value", int.class);
-        Member member = Fields.getField(Integer.class, "value");
+        Member member = Fields.field(Integer.class, "value");
 
         assert Invoker.field(handle).equals(member);
         assert Invoker.member(handle).equals(member);
@@ -321,7 +323,7 @@ public class ReflectTest {
 
     static void logFields(Object object) {
         Uncheck.handle(() -> {
-            for (Field field : Fields.getInstanceFields(object.getClass())) {
+            for (Field field : Fields.instanceFields(object.getClass())) {
                 System.out.printf("%s: %s\n", field, Accessor.get(object, field));
             }
         });
@@ -335,5 +337,24 @@ public class ReflectTest {
 
         assert Accessor.get(new A(), "end").equals((byte) 123);
         assert Accessor.getVolatile(new A(), "end").equals((byte) 123);
+
+        var obj = new Object() {
+            int field = 22;
+            String thing = "asd";
+            Object object = new Object() {};
+            List<Object> things = Arrays.asList(23, 46, "12");
+        };
+
+        obj.field = 84;
+        obj.thing = "hjk";
+        obj.object = null;
+        obj.things = new ArrayList<>();
+
+        var clone = Accessor.clone(obj);
+
+        assert clone.field == 84;
+        assert "hjk".equals(clone.thing);
+        assert clone.object == null;
+        assert clone.things instanceof ArrayList<Object> things && things.isEmpty();
     }
 }

@@ -1,6 +1,7 @@
 package user11681.reflect.generator;
 
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public enum Access {
     GET,
@@ -26,8 +27,26 @@ public enum Access {
         }
     }
 
+    public <T> Next put(T arg, Consumer<T> action) {
+        Next next = new Next(this.put());
+
+        if (next.result) {
+            action.accept(arg);
+        }
+
+        return next;
+    }
+
     @Override
     public String toString() {
         return this.name().toLowerCase(Locale.ROOT);
+    }
+
+    public static record Next(boolean result) {
+        public void otherwise(Runnable action) {
+            if (!this.result) {
+                action.run();
+            }
+        }
     }
 }
