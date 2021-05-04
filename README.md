@@ -37,8 +37,8 @@ dependencies {
 - `Constructors`: a collection of utilities for finding and invoking constructors
 - `EnumConstructor`: a class that constructs enum constants and adds them to the `values` array and a few other places;
   it can be used through static methods or directly as an object (more performant)
-- `Fields`: a set of utilities for enumerating class fields directly (without slow security checks)
-  and without filters
+- `Fields`: a set of utilities for enumerating class fields directly: without slow `Field` copying, security checks
+  or filters
 - `Invoker`: a static proxy for `IMPL_LOOKUP`, which should be able to access everything;
   its methods do not declare thrown exceptions
 - `JavaLangAccess`: a partial proxy for `JavaLangAccess`
