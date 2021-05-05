@@ -10,6 +10,7 @@ public class A implements Cloneable, Copyable<A> {
 
     public static String a0;
     public static String a1;
+
     public String a2;
     public double yes;
     public long no;

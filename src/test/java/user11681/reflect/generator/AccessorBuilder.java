@@ -14,15 +14,14 @@ import user11681.reflect.Fields;
 import user11681.reflect.generator.base.method.Block;
 import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.method.expression.Invocation;
-import user11681.reflect.generator.base.method.expression.NullLiteral;
-import user11681.reflect.generator.base.method.expression.TypeLiteral;
+import user11681.reflect.generator.base.method.expression.Literal;
 import user11681.reflect.generator.base.method.statement.EnhancedFor;
 import user11681.reflect.generator.base.method.statement.If;
 import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.ParameterizedType;
 
 @Execution(ExecutionMode.SAME_THREAD)
-class AccessorGenerator extends TestGenerator {
+class AccessorBuilder extends TestBuilder {
     static final Class<?>[] fieldTypes = {Field.class, String.class};
 
     static final Map<Class<?>, String> fieldDiscriminators = map(
@@ -63,7 +62,7 @@ class AccessorGenerator extends TestGenerator {
         null, Object.class
     );
 
-    public AccessorGenerator() {
+    public AccessorBuilder() {
         super("user11681.reflect", "Accessor");
 
         this.pub();
@@ -272,7 +271,7 @@ class AccessorGenerator extends TestGenerator {
 
                                 Block then = new Block();
 
-                                ifStatement.same(block.variable("type"), new TypeLiteral(type)).then(access.put() ? then.statement(put) : then.ret(put));
+                                ifStatement.same(block.variable("type"), Literal.of(type)).then(access.put() ? then.statement(put) : then.ret(put));
                             }
                         }
 
@@ -370,7 +369,7 @@ class AccessorGenerator extends TestGenerator {
             .typeParameter("T")
             .returnType("T")
             .parameter("T", "object")
-            .body(block -> block.statement(new If().nul(block.variable("object")).then(new Block().ret(NullLiteral.instance)))
+            .body(block -> block.statement(new If().nul(block.variable("object")).then(new Block().ret(Literal.nul())))
                 .newline()
                 .variable(method.typeArgument("T"), "clone", new Invocation(Unsafe.class, "allocateInstance", block.variable("object").invoke("getClass")).cast(method.typeArgument("T")))
                 .newline()

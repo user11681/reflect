@@ -2,17 +2,22 @@ package user11681.reflect.generator.base.method.statement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import user11681.reflect.generator.base.method.expression.Expression;
+import java.util.stream.Stream;
+import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.method.LoopVariable;
+import user11681.reflect.generator.base.method.expression.Expression;
+import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.Type;
+import user11681.reflect.util.Util;
 
 public class For implements Statement {
     protected Type variableType;
     protected Expression condition;
+    protected Statement action;
     protected List<LoopVariable> variables = new ArrayList<>();
     protected List<Statement> post = new ArrayList<>();
-    protected Statement action;
 
     public For variableType(Type type) {
         this.variableType = type;
@@ -45,6 +50,11 @@ public class For implements Statement {
     }
 
     @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return Util.join(Stream.of(this.variableType, this.condition, this.action), this.variables.stream(), this.post.stream()).filter(Objects::nonNull).flatMap(TypeReferencer::referencedTypes);
+    }
+
+    @Override
     public String toString() {
         StringBuilder string = new StringBuilder("for (");
 
@@ -53,7 +63,7 @@ public class For implements Statement {
         }
 
         if (this.variableType != null) {
-            string.append(this.variableType.simpleName());
+            string.append(this.variableType);
             string.append(this.variables.stream().map(LoopVariable::toString).collect(Collectors.joining(", ", " ", "")));
         }
 

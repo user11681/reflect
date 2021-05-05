@@ -3,6 +3,7 @@ package user11681.reflect.generator.base.type;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import user11681.reflect.generator.base.TypeReferencer;
 
 public record ParameterizedType(ConcreteType type, TypeArgument... typeArguments) implements Type {
     public ParameterizedType {
@@ -27,7 +28,12 @@ public record ParameterizedType(ConcreteType type, TypeArgument... typeArguments
     }
 
     @Override
-    public String simpleName() {
-        return this.type.simpleName() + Stream.of(this.typeArguments).map(TypeArgument::toString).collect(Collectors.joining(", ", "<", ">"));
+    public String toString() {
+        return this.type + Stream.of(this.typeArguments).map(TypeArgument::toString).collect(Collectors.joining(", ", "<", ">"));
+    }
+
+    @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return Stream.concat(Stream.of(this.type), Stream.of(this.typeArguments).flatMap(TypeReferencer::referencedTypes));
     }
 }

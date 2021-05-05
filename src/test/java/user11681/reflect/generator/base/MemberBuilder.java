@@ -3,7 +3,7 @@ package user11681.reflect.generator.base;
 import java.lang.reflect.Modifier;
 import java.util.stream.IntStream;
 
-public abstract class MemberGenerator<T extends MemberGenerator<T>> {
+public abstract class MemberBuilder<T extends MemberBuilder<T>> implements TypeReferencer {
     protected int access;
     protected String name;
 
@@ -37,5 +37,13 @@ public abstract class MemberGenerator<T extends MemberGenerator<T>> {
         this.name = name;
 
         return (T) this;
+    }
+
+    public String accessString() {
+        return Modifier.toString(this.access);
+    }
+
+    public String offsetAccessString() {
+        return this.access == 0 ? "" : this.accessString() + ' ';
     }
 }

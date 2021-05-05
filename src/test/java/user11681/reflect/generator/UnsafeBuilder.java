@@ -10,8 +10,8 @@ import user11681.reflect.Invoker;
 import user11681.reflect.Methods;
 import user11681.reflect.generator.base.method.expression.Invocation;
 
-public class UnsafeGenerator extends TestGenerator {
-    public UnsafeGenerator() {
+public class UnsafeBuilder extends TestBuilder {
+    public UnsafeBuilder() {
         super("user11681.unsafe.Unsafe");
 
         this.pub();
@@ -33,7 +33,7 @@ public class UnsafeGenerator extends TestGenerator {
 
                 MethodHandle handle = Invoker.unreflectSpecial(unsafeMethod, type);
 
-                this.field(field -> field.type(MethodHandle.class).name(unsafeMethod.getName()).initialize(new Invocation()));
+                this.field(field -> field.type(MethodHandle.class).name(unsafeMethod.getName()).initialize(new Invocation(Invoker.class, "bind")));
             }
         }
     }

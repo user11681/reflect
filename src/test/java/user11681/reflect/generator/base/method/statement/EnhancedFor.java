@@ -1,9 +1,12 @@
 package user11681.reflect.generator.base.method.statement;
 
+import java.util.Objects;
 import java.util.function.Function;
-import user11681.reflect.generator.base.type.ConcreteType;
-import user11681.reflect.generator.base.method.expression.Expression;
+import java.util.stream.Stream;
+import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.method.Variable;
+import user11681.reflect.generator.base.method.expression.Expression;
+import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.Type;
 
 public class EnhancedFor implements Statement {
@@ -35,6 +38,11 @@ public class EnhancedFor implements Statement {
 
     public EnhancedFor action(Function<Variable, Statement> action) {
         return this.action(action.apply(this.variable));
+    }
+
+    @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return Stream.of(this.variable, this.iterable, this.action).filter(Objects::nonNull).flatMap(TypeReferencer::referencedTypes);
     }
 
     @Override

@@ -1,9 +1,10 @@
 package user11681.reflect.generator.base.method.expression;
 
+import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.Type;
 
-public interface Expression {
+public interface Expression extends TypeReferencer {
      default Invocation invoke() {
           return new Invocation().owner(this);
      }

@@ -1,14 +1,14 @@
 package user11681.reflect.generator.base.method;
 
-import user11681.reflect.generator.base.MethodGenerator;
+import user11681.reflect.generator.base.MethodBuilder;
 import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.method.expression.StatementExpression;
 import user11681.reflect.generator.base.type.ConcreteType;
 
 public class MethodBlock extends Block {
-    protected final MethodGenerator method;
+    protected final MethodBuilder method;
 
-    public MethodBlock(MethodGenerator method) {
+    public MethodBlock(MethodBuilder method) {
         this.method = method;
     }
 

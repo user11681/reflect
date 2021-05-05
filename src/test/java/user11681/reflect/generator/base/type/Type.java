@@ -1,5 +1,5 @@
 package user11681.reflect.generator.base.type;
 
-public interface Type {
-    String simpleName();
-}
+import user11681.reflect.generator.base.TypeReferencer;
+
+public interface Type extends TypeReferencer {}

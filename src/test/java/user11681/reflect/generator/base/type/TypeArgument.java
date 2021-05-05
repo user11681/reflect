@@ -1,6 +1,9 @@
 package user11681.reflect.generator.base.type;
 
-public class TypeArgument {
+import java.util.stream.Stream;
+import user11681.reflect.generator.base.TypeReferencer;
+
+public class TypeArgument implements TypeReferencer {
     public static final TypeArgument wildcard = new TypeArgument();
 
     protected final Type bound;
@@ -21,6 +24,11 @@ public class TypeArgument {
     }
 
     @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return this.bound == null ? Stream.empty() : this.bound.referencedTypes();
+    }
+
+    @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
 
@@ -32,7 +40,7 @@ public class TypeArgument {
             string.append('?').append(this.type).append(' ');
         }
 
-        string.append(this.bound.simpleName());
+        string.append(this.bound.toString());
 
         return string.toString();
     }

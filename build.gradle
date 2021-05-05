@@ -6,12 +6,9 @@ plugins {
 group("user11681")
 version("1.9.0")
 
-sourceCompatibility = 8
-targetCompatibility = 8
-
-tasks[sourceSets.test.compileJavaTaskName].configure {
-    sourceCompatibility = JavaVersion.current()
-    targetCompatibility = JavaVersion.current()
+tasks[sourceSets.main.compileJavaTaskName].configure {
+    sourceCompatibility = 8
+    targetCompatibility = 8
 }
 
 repositories {

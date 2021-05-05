@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.method.expression.StatementExpression;
 import user11681.reflect.generator.base.method.statement.EmptyStatement;
-import user11681.reflect.generator.base.method.statement.ReturnStatement;
+import user11681.reflect.generator.base.method.statement.Return;
 import user11681.reflect.generator.base.method.statement.Statement;
 import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.reflect.generator.base.type.Type;
@@ -29,7 +31,7 @@ public class Block implements Statement {
     }
 
     public Block ret(Expression expression) {
-        return this.statement(new ReturnStatement(expression));
+        return this.statement(new Return(expression));
     }
 
     public Block newline() {
@@ -65,7 +67,16 @@ public class Block implements Statement {
     }
 
     @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return Stream.concat(this.statements.stream(), this.variables.values().stream()).flatMap(TypeReferencer::referencedTypes);
+    }
+
+    @Override
     public String toString() {
-        return this.statements.stream().flatMap(Statement::lines).collect(Collectors.joining("\n    ", "{\n    ", "\n}"));
+        if (this.statements.isEmpty()) {
+            return "{}";
+        }
+
+        return this.statements.stream().flatMap(Statement::lines).map(line -> "\n    " + line).collect(Collectors.joining("", "{", "\n}"));
     }
 }

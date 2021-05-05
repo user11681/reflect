@@ -1,7 +1,11 @@
 package user11681.reflect.generator.base.method.statement;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.method.operator.Equality;
+import user11681.reflect.generator.base.type.ConcreteType;
 
 public class If implements Statement {
     protected Expression condition;
@@ -36,6 +40,11 @@ public class If implements Statement {
 
     public If otherwiseIf(Expression condition) {
         return new If().condition(condition);
+    }
+
+    @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return Stream.of(this.condition, this.ifTrue, this.ifFalse).filter(Objects::nonNull).flatMap(TypeReferencer::referencedTypes);
     }
 
     @Override

@@ -2,17 +2,19 @@ package user11681.reflect.generator.base.method.expression;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import user11681.reflect.experimental.Copyable;
+import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.method.statement.InvocationStatement;
 import user11681.reflect.generator.base.method.statement.Statement;
 import user11681.reflect.generator.base.type.ConcreteType;
-import user11681.reflect.generator.base.type.Type;
 
 public class Invocation implements StatementExpression, Copyable<Invocation> {
     protected boolean instance;
     protected Expression object;
-    protected Type type;
+    protected ConcreteType type;
     protected String name;
     protected ArrayList<Expression> arguments = new ArrayList<>();
 
@@ -30,7 +32,7 @@ public class Invocation implements StatementExpression, Copyable<Invocation> {
         this.owner(owner).name(name).argument(arguments);
     }
 
-    public Invocation(Type owner, String name, Expression... arguments) {
+    public Invocation(ConcreteType owner, String name, Expression... arguments) {
         this.owner(owner).name(name).argument(arguments);
     }
 
@@ -47,7 +49,7 @@ public class Invocation implements StatementExpression, Copyable<Invocation> {
         return this;
     }
 
-    public Invocation owner(Type owner) {
+    public Invocation owner(ConcreteType owner) {
         this.type = owner;
 
         return this;
@@ -75,6 +77,11 @@ public class Invocation implements StatementExpression, Copyable<Invocation> {
     }
 
     @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return Stream.concat(Stream.ofNullable(this.instance ? this.object : this.type), this.arguments.stream()).flatMap(TypeReferencer::referencedTypes);
+    }
+
+    @Override
     public Invocation copy() {
         Invocation copy = Copyable.super.copy();
         copy.arguments = (ArrayList<Expression>) this.arguments.clone();
@@ -87,9 +94,9 @@ public class Invocation implements StatementExpression, Copyable<Invocation> {
         StringBuilder string = new StringBuilder();
 
         if (this.instance) {
-            string.append(this.object == null ? "this" : this.object.toString()).append('.');
+            string.append(Objects.requireNonNullElse(this.object, "this")).append('.');
         } else if (this.type != null) {
-            string.append(this.type.simpleName()).append('.');
+            string.append(this.type).append('.');
         }
 
         string.append(this.name).append("(").append(this.arguments.stream().map(Expression::toString).collect(Collectors.joining(", "))).append(')');

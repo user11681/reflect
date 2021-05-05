@@ -1,8 +1,11 @@
 package user11681.reflect.generator.base.method;
 
+import java.util.stream.Stream;
+import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.method.expression.Expression;
+import user11681.reflect.generator.base.type.ConcreteType;
 
-public class LoopVariable {
+public class LoopVariable implements TypeReferencer {
     protected String name;
     protected Expression initializer;
 
@@ -16,6 +19,11 @@ public class LoopVariable {
         this.initializer = initializer;
 
         return this;
+    }
+
+    @Override
+    public Stream<ConcreteType> referencedTypes() {
+        return this.initializer == null ? Stream.empty() : this.initializer.referencedTypes();
     }
 
     @Override
