@@ -111,14 +111,14 @@ class AccessorBuilder extends TestBuilder {
 
                         method.body(block -> {
                             Invocation unsafeMethod;
-                            Invocation offset = new Invocation(Unsafe.class, "staticFieldOffset", block.variable("field"));
-                            Invocation delcaringClass = block.variable("field").invoke("getDeclaringClass");
+                            Invocation offset = new Invocation(Unsafe.class, "staticFieldOffset", block.var("field"));
+                            Invocation delcaringClass = block.var("field").invoke("getDeclaringClass");
 
                             unsafeMethod = type == null
-                                ? new Invocation(access.toString(), delcaringClass, block.variable("field").invoke("getType"), offset)
+                                ? new Invocation(access.toString(), delcaringClass, block.var("field").invoke("getType"), offset)
                                 : new Invocation(Unsafe.class, method.name(), delcaringClass, offset);
 
-                            access.put(() -> unsafeMethod.argument(block.variable("value")));
+                            access.put(() -> unsafeMethod.argument(block.var("value")));
 
                             block.ret(unsafeMethod);
                         });
@@ -154,22 +154,22 @@ class AccessorBuilder extends TestBuilder {
                                     access.put(() -> method.parameter(actualType, "value"));
 
                                     method.body(block -> {
-                                        Expression field = fieldType == Field.class ? block.variable("fieldName") : new Invocation(Fields.class, "field",
-                                            block.variable(objectName),
-                                            block.variable("fieldName")
+                                        Expression field = fieldType == Field.class ? block.var("fieldName") : new Invocation(Fields.class, "field",
+                                            block.var(objectName),
+                                            block.var("fieldName")
                                         );
 
                                         if (type == null && fieldType == String.class) {
-                                            block.variable(Field.class, "field", field).newline();
-                                            field = block.variable("field");
+                                            block.var(Field.class, "field", field).newline();
+                                            field = block.var("field");
                                         }
 
                                         Invocation offset = new Invocation(Unsafe.class, objectType == Class.class ? "staticFieldOffset" : "objectFieldOffset", field);
                                         Invocation unsafeMethod = type == null
-                                            ? new Invocation(access.toString(), block.variable(objectName), field.invoke("getType"), offset)
-                                            : new Invocation(Unsafe.class, method.name(), block.variable(objectName), offset);
+                                            ? new Invocation(access.toString(), block.var(objectName), field.invoke("getType"), offset)
+                                            : new Invocation(Unsafe.class, method.name(), block.var(objectName), offset);
 
-                                        access.put(() -> unsafeMethod.argument(block.variable("value")));
+                                        access.put(() -> unsafeMethod.argument(block.var("value")));
 
                                         block.ret(unsafeMethod);
                                     });
@@ -207,23 +207,23 @@ class AccessorBuilder extends TestBuilder {
                             access.put(() -> method.parameter(actualType, "value"));
 
                             method.body(block -> {
-                                Expression field = fieldType == Field.class ? block.variable("fieldName") : new Invocation(Fields.class, "field",
-                                    block.variable("type"),
-                                    block.variable("fieldName")
+                                Expression field = fieldType == Field.class ? block.var("fieldName") : new Invocation(Fields.class, "field",
+                                    block.var("type"),
+                                    block.var("fieldName")
                                 );
 
                                 if (type == null && fieldType == String.class) {
-                                    block.variable(Field.class, "field", field).newline();
-                                    field = block.variable("field");
+                                    block.var(Field.class, "field", field).newline();
+                                    field = block.var("field");
                                 }
 
                                 Invocation offset = new Invocation(Unsafe.class, "objectFieldOffset", field);
                                 Invocation unsafeMethod = type == null
-                                    ? new Invocation(access.toString(), block.variable("object"), field.invoke("getType"), offset)
-                                    : new Invocation(Unsafe.class, method.name(), block.variable("object"), offset);
+                                    ? new Invocation(access.toString(), block.var("object"), field.invoke("getType"), offset)
+                                    : new Invocation(Unsafe.class, method.name(), block.var("object"), offset);
 
                                 if (access.put()) {
-                                    unsafeMethod.argument(block.variable("value"));
+                                    unsafeMethod.argument(block.var("value"));
                                 }
 
                                 block.ret(unsafeMethod);
@@ -254,7 +254,7 @@ class AccessorBuilder extends TestBuilder {
 
                     method.body(block -> {
                         If ifStatement = new If();
-                        Invocation unsafeMethod = new Invocation(Unsafe.class, block.variable("object"), block.variable("offset"));
+                        Invocation unsafeMethod = new Invocation(Unsafe.class, block.var("object"), block.var("offset"));
 
                         block.statement(ifStatement);
 
@@ -263,19 +263,19 @@ class AccessorBuilder extends TestBuilder {
 
                             if (type != Object.class) {
                                 Invocation put = unsafeMethod.copy().name(access + name(type) + suffix);
-                                access.put(() -> put.argument(block.variable("value").cast(type)));
+                                access.put(() -> put.argument(block.var("value").cast(type)));
 
                                 if (i != 0) {
                                     ifStatement.otherwise(ifStatement = new If());
                                 }
 
                                 Block then = new Block();
-                                ifStatement.same(block.variable("type"), Literal.of(type)).then(access.put() ? then.statement(put) : then.ret(put));
+                                ifStatement.same(block.var("type"), Literal.of(type)).then(access.put() ? then.statement(put) : then.ret(put));
                             }
                         }
 
                         unsafeMethod.name(access + "Object" + suffix);
-                        access.put(ifStatement, if1 -> if1.otherwise(unsafeMethod.argument(block.variable("value")).statement())).fail(() -> block.newline().ret(unsafeMethod));
+                        access.put(ifStatement, if1 -> if1.otherwise(unsafeMethod.argument(block.var("value")).statement())).fail(() -> block.newline().ret(unsafeMethod));
                     });
                 });
             }
@@ -308,22 +308,22 @@ class AccessorBuilder extends TestBuilder {
                                     if (discriminator != long.class) {
                                         Invocation offsetMethod = new Invocation(Unsafe.class, ownerType == Class.class ? "staticFieldOffset" : "objectFieldOffset");
 
-                                        block.variable(variable -> {
+                                        block.var(variable -> {
                                             variable.type(long.class).name("offset");
 
                                             if (discriminator == String.class) {
                                                 Expression field = new Invocation(Fields.class, "field",
-                                                    block.variable("to"),
-                                                    block.variable("fieldName")
+                                                    block.var("to"),
+                                                    block.var("fieldName")
                                                 );
 
                                                 if (type == null) {
-                                                    block.variable(Field.class, "field", field);
-                                                    field = block.variable("field");
+                                                    block.var(Field.class, "field", field);
+                                                    field = block.var("field");
                                                 }
 
                                                 variable.initialize(offsetMethod.copy().argument(field));
-                                            } else variable.initialize(offsetMethod.argument(block.variable("field")));
+                                            } else variable.initialize(offsetMethod.argument(block.var("field")));
                                         });
 
                                         block.newline();
@@ -333,21 +333,21 @@ class AccessorBuilder extends TestBuilder {
 
                                     if (type == null) {
                                         unsafeMethod = new Invocation("put" + suffix,
-                                            block.variable("to"),
-                                            block.variable("field").invoke("getType"),
-                                            block.variable("offset"),
+                                            block.var("to"),
+                                            block.var("field").invoke("getType"),
+                                            block.var("offset"),
                                             new Invocation("get" + suffix,
-                                                block.variable("from"),
-                                                block.variable("field").invoke("getType"),
-                                                block.variable("offset")
+                                                block.var("from"),
+                                                block.var("field").invoke("getType"),
+                                                block.var("offset")
                                             )
                                         );
                                     } else unsafeMethod = new Invocation(Unsafe.class, "put" + methodName,
-                                        block.variable("to"),
-                                        block.variable("offset"),
+                                        block.var("to"),
+                                        block.var("offset"),
                                         new Invocation(Unsafe.class, "get" + methodName,
-                                            block.variable("from"),
-                                            block.variable("offset")
+                                            block.var("from"),
+                                            block.var("offset")
                                         )
                                     );
 
@@ -368,16 +368,16 @@ class AccessorBuilder extends TestBuilder {
             .typeParameter("T")
             .returnType("T")
             .parameter("T", "object")
-            .body(block -> block.statement(new If().nul(block.variable("object")).then(new Block().ret(Literal.nul)))
+            .body(block -> block.statement(new If().nul(block.var("object")).then(new Block().ret(Literal.nul)))
                 .newline()
-                .variable(method.typeArgument("T"), "clone", new Invocation(Unsafe.class, "allocateInstance", block.variable("object").invoke("getClass")).cast(method.typeArgument("T")))
+                .var(method.typeArgument("T"), "clone", new Invocation(Unsafe.class, "allocateInstance", block.var("object").invoke("getClass")).cast(method.typeArgument("T")))
                 .newline()
                 .statement(new EnhancedFor()
-                    .variable(Field.class, "field")
-                    .iterable(new Invocation(Fields.class, "allInstanceFields", block.variable("object")))
-                    .action(field -> new Block().statement(new Invocation(Accessor.class, "copy", block.variable("clone"), block.variable("object"), field))))
+                    .var(Field.class, "field")
+                    .iterable(new Invocation(Fields.class, "allInstanceFields", block.var("object")))
+                    .action(field -> new Block().statement(new Invocation(Accessor.class, "copy", block.var("clone"), block.var("object"), field))))
                 .newline()
-                .ret(block.variable("clone"))
+                .ret(block.var("clone"))
             )
         );
     }
@@ -390,8 +390,8 @@ class AccessorBuilder extends TestBuilder {
                 .parameter(String.class, "name")
                 .body(block -> block.ret(new Invocation(Unsafe.class, method.name(),
                     new Invocation(Fields.class, "field",
-                        block.variable("type"),
-                        block.variable("name")
+                        block.var("type"),
+                        block.var("name")
                     )
                 )))
             );

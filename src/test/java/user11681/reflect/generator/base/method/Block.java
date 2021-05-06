@@ -40,19 +40,19 @@ public class Block implements Statement {
         return this;
     }
 
-    public Block variable(Class<?> type, String name, Expression initializer) {
-        return this.variable(new ConcreteType(type), name, initializer);
+    public Block var(Class<?> type, String name, Expression initializer) {
+        return this.var(new ConcreteType(type), name, initializer);
     }
 
-    public Block variable(Type type, String name, Expression initializer) {
-        return this.variable(variable -> variable.type(type).name(name).initialize(initializer));
+    public Block var(Type type, String name, Expression initializer) {
+        return this.var(variable -> variable.type(type).name(name).initialize(initializer));
     }
 
-    public Block variable(Consumer<VariableDeclaration> consumer) {
+    public Block var(Consumer<VariableDeclaration> consumer) {
         VariableDeclaration declaration = new VariableDeclaration();
         consumer.accept(declaration);
 
-        if (this.variable(declaration.name) != null) {
+        if (this.var(declaration.name) != null) {
             throw new IllegalStateException("variable \"%s\" already exists".formatted(declaration.name));
         }
 
@@ -62,7 +62,7 @@ public class Block implements Statement {
         return this;
     }
 
-    public Variable variable(String name) {
+    public Variable var(String name) {
         return this.variables.get(name);
     }
 

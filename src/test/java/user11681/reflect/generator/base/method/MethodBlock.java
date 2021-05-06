@@ -22,8 +22,8 @@ public class MethodBlock extends Block {
     }
 
     @Override
-    public Variable variable(String name) {
-        Variable variable = super.variable(name);
+    public Variable var(String name) {
+        Variable variable = super.var(name);
 
         return variable == null ? this.method.parameter(name) : variable;
 

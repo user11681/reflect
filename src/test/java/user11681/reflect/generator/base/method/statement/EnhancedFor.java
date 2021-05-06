@@ -14,14 +14,14 @@ public class EnhancedFor implements Statement {
     protected Expression iterable;
     protected Statement action;
 
-    public EnhancedFor variable(Type type, String name) {
+    public EnhancedFor var(Type type, String name) {
         this.variable = new Variable(type, name);
 
         return this;
     }
 
-    public EnhancedFor variable(Class<?> type, String name) {
-        return this.variable(new ConcreteType(type), name);
+    public EnhancedFor var(Class<?> type, String name) {
+        return this.var(new ConcreteType(type), name);
     }
 
     public EnhancedFor iterable(Expression iterable) {
