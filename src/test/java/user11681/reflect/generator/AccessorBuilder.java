@@ -14,7 +14,7 @@ import user11681.reflect.Fields;
 import user11681.reflect.generator.base.method.Block;
 import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.method.expression.Invocation;
-import user11681.reflect.generator.base.method.expression.Literal;
+import user11681.reflect.generator.base.method.expression.literal.Literal;
 import user11681.reflect.generator.base.method.statement.EnhancedFor;
 import user11681.reflect.generator.base.method.statement.If;
 import user11681.reflect.generator.base.type.ConcreteType;
@@ -270,13 +270,12 @@ class AccessorBuilder extends TestBuilder {
                                 }
 
                                 Block then = new Block();
-
                                 ifStatement.same(block.variable("type"), Literal.of(type)).then(access.put() ? then.statement(put) : then.ret(put));
                             }
                         }
 
                         unsafeMethod.name(access + "Object" + suffix);
-                        access.put(ifStatement, if1 -> if1.otherwise(unsafeMethod.argument(block.variable("value")).statement())).otherwise(() -> block.newline().ret(unsafeMethod));
+                        access.put(ifStatement, if1 -> if1.otherwise(unsafeMethod.argument(block.variable("value")).statement())).fail(() -> block.newline().ret(unsafeMethod));
                     });
                 });
             }
@@ -369,7 +368,7 @@ class AccessorBuilder extends TestBuilder {
             .typeParameter("T")
             .returnType("T")
             .parameter("T", "object")
-            .body(block -> block.statement(new If().nul(block.variable("object")).then(new Block().ret(Literal.nul())))
+            .body(block -> block.statement(new If().nul(block.variable("object")).then(new Block().ret(Literal.nul)))
                 .newline()
                 .variable(method.typeArgument("T"), "clone", new Invocation(Unsafe.class, "allocateInstance", block.variable("object").invoke("getClass")).cast(method.typeArgument("T")))
                 .newline()

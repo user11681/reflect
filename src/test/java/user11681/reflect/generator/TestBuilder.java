@@ -11,7 +11,7 @@ import user11681.reflect.Methods;
 import user11681.reflect.generator.base.ClassBuilder;
 import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.method.expression.Invocation;
-import user11681.reflect.generator.base.method.expression.Literal;
+import user11681.reflect.generator.base.method.expression.literal.Literal;
 
 public abstract class TestBuilder extends ClassBuilder {
     public TestBuilder(Class<?> klass) {
@@ -41,17 +41,17 @@ public abstract class TestBuilder extends ClassBuilder {
     }
 
     protected ClassBuilder methodHandle(Expression klass, Method method) {
-        String type;
+        String name;
 
         if (Modifier.isStatic(method.getModifiers())) {
-            type = "Static";
+            name = "findStatic";
         } else if (Modifier.isPrivate(method.getModifiers())) {
-            type = "Special";
+            name = "findSpecial";
         } else {
-            type = "Virtual";
+            name = "findVirtual";
         }
 
-        Invocation initializer = new Invocation(Invoker.class, "find" + type,
+        Invocation initializer = new Invocation(Invoker.class, name,
             klass,
             Literal.of(method.getName()),
             Literal.of(method.getReturnType())

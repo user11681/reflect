@@ -43,7 +43,7 @@ public enum Access {
     }
 
     public static record Next(boolean result) {
-        public void otherwise(Runnable action) {
+        public void fail(Runnable action) {
             if (!this.result) {
                 action.run();
             }

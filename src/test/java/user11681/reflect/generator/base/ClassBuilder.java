@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import user11681.reflect.generator.base.method.expression.Literal;
-import user11681.reflect.generator.base.method.expression.TypeLiteral;
+import user11681.reflect.generator.base.method.expression.literal.Literal;
+import user11681.reflect.generator.base.method.expression.literal.TypeLiteral;
 import user11681.reflect.generator.base.type.ConcreteType;
 import user11681.uncheck.Uncheck;
 
@@ -79,11 +79,6 @@ public class ClassBuilder extends MemberBuilder<ClassBuilder> {
         return this;
     }
 
-    @Override
-    public Stream<ConcreteType> referencedTypes() {
-        return Stream.concat(this.fields.stream(), this.methods.stream()).flatMap(TypeReferencer::referencedTypes);
-    }
-
     public void write(OutputStream output) {
         Uncheck.handle(() -> output.write(this.toString().getBytes()));
     }
@@ -116,9 +111,12 @@ public class ClassBuilder extends MemberBuilder<ClassBuilder> {
     }
 
     @Override
-    public String toString() {
-        ;
+    public Stream<ConcreteType> referencedTypes() {
+        return Stream.concat(this.fields.stream(), this.methods.stream()).flatMap(TypeReferencer::referencedTypes);
+    }
 
+    @Override
+    public String toString() {
         IndentingStringBuilder string = new IndentingStringBuilder();
 
         if (!this.pakage.isEmpty()) {

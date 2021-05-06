@@ -1,6 +1,7 @@
-package user11681.reflect.generator.base.method.expression;
+package user11681.reflect.generator.base.method.expression.literal;
 
 import java.util.stream.Stream;
+import user11681.reflect.generator.base.method.expression.Expression;
 import user11681.reflect.generator.base.type.ConcreteType;
 
 public record TypeLiteral(ConcreteType type) implements Expression, Literal {

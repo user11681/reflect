@@ -3,7 +3,7 @@ package user11681.reflect.generator.base.method.operator;
 import java.util.stream.Stream;
 import user11681.reflect.generator.base.TypeReferencer;
 import user11681.reflect.generator.base.method.expression.Expression;
-import user11681.reflect.generator.base.method.expression.Literal;
+import user11681.reflect.generator.base.method.expression.literal.Literal;
 import user11681.reflect.generator.base.type.ConcreteType;
 
 public class Equality implements Expression {
@@ -17,7 +17,7 @@ public class Equality implements Expression {
     }
 
     public static Equality nul(Expression expression) {
-        return new Equality().left(expression).right(Literal.nul());
+        return new Equality().left(expression).right(Literal.nul);
     }
 
     public Equality left(Expression left) {
