@@ -375,7 +375,7 @@ class AccessorBuilder extends TestBuilder {
                 .statement(new EnhancedFor()
                     .var(Field.class, "field")
                     .iterable(new Invocation(Fields.class, "allInstanceFields", block.var("object")))
-                    .action(field -> new Block().statement(new Invocation(Accessor.class, "copy", block.var("clone"), block.var("object"), field))))
+                    .action(field -> Block.wrap(new Invocation(Accessor.class, "copy", block.var("clone"), block.var("object"), field))))
                 .newline()
                 .ret(block.var("clone"))
             )

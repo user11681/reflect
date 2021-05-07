@@ -33,8 +33,11 @@ public class Fields {
 
     private static final Field notFound = null;
 
+    /**
+     * @deprecated for removal; use {@link #field(Object, String)}
+     */
     public static Field anyField(Object object, String name) {
-        return anyField(object.getClass(), name);
+        return field(object, name);
     }
 
     public static Field anyField(String klass, String name) {
@@ -42,7 +45,7 @@ public class Fields {
     }
 
     public static Field field(Object object, String name) {
-        return field(object.getClass(), name);
+        return anyField(object.getClass(), name);
     }
 
     public static Field field(String klass, String name) {

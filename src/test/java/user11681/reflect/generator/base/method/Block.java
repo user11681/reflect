@@ -20,6 +20,14 @@ public class Block implements Statement {
     protected List<Statement> statements = new ArrayList<>();
     protected Map<String, Variable> variables = new HashMap<>();
 
+    public static Block wrap(Statement statement) {
+        return new Block().statement(statement);
+    }
+
+    public static Block wrap(StatementExpression statement) {
+        return new Block().statement(statement);
+    }
+
     public Block statement(Statement statement) {
         this.statements.add(statement);
 
