@@ -4,7 +4,7 @@ plugins {
 }
 
 group("user11681")
-version("1.9.0")
+version("1.9.1")
 
 tasks[sourceSets.main.compileJavaTaskName].configure {
     sourceCompatibility = 8
