@@ -366,6 +366,7 @@ public class ReflectTest {
        assert Util.equals(
             StackFrames.caller(),
             StackFrames.caller(0),
+            StackFrames.caller(frame -> true),
             lambda.get(),
             StackFrames.frames().get(1).getDeclaringClass()
         );

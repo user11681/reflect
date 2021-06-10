@@ -15,6 +15,10 @@ public class StackFrames {
         return frame(depth + 2).getDeclaringClass();
     }
 
+    public static Class<?> caller(Predicate<? super StackWalker.StackFrame> predicate) {
+        return walker.walk(frames -> frames.skip(2).filter(predicate).findFirst().orElseThrow().getDeclaringClass());
+    }
+
     public static StackWalker.StackFrame frame() {
         return frame(1);
     }
@@ -24,7 +28,7 @@ public class StackFrames {
     }
 
     public static StackWalker.StackFrame frame(Predicate<? super StackWalker.StackFrame> predicate) {
-        return walker.walk(frames -> frames.filter(predicate).findFirst().orElseThrow());
+        return walker.walk(frames -> frames.skip(1).filter(predicate).findFirst().orElseThrow());
     }
 
     public static List<StackWalker.StackFrame> frames() {
