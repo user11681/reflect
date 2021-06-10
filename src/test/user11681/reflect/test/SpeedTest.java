@@ -32,7 +32,7 @@ import user11681.uncheck.Uncheck;
 
 @SuppressWarnings("ALL")
 public class SpeedTest {
-    static final int iterations = 3;
+    static final int iterations = 10;
     static final int tests = 1;
     static Runnable runnable0;
     static Runnable runnable1;
@@ -241,14 +241,14 @@ public class SpeedTest {
     }
 
     @Test
-    public void newInvokerUnreflect() {
+    void newInvokerUnreflect() {
         // timeN("new", () -> Invoker.unreflect2(A.class, "privateMethod"));
 
         mean("old", () -> Invoker.unreflect(A.class, "privateMethod"));
     }
 
     @Test
-    public void method() {
+    void method() {
         mean(() -> Methods.getMethods(TestObject.class));
         mean(ReflectTest.class::getDeclaredMethods);
     }
@@ -265,7 +265,7 @@ public class SpeedTest {
     }
 
     @Test
-    public void cast() {
+    void cast() {
         mean("checkcast", () -> {ReflectTest test = Util.nul();});
         mean("Class#cast", () -> {ReflectTest test = ReflectTest.class.cast(Util.nul());});
     }
@@ -279,6 +279,39 @@ public class SpeedTest {
 
         mean("MethodHandle", () -> handle.invoke("", 1));
         mean("NativeConstructorAccessorImpl", () -> newInstance0.invoke(new Object[]{"", 1}));
+    }
+
+    @Test
+    void stringChars() {
+        String string = "a".repeat(10000);
+
+        Logger.log("array");
+        mean("toCharArray", string::toCharArray);
+        mean("codePoints", () -> string.codePoints().toArray());
+        mean("getBytes", string::getBytes);
+
+        Logger.log("\niteration");
+        mean("toCharArary", () -> {
+            for (char character : string.toCharArray()) {}
+        });
+        mean("codePoints", () -> string.codePoints().forEach(value -> {}));
+        mean("getBytes", () -> {
+            for (byte bite : string.getBytes()) {}
+        });
+    }
+
+    @Test
+    void typeCheck() {
+        enum Type {INT, DOUBLE}
+        record BoxRecord(Type type) {}
+        abstract class BoxClass {}
+        class IntBox extends BoxClass {int i;}
+        class DoubleBox extends BoxClass {double d;}
+        BoxClass b = new IntBox();
+        BoxRecord r = new BoxRecord(Type.INT);
+
+        mean("instanceof", Util.voidify(() -> b instanceof DoubleBox));
+        mean("enum", Util.voidify(() -> r.type() == Type.DOUBLE));
     }
 
     static {

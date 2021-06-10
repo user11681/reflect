@@ -4,12 +4,7 @@ plugins {
 }
 
 group("user11681")
-version("1.9.1")
-
-tasks[sourceSets.main.compileJavaTaskName].configure {
-    sourceCompatibility = 8
-    targetCompatibility = 8
-}
+version("1.10.0")
 
 repositories {
     mavenCentral()
@@ -27,18 +22,57 @@ dependencies {
     testImplementation("org.ow2.asm:asm-tree:9.0")
     testImplementation("org.openjdk.jol:jol-core:latest.release")
     testImplementation("user11681:uncheck:latest.release")
+    testImplementation("net.bytebuddy:byte-buddy-agent:latest.release")
+}
+
+sourceSets {
+    main {
+        java.srcDir(file("src/java8"))
+    }
+
+    java16 {
+        java.srcDir(file("src/java16"))
+        println(java.outputDir)
+        java.outputDir = main.java.outputDir
+
+        runtimeClasspath += main.runtimeClasspath + main.output
+        compileClasspath += main.compileClasspath + main.output
+    }
+
+    test {
+        java.srcDir(file("src/test"))
+
+        compileClasspath += main.compileClasspath + java16.output
+        runtimeClasspath += main.runtimeClasspath + java16.output
+    }
 }
 
 java {
     withSourcesJar()
 }
 
+compileJava {
+    sourceCompatibility = 8
+    targetCompatibility = 8
+}
+
+compileJava16Java {
+    sourceCompatibility = 16
+    targetCompatibility = 16
+}
+
+jar {
+    dependsOn(compileJava16Java)
+}
+
 publishing {
+    /*
     publications {
         maven(MavenPublication) {
             from(components.java)
         }
     }
+    */
 
     repositories {
         mavenLocal()

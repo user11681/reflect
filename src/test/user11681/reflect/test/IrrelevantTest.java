@@ -1,6 +1,8 @@
 package user11681.reflect.test;
 
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,12 +11,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import net.bytebuddy.agent.ByteBuddyAgent;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Opcodes;
 import org.openjdk.jol.info.ClassData;
 import user11681.reflect.Classes;
+import user11681.reflect.Fields;
 import user11681.reflect.Invoker;
+import user11681.reflect.Methods;
 import user11681.reflect.ReflectTest;
 import user11681.reflect.asm.ClassNode2;
 import user11681.reflect.experimental.Classes2;
@@ -110,6 +115,32 @@ public class IrrelevantTest {
             });
 
         throw new AssertionError("class version");
+    }
+
+    @Test
+    void visibilities() {
+        Consumer<Function<Class<?>, Member[]>> count = members -> {
+            int pub = 0;
+            int pri = 0;
+
+            for (Class<?> type : ByteBuddyAgent.install().getAllLoadedClasses()) {
+                for (Member method : members.apply(type)) {
+                    if (Modifier.isPublic(method.getModifiers())) {
+                        ++pub;
+                    } else if (Modifier.isPrivate(method.getModifiers())) {
+                        ++pri;
+                    }
+                }
+            }
+
+            System.out.printf("private: %d;%npublic: %d;%n%f%% private%n%n", pri, pub, pri / (float) (pub + pri) * 100);
+        };
+
+        System.out.println("fields");
+        count.accept(Fields::rawFields);
+
+        System.out.println("methods");
+        count.accept(Methods::getRawMethods);
     }
 
     static {

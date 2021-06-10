@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import net.gudenau.lib.unsafe.Unsafe;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
@@ -356,5 +357,21 @@ public class ReflectTest {
         assert "hjk".equals(clone.thing);
         assert clone.object == null;
         assert clone.things instanceof ArrayList<Object> things && things.isEmpty();
+    }
+
+    @Test
+    void stack() throws Throwable {
+        Supplier<Class<?>> lambda = StackFrames::caller;
+
+       assert Util.equals(
+            StackFrames.caller(),
+            StackFrames.caller(0),
+            lambda.get(),
+            StackFrames.frames().get(1).getDeclaringClass()
+        );
+
+       assert StackFrames.trace()[0].getClassName().equals(ReflectTest.class.getName());
+       assert StackFrames.traceFrame().getMethodName().equals("stack");
+       assert StackFrames.traceFrame(0).getMethodName().equals("stack");
     }
 }

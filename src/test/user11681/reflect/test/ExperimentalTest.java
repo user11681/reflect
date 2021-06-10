@@ -2,13 +2,11 @@ package user11681.reflect.test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.annotation.Testable;
 import user11681.reflect.Accessor;
 import user11681.reflect.Fields;
 import user11681.reflect.experimental.ReflectionFactory;
-import user11681.reflect.experimental.StackFrames;
 import user11681.reflect.util.Logger;
 import user11681.reflect.util.Retainable;
 import user11681.reflect.util.Util;
@@ -22,18 +20,6 @@ public class ExperimentalTest {
     byte byte0;
     byte byte1;
     float instance = 54.2F;
-
-    @Test
-    void caller() throws Throwable {
-        Supplier<Class<?>> lambda = StackFrames::caller;
-
-        assert Util.equals(this.getClass(),
-            StackFrames.caller(),
-            StackFrames.caller(0),
-            lambda.get(),
-            StackFrames.frames().get(0).getDeclaringClass()
-        );
-    }
 
     @Test
     void trustedFinal() {

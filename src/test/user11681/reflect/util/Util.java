@@ -1,6 +1,7 @@
 package user11681.reflect.util;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.gudenau.lib.unsafe.Unsafe;
 import user11681.uncheck.ThrowingRunnable;
@@ -36,14 +37,8 @@ public class Util {
         return name.substring(name.lastIndexOf('.') + 1).replace('$', '.') + "[]".repeat(dimensions);
     }
 
-    public static boolean equals(Object target, Object... objects) {
-        for (Object object : objects) {
-            if (!target.equals(object)) {
-                return false;
-            }
-        }
-
-        return true;
+    public static boolean equals(Object... objects) {
+        return Stream.of(objects).skip(1).allMatch(objects[0]::equals);
     }
 
     public static void repeat(ThrowingRunnable test) {
@@ -58,5 +53,9 @@ public class Util {
                 throw Unsafe.throwException(throwable);
             }
         }
+    }
+
+    public static ThrowingRunnable voidify(Supplier<?> supplier) {
+        return supplier::get;
     }
 }
