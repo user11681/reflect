@@ -76,7 +76,7 @@ publishing {
         mavenLocal()
 
         maven {
-            url = System.properties["maven.repository"]
+            url = "https://auoeke.jfrog.io/artifactory/maven"
 
             credentials {
                 username = System.properties["maven.username"]
