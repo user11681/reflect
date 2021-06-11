@@ -39,22 +39,6 @@ public class Invoker {
         }
     }
 
-    /**
-     * @deprecated by {@link #invoke}.
-     */
-    @Deprecated
-    public static <T> T apply(MethodHandle handle, Object... arguments) {
-        return invoke(handle, arguments);
-    }
-
-    /**
-     * @deprecated by {@link #invoke}.
-     */
-    @Deprecated
-    public static void run(MethodHandle handle, Object... arguments) {
-        invoke(handle, arguments);
-    }
-
     public static MethodHandle bind(Object receiver, String name, MethodType type) {
         try {
             return Unsafe.trustedLookup.bind(receiver, name, type);

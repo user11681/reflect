@@ -188,18 +188,6 @@ public class EnumConstructor<E extends Enum<E>> {
         return enumClass.getEnumConstants().length;
     }
 
-    @Deprecated // for removal
-    public /* not static? 🤔 */ Object[] joinArguments(int ordinal, String name, Object... others) {
-        int length = others.length;
-        Object[] arguments = new Object[length + 2];
-        arguments[0] = name;
-        arguments[1] = ordinal;
-
-        System.arraycopy(others, 0, arguments, 2, length);
-
-        return arguments;
-    }
-
     public E add(String name, Object... arguments) {
         return this.add(getNextOrdinal(this.enumClass), name);
     }

@@ -56,9 +56,4 @@ public class Types {
 
         return null;
     }
-
-    /** @deprecated by {@link #primitive} */
-    public static Class<?> getPrimitive(Class<?> klass) {
-        return primitive(klass);
-    }
 }

@@ -277,6 +277,8 @@ public class Classes {
         }
     }
 
+    // todo: Convenience overloads ought to be distinguishable from proxies. Use a builder?
+
     @SuppressWarnings("ConstantConditions")
     public static <T> Class<T> defineBootstrapClass(ClassLoader resourceLoader, String name) {
         try {
@@ -381,6 +383,8 @@ public class Classes {
         }
     }
 
+    // todo: end of mess
+
     public List<Class<?>> supertypes(Class<?> klass) {
         List<Class<?>> supertypes = new ArrayList<>(Arrays.asList(klass.getInterfaces()));
         klass = klass.getSuperclass();
@@ -390,62 +394,6 @@ public class Classes {
         }
 
         return supertypes;
-    }
-
-    @Deprecated
-    public static Object getClassPath(ClassLoader classLoader) {
-        return classPath(classLoader);
-    }
-
-    @Deprecated
-    public static Field getClassPathField(Class<?> loaderClass) {
-        return classPathField(loaderClass);
-    }
-
-    @Deprecated
-    public static URL[] getURLs(ClassLoader classLoader) {
-        return urls(classLoader);
-    }
-
-    @Deprecated
-    public static URL[] getURLs(Object classPath) {
-        return urls(classPath);
-    }
-
-    @SafeVarargs
-    @Deprecated
-    public static <T> T staticCast(Object object, T... dummy) {
-        return reinterpret(object, dummy);
-    }
-
-    @Deprecated
-    public static <T> T staticCast(Object object, String klass) {
-        return reinterpret(object, klass);
-    }
-
-    @Deprecated
-    public static <T> T staticCast(Object object, Class<T> klass) {
-        return reinterpret(object, klass);
-    }
-
-    @Deprecated
-    public static <T> T staticCast(Object to, T from) {
-        return reinterpret(to, from);
-    }
-
-    @Deprecated
-    public static <T> T staticCast(Object object, long classPointer) {
-        return reinterpret(object, classPointer);
-    }
-
-    @Deprecated
-    public static long getClassPointer(Class<?> klass) {
-        return klass(klass);
-    }
-
-    @Deprecated
-    public static long getClassPointer(Object object) {
-        return klass(object);
     }
 
     private static Class<?> tryLoad(String... classes) {

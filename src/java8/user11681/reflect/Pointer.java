@@ -66,26 +66,6 @@ public class Pointer implements Cloneable {
         return this;
     }
 
-    /** @deprecated by {@link #getObject()} */
-    public <T> T get() {
-        return Unsafe.getObject(this.object, this.offset);
-    }
-
-    /** @deprecated by {@link #getObject(Object)} */
-    public <T> T get(Object object) {
-        return Unsafe.getObject(object, this.offset);
-    }
-
-    /** @deprecated by {@link #putObject(Object, Object)} */
-    public void put(Object object, Object value) {
-        Unsafe.putObject(object, this.offset, value);
-    }
-
-    /** @deprecated by {@link #putObject(Object)} */
-    public void put(Object value) {
-        Unsafe.putObject(this.object, this.offset, value);
-    }
-
     public <T> T getObject() {
         return Unsafe.getObject(this.object, this.offset);
     }

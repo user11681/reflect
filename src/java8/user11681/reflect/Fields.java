@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -25,20 +24,7 @@ public class Fields {
     private static final IdentityHashMap<Class<?>, ArrayList<Field>> instanceFieldCache = new IdentityHashMap<>();
     private static final HashMap<String, Field> nameToField = new HashMap<>();
 
-    @Deprecated
-    private static final IdentityHashMap<Class<?>, Field[]> oldStaticFieldCache = new IdentityHashMap<>();
-
-    @Deprecated
-    private static final IdentityHashMap<Class<?>, Field[]> oldInstanceFieldCache = new IdentityHashMap<>();
-
     private static final Field notFound = null;
-
-    /**
-     * @deprecated for removal; use {@link #field(Object, String)}
-     */
-    public static Field anyField(Object object, String name) {
-        return field(object, name);
-    }
 
     public static Field anyField(String klass, String name) {
         return anyField(Classes.load(klass), name);
@@ -226,180 +212,7 @@ public class Fields {
         return fields;
     }
 
-    /**
-     * @deprecated by {@link #field(Class, String)}
-     */
-    public static Field getField(Class<?> klass, String name) {
-        Field field = nameToField.get(klass.getName() + '@' + name);
-
-        if (field != null) {
-            return field;
-        }
-
-        fields(klass);
-
-        return nameToField.get(klass.getName() + '@' + name);
-    }
-
-    /**
-     * @deprecated by {@link #rawField(Object, String)}
-     */
-    public static Field getRawField(Object object, String name) {
-        Class<?> klass = object.getClass();
-        Field field;
-
-        while (klass != Object.class) {
-            if ((field = getRawField(klass, name)) != null) {
-                return field;
-            }
-
-            klass = klass.getSuperclass();
-        }
-
-        return notFound;
-    }
-
     public static Field[] rawFields(Class<?> klass) {
-        try {
-            return (Field[]) getDeclaredFields.invokeExact(klass);
-        } catch (Throwable throwable) {
-            throw Unsafe.throwException(throwable);
-        }
-    }
-
-    /**
-     * @deprecated by {@link #field(Object, String)}
-     */
-    public static Field getField(Object object, String name) {
-        Class<?> klass = object.getClass();
-        Field field;
-
-        while (klass != Object.class) {
-            if ((field = getField(klass, name)) != null) {
-                return field;
-            }
-
-            klass = klass.getSuperclass();
-        }
-
-        return notFound;
-    }
-
-    /**
-     * @deprecated by {@link #field(String, String)}
-     */
-    public static Field getField(String klass, String name) {
-        return getField(Classes.load(klass), name);
-    }
-
-    /**
-     * @deprecated by {@link #rawField(String, String)}
-     */
-    public static Field getRawField(String klass, String name) {
-        return getRawField(Classes.load(klass), name);
-    }
-
-    /**
-     * @deprecated by {@link #rawField(Class, String)}
-     */
-    public static Field getRawField(Class<?> klass, String name) {
-        for (Field field : rawFields(klass)) {
-            if (field.getName().equals(name)) {
-                return field;
-            }
-        }
-
-        return notFound;
-    }
-
-    /**
-     * @deprecated by {@link #instanceFields}
-     */
-    public static Field[] getInstanceFields(Class<?> type) {
-        Field[] fields = oldInstanceFieldCache.get(type);
-
-        if (fields != null) {
-            return fields;
-        }
-
-        List<Field> fieldList = new ArrayList<>();
-
-        for (Field field : fields(type)) {
-            if ((field.getModifiers() & Modifier.STATIC) == 0) {
-                fieldList.add(field);
-            }
-        }
-
-        fields = fieldList.toArray(new Field[0]);
-        oldInstanceFieldCache.put(type, fields);
-
-        return fields;
-    }
-
-    /**
-     * @deprecated by {@link #staticFields}
-     */
-    public static Field[] getStaticFields(Class<?> type) {
-        Field[] fields = oldStaticFieldCache.get(type);
-
-        if (fields != null) {
-            return fields;
-        }
-
-        List<Field> fieldList = new ArrayList<>();
-
-        for (Field field : fields(type)) {
-            if ((field.getModifiers() & Modifier.STATIC) != 0) {
-                fieldList.add(field);
-            }
-        }
-
-        fields = fieldList.toArray(new Field[0]);
-        oldStaticFieldCache.put(type, fields);
-
-        return fields;
-
-    }
-
-    /**
-     * @deprecated by {@link #all}
-     */
-    public static List<Field> getAllFields(Class<?> klass) {
-        final List<Field> fields = new ArrayList<>(Arrays.asList(fields(klass)));
-
-        klass = klass.getSuperclass();
-
-        while (klass != null) {
-            fields.addAll(Arrays.asList(fields(klass)));
-
-            klass = klass.getSuperclass();
-        }
-
-        return fields;
-    }
-
-    /**
-     * @deprecated by {@link #fields}
-     */
-    public static Field[] getFields(Class<?> klass) {
-        Field[] fields = cache.get(klass);
-
-        if (fields == null) {
-            fields = rawFields(klass);
-            cache.put(klass, fields);
-
-            for (Field field : fields) {
-                nameToField.put(klass.getName() + '@' + field.getName(), field);
-            }
-        }
-
-        return fields;
-    }
-
-    /**
-     * @deprecated by {@link #rawFields}
-     */
-    public static Field[] getRawFields(Class<?> klass) {
         try {
             return (Field[]) getDeclaredFields.invokeExact(klass);
         } catch (Throwable throwable) {
