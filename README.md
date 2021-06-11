@@ -10,8 +10,8 @@ It reduces the usual verbosity of reflection by providing concise methods for mo
 
 Currently, it should be compatible with Java versions 8 and above.
 However, since I made it primarily for use in Minecraft,
-I intend to drop support for Java 8 should Mojang update the JRE included
-in the official launcher due to maintenance burden and bloat.
+due to maintenance burden and bloat, I intend to drop support for Java 8 soon
+for the JRE used for the latest versions in the official launcher has been updated.
 
 I try to keep this library mostly stable, although occasionally (with prior notice) I may break things.
 
@@ -22,11 +22,11 @@ repositories {
 }
 
 dependencies {
-    // Use "latest.release" for the latest version or see
-    // https://auoeke.jfrog.io/artifactory/maven/net/gudenau/lib/unsafe and
+    // Use "latest.integration" for the latest version or see
+    // https://auoeke.jfrog.io/artifactory/maven/{net/gudenau/lib/unsafe and
     // https://auoeke.jfrog.io/artifactory/maven/user11681/reflect
-    api("net.gudenau.lib:unsafe:latest.release")
-    api("user11681:reflect:latest.release")
+    api("net.gudenau.lib:unsafe:latest.integration")
+    api("user11681:reflect:latest.integration")
 }
 ```
 
@@ -47,6 +47,8 @@ dependencies {
   intended for use with frequently accessed fields
 - `Reflect`: a container for useful state
   and a set of methods that disable security manager and illegal access logger
+- `StackFrames` (Java 16+): a set of utility methods that assist in getting stack frames and callers
+  with support for `StackWalker` and the traditional `StackTraceElement[]`.
 - `Types`: a collection of methods for dealing with `Class`es
   (mainly conversion between primitive and wrapper types)
 
