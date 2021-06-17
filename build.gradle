@@ -32,7 +32,6 @@ sourceSets {
 
     java16 {
         java.srcDir(file("src/java16"))
-        println(java.outputDir)
         java.outputDir = main.java.outputDir
 
         runtimeClasspath += main.runtimeClasspath + main.output
