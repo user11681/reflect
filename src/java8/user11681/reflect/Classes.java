@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.ByteBuffer;
@@ -385,12 +386,23 @@ public class Classes {
 
     // todo: end of mess
 
-    public static List<Class<?>> supertypes(Class<?> klass) {
-        List<Class<?>> supertypes = new ArrayList<>(Arrays.asList(klass.getInterfaces()));
-        klass = klass.getSuperclass();
+    public static List<Class<?>> supertypes(Class<?> type) {
+        List<Class<?>> supertypes = new ArrayList<>(Arrays.asList(type.getInterfaces()));
+        type = type.getSuperclass();
 
-        if (klass != null) {
-            supertypes.add(klass);
+        if (type != null) {
+            supertypes.add(type);
+        }
+
+        return supertypes;
+    }
+
+    public static List<Type> genericSupertypes(Class<?> type) {
+        List<Type> supertypes = new ArrayList<>(Arrays.asList(type.getGenericInterfaces()));
+        Type superclass = type.getGenericSuperclass();
+
+        if (superclass != null) {
+            supertypes.add(superclass);
         }
 
         return supertypes;
