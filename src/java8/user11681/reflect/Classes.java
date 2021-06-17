@@ -385,7 +385,7 @@ public class Classes {
 
     // todo: end of mess
 
-    public List<Class<?>> supertypes(Class<?> klass) {
+    public static List<Class<?>> supertypes(Class<?> klass) {
         List<Class<?>> supertypes = new ArrayList<>(Arrays.asList(klass.getInterfaces()));
         klass = klass.getSuperclass();
 
