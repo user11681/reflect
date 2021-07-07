@@ -4,7 +4,30 @@ plugins {
 }
 
 group("user11681")
-version("1.12.0")
+version("2.0.0")
+
+sourceSets {
+    all {
+        extensions.add("classpath") {SourceSet other ->
+            runtimeClasspath += other.runtimeClasspath + other.output
+            compileClasspath += other.compileClasspath + other.output
+        }
+    }
+
+    main {
+        java.srcDir("src/java8")
+    }
+
+    java16 {
+        java.srcDir("src/java16")
+        classpath(main)
+    }
+
+    test {
+        java.srcDir("src/test")
+        classpath(java16)
+    }
+}
 
 repositories {
     mavenCentral()
@@ -25,27 +48,6 @@ dependencies {
     testImplementation("net.bytebuddy:byte-buddy-agent:latest.release")
 }
 
-sourceSets {
-    main {
-        java.srcDir(file("src/java8"))
-    }
-
-    java16 {
-        java.srcDir(file("src/java16"))
-        java.outputDir = main.java.outputDir
-
-        runtimeClasspath += main.runtimeClasspath + main.output
-        compileClasspath += main.compileClasspath + main.output
-    }
-
-    test {
-        java.srcDir(file("src/test"))
-
-        compileClasspath += main.compileClasspath + java16.output
-        runtimeClasspath += main.runtimeClasspath + java16.output
-    }
-}
-
 java {
     withSourcesJar()
 }
@@ -61,7 +63,7 @@ compileJava16Java {
 }
 
 jar {
-    dependsOn(compileJava16Java)
+    from(sourceSets.java16.output)
 }
 
 publishing {

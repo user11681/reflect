@@ -260,9 +260,6 @@ public class Fields {
             }
 
             overrideOffset = offset;
-
-            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(field(Classes.Reflection, "fieldFilterMap")), new HashMap<>());
-            Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(field(Classes.Reflection, "methodFilterMap")), new HashMap<>());
         } catch (Throwable throwable) {
             throw Unsafe.throwException(throwable);
         }

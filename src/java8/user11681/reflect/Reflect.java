@@ -2,6 +2,7 @@ package user11681.reflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 
 public class Reflect {
@@ -43,5 +44,25 @@ public class Reflect {
 
             securityDisabled = true;
         }
+    }
+
+    /**
+     * Clears the reflection field filter map, preventing {@link Class#getFields} and {@link Class#getDeclaredFields} from filtering,
+     * as defined in {@link jdk.internal.reflect.Reflection}.
+     *
+     * @apiNote this method can break code that relies on the aforementioned methods filtering fields.
+     */
+    public static void clearFieldFilterMap() {
+        Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(Fields.field(Classes.Reflection, "fieldFilterMap")), new HashMap<>());
+    }
+
+    /**
+     * Clears the reflection method filter map, preventing {@link Class#getMethods} and {@link Class#getDeclaredMethods} from filtering,
+     * as defined in {@link jdk.internal.reflect.Reflection}.
+     *
+     * @apiNote this method can break code that relies on the aforementioned methods filtering methods.
+     */
+    public static void clearMethodFilterMap() {
+        Unsafe.putObjectVolatile(Classes.Reflection, Unsafe.staticFieldOffset(Fields.field(Classes.Reflection, "methodFilterMap")), new HashMap<>());
     }
 }
